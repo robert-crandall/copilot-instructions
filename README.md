@@ -65,6 +65,7 @@ Then create symlinks or reference files directly:
 - **SvelteKit**: Best practices for SvelteKit development
 - **TailwindCSS**: Guidelines for using Tailwind CSS (including v4)
 - **daisyUI**: Component-based design patterns with daisyUI 5
+- **Testing**: Minimal unit testing approach with E2E focus
 - **Drizzle ORM**: Best practices for database operations with Drizzle
 
 ## Reference Documentation
