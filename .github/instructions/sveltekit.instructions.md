@@ -1,117 +1,291 @@
 ---
-description: SvelteKit coding standards and best practices
+description: SvelteKit 5 coding standards and best practices for fullstack applications
 applyTo: "**/*.{js,ts,svelte}"
 ---
 
-# SvelteKit Development Guidelines
+# SvelteKit 5 Development Guidelines
 
-## Project Structure and Routing
+> Reference: [Complete SvelteKit Documentation](../references/sveltekit-llms.md)
 
-- Follow SvelteKit's filesystem-based routing pattern in `src/routes`:
-  - `src/routes` is the root route
-  - `src/routes/about` creates an `/about` route
-  - `src/routes/blog/[slug]` creates a parameterized route
+## Modern Svelte 5 Component Patterns
 
-- Use the correct route files with the `+` prefix:
-  - `+page.svelte` - UI component for the page
-  - `+page.server.js|ts` - Server-only code for data loading and form actions
-  - `+page.js|ts` - Shared code that runs on both server and client
-  - `+layout.svelte` - UI wrapper that applies to the current directory and all subdirectories
-  - `+layout.server.js|ts` - Server-only layout code
-  - `+error.svelte` - Error handling component
-  - `+server.js|ts` - API endpoints and server routes
-
-- Organize your code structure:
-  - Place reusable components in `src/lib/components/`
-  - Place server-only code in `src/lib/server/`
-  - Place utilities in `src/lib/utils/`
-  - Place stores in `src/lib/stores/`
-  - Use `$lib` alias for importing from the lib directory
-
-## Components
-
-- Use `.svelte` extension for Svelte components
-- Structure components with `<script>`, markup, and `<style>` sections
-- Export props with `export let propName` syntax
-- Add TypeScript types to props for better type safety:
+### Runes System (Svelte 5+)
+- Use `$state()` for reactive state instead of `let` declarations:
   ```svelte
-  <script lang="ts">
-    export let name: string;
-    export let count: number = 0;
+  <script>
+    let count = $state(0);
+    let user = $state({ name: '', email: '' });
   </script>
   ```
-- Use `$:` for reactive declarations and statements
-- Use the new `$derived` and `$effect` runes for clearer reactivity
-- Use component events with `createEventDispatcher` for parent communication
-- Create reusable actions with the `use:` directive
 
-## Stores and State Management
-
-- Import stores from `svelte/store`
-- Use appropriate store types:
-  - `writable` for mutable state
-  - `readable` for read-only state
-  - `derived` for computed values
-- Access store values with the `$` prefix in components
-- Use SvelteKit's built-in stores:
-  - `$page` - Current page data and information
-  - `$navigating` - Navigation status
-  - `$app/stores` - Application-level stores
-
-## Data Loading
-
-- Use `load` functions in `+page.ts` or `+page.server.ts`:
-  ```typescript
-  export const load = async ({ params, fetch, depends }) => {
-    // Load data here
-    return {
-      myData: data
-    };
-  };
-  ```
-- Use server-side `load` for sensitive operations or database access
-- Use client-side `load` for browser-only APIs
-- Use `depends()` to mark external dependencies
-- Handle errors gracefully with try/catch
-- Use `error` and `redirect` helpers for navigation control
-
-## Form Handling
-
-- Use progressive enhancement with native HTML forms
-- Define form actions in `+page.server.js|ts`:
-  ```typescript
-  export const actions = {
-    default: async ({ request }) => {
-      const data = await request.formData();
-      // Process form data
-      return { success: true };
-    }
-  };
-  ```
-- Use `use:enhance` for JavaScript-enhanced forms:
+- Use `$derived()` for computed values instead of `$:` reactive declarations:
   ```svelte
-  <form method="POST" use:enhance>
+  <script>
+    let firstName = $state('John');
+    let lastName = $state('Doe');
+    let fullName = $derived(firstName + ' ' + lastName);
+  </script>
   ```
-- Validate form data on both client and server
-- Use named form actions for multiple actions on one page
-- Return validation errors as part of the action response
 
-## Routing and Navigation
+- Use `$effect()` for side effects instead of `$:` statements:
+  ```svelte
+  <script>
+    let count = $state(0);
+    
+    $effect(() => {
+      document.title = `Count: ${count}`;
+    });
+  </script>
+  ```
 
-- Use `<a>` elements for standard navigation
-- Add client-side features with `data-sveltekit-*` attributes:
-  - `data-sveltekit-preload-data` for preloading
-  - `data-sveltekit-reload` for full-page reload
-- Use the `goto()` function from `$app/navigation` for programmatic navigation
-- Use `beforeNavigate` and `afterNavigate` hooks for navigation lifecycle events
-- Set up named layout groups with `(groupname)` directory syntax for shared layouts
+### Component Props and Events
+- Use `$props()` for component props with TypeScript:
+  ```svelte
+  <script lang="ts">
+    interface Props {
+      title: string;
+      count?: number;
+    }
+    
+    let { title, count = 0 }: Props = $props();
+  </script>
+  ```
+
+- Use snippets instead of slots for content composition:
+  ```svelte
+  {#snippet header()}
+    <h1>{title}</h1>
+  {/snippet}
+  
+  {@render header()}
+  ```
+
+## SvelteKit File Structure and Routing
+
+### Route Files (filesystem-based routing)
+- `+page.svelte` - Page component UI
+- `+page.server.ts` - Server-only data loading and form actions
+- `+page.ts` - Universal data loading (runs on both server and client)
+- `+layout.svelte` - Layout wrapper for current directory and subdirectories
+- `+layout.server.ts` - Server-only layout data
+- `+error.svelte` - Error boundary component
+- `+server.ts` - API endpoints (GET, POST, etc.)
+
+### Project Organization
+- `src/lib/components/` - Reusable UI components
+- `src/lib/server/` - Server-only utilities and database code
+- `src/lib/stores/` - Global state management
+- `src/lib/utils/` - Shared utilities
+- `src/lib/types/` - TypeScript type definitions
+- Use `$lib` alias for clean imports: `import { Button } from '$lib/components'`
+
+## Data Loading Patterns
+
+### Load Functions
+```typescript
+// +page.server.ts - Server-only data loading
+export const load = async ({ params, fetch, cookies }) => {
+  // Access to cookies, headers, database
+  const user = await getUserFromDatabase(cookies.get('session'));
+  
+  return {
+    user,
+    posts: await fetch('/api/posts').then(r => r.json())
+  };
+};
+```
+
+```typescript
+// +page.ts - Universal data loading
+export const load = async ({ params, fetch, parent }) => {
+  // Runs on both server and client
+  const { user } = await parent();
+  
+  return {
+    posts: await fetch(`/api/users/${user.id}/posts`).then(r => r.json())
+  };
+};
+```
+
+### Data Dependencies
+- Use `depends()` to mark external dependencies for cache invalidation
+- Use `invalidate()` and `invalidateAll()` for manual cache busting
+
+## Form Handling and Actions
+
+### Form Actions (Server-side)
+```typescript
+// +page.server.ts
+export const actions = {
+  create: async ({ request, cookies }) => {
+    const data = await request.formData();
+    const title = data.get('title');
+    
+    try {
+      await createPost({ title, authorId: getCurrentUser(cookies) });
+      return { success: true };
+    } catch (error) {
+      return fail(400, { error: error.message });
+    }
+  },
+  
+  delete: async ({ request }) => {
+    const data = await request.formData();
+    await deletePost(data.get('id'));
+    return { success: true };
+  }
+};
+```
+
+### Progressive Enhancement
+```svelte
+<script>
+  import { enhance } from '$app/forms';
+  import { page } from '$app/stores';
+  
+  let loading = $state(false);
+</script>
+
+<form method="POST" action="?/create" use:enhance={() => {
+  loading = true;
+  return async ({ result, update }) => {
+    loading = false;
+    await update();
+  };
+}}>
+  <input name="title" required />
+  <button disabled={loading}>
+    {loading ? 'Creating...' : 'Create Post'}
+  </button>
+</form>
+```
+
+## Navigation and Routing
+
+### Programmatic Navigation
+```svelte
+<script>
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  
+  function navigateToPost(id: string) {
+    goto(`/posts/${id}`);
+  }
+</script>
+```
+
+### Navigation Hooks
+```svelte
+<script>
+  import { beforeNavigate, afterNavigate } from '$app/navigation';
+  
+  beforeNavigate(({ from, to, cancel }) => {
+    if (hasUnsavedChanges) {
+      if (!confirm('You have unsaved changes. Continue?')) {
+        cancel();
+      }
+    }
+  });
+  
+  afterNavigate(() => {
+    // Analytics, focus management, etc.
+  });
+</script>
+```
+
+## State Management
+
+### Global Stores
+```typescript
+// src/lib/stores/user.ts
+import { writable } from 'svelte/store';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export const user = writable<User | null>(null);
+```
+
+### Reactive State with Runes
+```svelte
+<!-- Component using global state -->
+<script>
+  import { user } from '$lib/stores/user.ts';
+  
+  // Subscribe to store
+  $: currentUser = $user;
+  
+  // Or use in runes mode
+  let currentUser = $derived($user);
+</script>
+```
+
+## TypeScript Best Practices
+
+### Page Data Types
+```typescript
+// app.d.ts
+declare global {
+  namespace App {
+    interface Locals {
+      user?: User;
+    }
+    
+    interface PageData {
+      user?: User;
+    }
+    
+    interface Error {
+      message: string;
+      code?: string;
+    }
+  }
+}
+```
+
+### Component Typing
+```svelte
+<script lang="ts">
+  interface Props {
+    posts: Post[];
+    user?: User;
+    onSelect?: (post: Post) => void;
+  }
+  
+  let { posts, user, onSelect }: Props = $props();
+</script>
+```
 
 ## Security and Performance
 
-- Keep sensitive code in `+server.js|ts` or `+page.server.js|ts` files
-- Use `handle` hook in `hooks.server.js` for authentication
-- Set appropriate caching strategies with `cache` functions
-- Generate proper HTTP headers in server routes
-- Use SvelteKit's adapter system for optimal deployment to your platform
+### Server-Side Security
+- Keep sensitive operations in `.server.ts` files
+- Use `hooks.server.ts` for authentication middleware
+- Validate and sanitize all form inputs
+- Use CSRF protection for forms
+
+### Performance Optimization
+- Use server-side rendering (SSR) by default
+- Preload data with `data-sveltekit-preload-data`
+- Implement proper caching strategies
+- Use adapters optimized for your deployment platform
+
+### Error Handling
+```svelte
+<!-- +error.svelte -->
+<script>
+  import { page } from '$app/stores';
+</script>
+
+<h1>Error {$page.status}</h1>
+<p>{$page.error?.message}</p>
+
+<a href="/">Go home</a>
+```
+
+This instruction set focuses on modern SvelteKit 5 patterns with runes, avoiding deprecated `$:` syntax and emphasizing fullstack development best practices.
 
 Reference: [SvelteKit Instructions](../references/sveltekit-llms.md)

@@ -7,6 +7,7 @@ This repository serves as a central location for GitHub Copilot instruction file
 - `.github/copilot-instructions.md`: Main instructions file that applies globally.
 - `.github/instructions/`: Folder for specific technology or task instructions.
 - `.github/prompts/`: Folder for reusable prompt templates.
+- `.github/references/`: Folder for comprehensive documentation references that support the instruction files.
 - `sveltekit/`: Technology-specific documentation that can be referenced in instructions.
 
 ## How to Use
@@ -63,7 +64,18 @@ Then create symlinks or reference files directly:
 - **General**: Base coding standards for JS/TS projects
 - **SvelteKit**: Best practices for SvelteKit development
 - **TailwindCSS**: Guidelines for using Tailwind CSS (including v4)
+- **daisyUI**: Component-based design patterns with daisyUI 5
 - **Drizzle ORM**: Best practices for database operations with Drizzle
+
+## Reference Documentation
+
+The `.github/references/` directory contains comprehensive documentation that supports the instruction files:
+
+- **tailwindcss-llms.md**: Complete Tailwind CSS utility documentation and examples
+- **tailwindcss4-llms.md**: Tailwind CSS v4 specific features and migration guide
+- **daiyui-llms.md**: Complete daisyUI 5 component documentation and usage patterns
+
+These reference files provide detailed context that Copilot can use when the instruction files reference them, ensuring more accurate and comprehensive code generation.
 
 ## Contributing
 
