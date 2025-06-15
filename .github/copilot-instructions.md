@@ -42,6 +42,8 @@
 - Use semantic naming: `userId` instead of `id`, `createdAt` instead of `date`.
 - Prefer enums or constants over magic strings/numbers.
 - Use TypeScript interfaces for object shapes and API contracts.
+- Deleting data should be soft-deletion by default (e.g., `isDeleted` flag).
+- Use `null` for missing values, not `undefined`.
 
 ### Error Handling
 
@@ -74,19 +76,6 @@
 - Implement consistent error handling patterns across the application.
 - Use configuration objects instead of long parameter lists.
 - Follow consistent naming conventions throughout the codebase.
-
-### Date and DateTime Handling
-
-- Store all datetime fields as `timestamptz` (timestamp with timezone) in PostgreSQL.
-- Always work with UTC in the backend and database layer.
-- Convert to user's local timezone only in the presentation layer (frontend).
-- Use ISO 8601 format for API responses: `2024-03-15T14:30:00Z`.
-- Use libraries like `date-fns-tz` or `Temporal` API for timezone conversions.
-- Store user's timezone preference in user settings or detect from browser.
-- For recurring events, store timezone information separately from the timestamp.
-- Use `Date.now()` or `new Date().toISOString()` for current timestamps.
-- Never rely on `new Date()` without timezone information for user-facing dates.
-- For date-only fields (birthdays, deadlines), use `date` type in PostgreSQL.
 
 ## For specific technology stacks, see the following instructions:
 

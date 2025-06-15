@@ -114,6 +114,8 @@ export const load = async ({ params, fetch, parent }) => {
 ## Form Handling and Actions
 
 ### Form Actions (Server-side)
+
+`redirect` throws an error. Do not use it in a `try/catch` block.
 ```typescript
 // +page.server.ts
 export const actions = {
