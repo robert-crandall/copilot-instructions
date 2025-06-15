@@ -283,3 +283,5 @@ applyTo: "**/*.{html,js,jsx,ts,tsx,svelte}"
 - Apply consistent spacing with daisyUI's built-in scales
 
 This instruction set emphasizes component-driven development with daisyUI 5 while maintaining design system consistency and accessibility standards.
+
+Reference: [DaisyUI Instructions](../references/daisyui-llms.md)

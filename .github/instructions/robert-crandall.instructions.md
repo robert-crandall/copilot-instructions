@@ -24,6 +24,7 @@ applyTo: "**/*"
 - Target mobile-first design principles. Target mobile Safari running on iOS 16+
 - Use responsive design techniques to ensure a good experience on all devices.
 - Optimize for PWA (Progressive Web App) standards.
+- If using a separate backend, the deployment target of the frontend will be Single Page Application (SPA).
 - Use a navigation bar that is accessible and easy to use on both desktop and mobile.
 
 ## Architecture
