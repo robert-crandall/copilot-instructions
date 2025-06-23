@@ -15,9 +15,10 @@ applyTo: "**/*"
 - Choose semantic icon names that clearly represent their function.
 - Use consistent icon sizes throughout the application (typically 16px, 20px, 24px).
 - Prefer outline icons over filled icons for better visual hierarchy.
-- Use proper ARIA labels for accessibility: `aria-label` or `aria-hidden="true"`.
 - Use modals sparingly. These are good for quick actions. They are not good for complex forms or workflows.
 - Use confirmation dialogs for destructive actions only.
+- Cards should be linked to their detail view. Do not include a "view" link or button inside the card.
+- Use left-border colors to indicate the status of an item (e.g., green for success, red for error).
 
 ## Target Browsers
 

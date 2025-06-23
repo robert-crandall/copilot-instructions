@@ -1,348 +1,428 @@
 ---
-description: Hono web framework coding standards and best practices for ultrafast web APIs
-applyTo: "**/*.{js,ts,jsx,tsx}"
+description: Hono best practices
+applyTo: "backend/**/*.{js,ts}"
 ---
 
-# Hono Web Framework Guidelines
-
-> Reference: [Complete Hono Documentation](../references/hono-llms.md)
+# Hono Instructions
 
 ## Core Principles
 
-- **Web Standards First**: Build on Web Standards APIs for maximum portability across runtimes
-- **Multi-Runtime**: Write code that works on Cloudflare Workers, Deno, Bun, Vercel, AWS Lambda, and Node.js
-- **Type Safety**: Leverage Hono's excellent TypeScript support with end-to-end type safety
-- **Performance**: Use Hono's RegExpRouter for ultrafast routing performance
-- **Minimal Bundle Size**: Keep imports lean, use only what you need
+### Framework Philosophy
+- Hono is designed to be flexible and fast
+- Follow Hono's conventions rather than forcing other framework patterns
+- Leverage Hono's built-in features and middleware over external alternatives
+- Maintain type safety throughout the application stack
 
-## Project Structure
+## Project Structure and Organization
 
-```
-src/
-  ├── app.ts              # Main Hono app instance
-  ├── routes/             # Route handlers organized by feature
-  │   ├── api/            # API routes
-  │   ├── auth/           # Authentication routes
-  │   └── webhooks/       # Webhook handlers
-  ├── middleware/         # Custom middleware
-  ├── lib/               # Business logic and utilities
-  ├── types/             # TypeScript type definitions
-  └── bindings.ts        # Environment bindings types
-```
-
-## Application Setup
-
-### Basic App Structure
+### Avoid Ruby on Rails-style Controllers
+**❌ Don't create separate controller functions when possible:**
 ```typescript
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-import { prettyJSON } from 'hono/pretty-json';
+// 🙁 RoR-like Controller - avoid this pattern
+const booksList = (c: Context) => {
+  return c.json('list books')
+}
 
-// Define environment bindings
-type Bindings = {
-  DATABASE_URL: string;
-  JWT_SECRET: string;
-};
+app.get('/books', booksList)
 
-const app = new Hono<{ Bindings: Bindings }>();
-
-// Global middleware
-app.use('*', logger());
-app.use('*', cors());
-app.use('*', prettyJSON());
-
-// Routes
-app.route('/api', apiRoutes);
-app.route('/auth', authRoutes);
-
-export default app;
+// Type inference issues
+const bookPermalink = (c: Context) => {
+  const id = c.req.param('id') // Can't infer the path param type
+  return c.json(`get ${id}`)
+}
 ```
 
-### Environment Types
+**✅ Write handlers directly after path definitions:**
 ```typescript
-// bindings.ts
-export type Bindings = {
-  // Cloudflare Workers
-  DATABASE: D1Database;
-  KV: KVNamespace;
-  
-  // Environment variables
-  JWT_SECRET: string;
-  API_KEY: string;
-};
-
-export type Variables = {
-  user: User;
-  requestId: string;
-};
-
-export type HonoEnv = {
-  Bindings: Bindings;
-  Variables: Variables;
-};
+// 😃 Preferred approach
+app.get('/books/:id', (c) => {
+  const id = c.req.param('id') // Proper type inference
+  return c.json(`get ${id}`)
+})
 ```
 
-## Routing Patterns
+**Why:** Direct handlers provide better type inference for path parameters and maintain Hono's type safety benefits.
 
-### Route Organization
+### Use Factory Pattern for Reusable Handlers
+**✅ When you need reusable logic, use `factory.createHandlers()`:**
 ```typescript
-// routes/api/users.ts
-import { Hono } from 'hono';
-import type { HonoEnv } from '../../bindings';
+import { createFactory } from 'hono/factory'
+import { logger } from 'hono/logger'
 
-const users = new Hono<HonoEnv>();
+const factory = createFactory()
 
-users.get('/', async (c) => {
-  // List users
-  return c.json({ users: [] });
-});
+const middleware = factory.createMiddleware(async (c, next) => {
+  c.set('foo', 'bar')
+  await next()
+})
 
-users.get('/:id', async (c) => {
-  const id = c.req.param('id');
-  // Get user by ID
-  return c.json({ user: { id } });
-});
+const handlers = factory.createHandlers(logger(), middleware, (c) => {
+  return c.json(c.var.foo)
+})
 
-users.post('/', async (c) => {
-  const body = await c.req.json();
-  // Create user
-  return c.json({ user: body }, 201);
-});
-
-export { users };
+app.get('/api', ...handlers)
 ```
 
-### Path Parameters and Validation
+## Building Larger Applications
+
+### Use `app.route()` for Modular Architecture
+**✅ Separate concerns into different files:**
+
 ```typescript
-// Use Zod for request validation
-import { z } from 'zod';
-import { zValidator } from '@hono/zod-validator';
+// authors.ts
+import { Hono } from 'hono'
 
-const createUserSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().email(),
-});
+const app = new Hono()
 
-app.post('/users', 
-  zValidator('json', createUserSchema), 
-  async (c) => {
-    const validated = c.req.valid('json');
-    // validated is fully typed
-    return c.json({ user: validated }, 201);
+app.get('/', (c) => c.json('list authors'))
+app.post('/', (c) => c.json('create an author', 201))
+app.get('/:id', (c) => c.json(`get ${c.req.param('id')}`))
+
+export default app
+```
+
+```typescript
+// books.ts  
+import { Hono } from 'hono'
+
+const app = new Hono()
+
+app.get('/', (c) => c.json('list books'))
+app.post('/', (c) => c.json('create a book', 201))
+app.get('/:id', (c) => c.json(`get ${c.req.param('id')}`))
+
+export default app
+```
+
+```typescript
+// index.ts - Main application
+import { Hono } from 'hono'
+import authors from './authors'
+import books from './books'
+
+const app = new Hono()
+
+// Mount routes with proper prefixes
+app.route('/authors', authors)
+app.route('/books', books)
+
+export default app
+```
+
+### RPC (Remote Procedure Call) Features
+**✅ For type-safe client-server communication:**
+
+```typescript
+// authors.ts - Chain methods for RPC compatibility
+import { Hono } from 'hono'
+
+const app = new Hono()
+  .get('/', (c) => c.json('list authors'))
+  .post('/', (c) => c.json('create an author', 201))
+  .get('/:id', (c) => c.json(`get ${c.req.param('id')}`))
+
+export default app
+```
+
+```typescript
+// client.ts - Type-safe client usage
+import app from './authors'
+import { hc } from 'hono/client'
+
+const client = hc<typeof app>('http://localhost') // Fully typed
+```
+
+## Middleware Best Practices
+
+### Use Hono's Built-in Middleware
+**✅ Prefer first-party middleware:**
+```typescript
+import { Hono } from 'hono'
+import { jwt } from 'hono/jwt'
+import { logger } from 'hono/logger'
+import { cors } from 'hono/cors'
+import type { JwtVariables } from 'hono/jwt'
+
+const app = new Hono<{ Variables: JwtVariables }>()
+
+// Chain middleware in logical order
+app.use('*', logger())
+app.use('*', cors())
+app.use('/api/*', jwt({ secret: process.env.JWT_SECRET! }))
+```
+
+### Custom Middleware Pattern
+**✅ Create reusable custom middleware:**
+```typescript
+import { createMiddleware } from 'hono/factory'
+
+const authMiddleware = createMiddleware(async (c, next) => {
+  // Custom authentication logic
+  const token = c.req.header('Authorization')
+  if (!token) {
+    return c.json({ error: 'Unauthorized' }, 401)
   }
-);
-```
-
-## Context and Request Handling
-
-### Context Usage
-```typescript
-app.get('/example', async (c) => {
-  // Request data
-  const param = c.req.param('id');
-  const query = c.req.query('filter');
-  const header = c.req.header('authorization');
-  const body = await c.req.json();
   
-  // Environment access
-  const secret = c.env.JWT_SECRET;
-  const db = c.env.DATABASE;
-  
-  // Variables (set by middleware)
-  const user = c.get('user');
-  
-  // Response
-  return c.json({ data: 'example' });
-});
+  // Set context variables
+  c.set('userId', extractUserId(token))
+  await next()
+})
+
+// Use in routes
+app.use('/protected/*', authMiddleware)
 ```
 
-### Response Types
+## Type Safety and Hono Stacks
+
+### Define Proper Types
+**✅ Use Hono's type system for end-to-end type safety:**
 ```typescript
-// JSON responses (most common)
-return c.json({ data: result });
-return c.json({ error: 'Not found' }, 404);
+type AppBindings = {
+  Variables: {
+    userId: string
+    user: User
+  }
+  Bindings: {
+    DATABASE_URL: string
+    JWT_SECRET: string
+  }
+}
 
-// Text responses
-return c.text('Hello World');
+const app = new Hono<AppBindings>()
 
-// HTML responses
-return c.html('<h1>Hello</h1>');
-
-// Redirects
-return c.redirect('/login', 302);
-
-// Stream responses
-return c.stream(async (stream) => {
-  await stream.write('chunk 1');
-  await stream.write('chunk 2');
-});
+app.get('/profile', (c) => {
+  const userId = c.var.userId // Fully typed
+  const dbUrl = c.env.DATABASE_URL // Fully typed
+  return c.json({ userId })
+})
 ```
 
-## Middleware Patterns
-
-### Custom Middleware
+### Export Types for Frontend
+**✅ Enable frontend type safety:**
 ```typescript
-// middleware/auth.ts
-import type { MiddlewareHandler } from 'hono';
-import type { HonoEnv } from '../bindings';
-
-export const authMiddleware = (): MiddlewareHandler<HonoEnv> => {
-  return async (c, next) => {
-    const token = c.req.header('Authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
-      return c.json({ error: 'Unauthorized' }, 401);
-    }
-    
-    try {
-      const user = await validateToken(token, c.env.JWT_SECRET);
-      c.set('user', user);
-      await next();
-    } catch {
-      return c.json({ error: 'Invalid token' }, 401);
-    }
-  };
-};
+// Export the app type for frontend usage
+export type AppType = typeof app
+export default app
 ```
 
-### Built-in Middleware Usage
 ```typescript
-import { bearerAuth } from 'hono/bearer-auth';
-import { basicAuth } from 'hono/basic-auth';
-import { jwt } from 'hono/jwt';
-import { cache } from 'hono/cache';
-import { compress } from 'hono/compress';
+// Frontend usage with full type safety
+import type { AppType } from '../backend/src/index'
+import { hc } from 'hono/client'
 
-// Bearer token auth
-app.use('/api/*', bearerAuth({ token: 'secret-token' }));
-
-// JWT auth
-app.use('/protected/*', jwt({ secret: 'jwt-secret' }));
-
-// Caching
-app.get('/api/data', cache({ cacheName: 'api-data', cacheControl: 'max-age=3600' }));
-
-// Compression
-app.use('*', compress());
+const client = hc<AppType>('/api')
+const response = await client.profile.$get() // Fully typed response
 ```
 
 ## Error Handling
 
-### Global Error Handler
+### Use Hono's Error Handling
+**✅ Implement proper error responses:**
 ```typescript
-app.onError((err, c) => {
-  console.error('Error:', err);
-  
-  if (err instanceof ValidationError) {
-    return c.json({ error: 'Validation failed', details: err.details }, 400);
-  }
-  
-  if (err instanceof NotFoundError) {
-    return c.json({ error: 'Resource not found' }, 404);
-  }
-  
-  return c.json({ error: 'Internal server error' }, 500);
-});
-```
+import { HTTPException } from 'hono/http-exception'
 
-### Route-Level Error Handling
-```typescript
 app.get('/users/:id', async (c) => {
-  try {
-    const user = await getUserById(c.req.param('id'));
-    return c.json({ user });
-  } catch (error) {
-    if (error instanceof UserNotFoundError) {
-      return c.json({ error: 'User not found' }, 404);
-    }
-    throw error; // Let global handler deal with it
-  }
-});
-```
-
-## Type Safety and RPC
-
-### RPC Client Setup
-```typescript
-// client.ts
-import { hc } from 'hono/client';
-import type { AppType } from './app';
-
-const client = hc<AppType>('http://localhost:8787');
-
-// Fully typed API calls
-const response = await client.api.users.$get();
-const users = await response.json(); // Typed automatically
-```
-
-### Type-Safe Route Definitions
-```typescript
-import type { Hono } from 'hono';
-
-const api = new Hono()
-  .get('/users', (c) => c.json({ users: [] as User[] }))
-  .post('/users', (c) => c.json({ user: {} as User }, 201));
-
-export type ApiType = typeof api;
-```
-
-## Testing
-
-### Unit Testing with Hono
-```typescript
-import { describe, test, expect } from 'vitest';
-import app from '../src/app';
-
-describe('API Tests', () => {
-  test('GET /api/users returns users list', async () => {
-    const res = await app.request('/api/users');
-    expect(res.status).toBe(200);
-    const data = await res.json();
-    expect(data).toHaveProperty('users');
-  });
+  const id = c.req.param('id')
+  const user = await getUserById(id)
   
-  test('POST /api/users creates user', async () => {
-    const userData = { name: 'John', email: 'john@example.com' };
-    const res = await app.request('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-    expect(res.status).toBe(201);
-  });
-});
+  if (!user) {
+    throw new HTTPException(404, { message: 'User not found' })
+  }
+  
+  return c.json(user)
+})
+
+// Global error handler
+app.onError((err, c) => {
+  if (err instanceof HTTPException) {
+    return err.getResponse()
+  }
+  
+  console.error('Unhandled error:', err)
+  return c.json({ error: 'Internal Server Error' }, 500)
+})
 ```
 
-## Best Practices
+## Validation and Input Handling
 
-### Performance
-- Use `RegExpRouter` (default) for optimal routing performance
-- Leverage streaming for large responses
-- Implement proper caching strategies with cache middleware
-- Use compression middleware for text responses
+### Use Hono's Built-in Validation
+**✅ Validate requests with Hono validators:**
+```typescript
+import { zValidator } from '@hono/zod-validator'
+import { z } from 'zod'
 
-### Security
-- Always validate input with Zod or similar validation library
-- Use bearer auth or JWT middleware for protected routes
-- Implement CORS properly for browser requests
-- Sanitize user input to prevent XSS attacks
-- Use secure headers middleware
+const createUserSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  age: z.number().int().positive().optional()
+})
 
-### Code Organization
-- Separate routes into feature-based modules
-- Keep middleware in dedicated files
-- Use TypeScript interfaces for all data shapes
-- Implement proper error boundaries
-- Use environment-specific configurations
+app.post('/users', 
+  zValidator('json', createUserSchema),
+  async (c) => {
+    const data = c.req.valid('json') // Typed and validated
+    const user = await createUser(data)
+    return c.json(user, 201)
+  }
+)
+```
 
-### Runtime Compatibility
-- Avoid Node.js-specific APIs (use Web Standards)
-- Test across different runtimes (Cloudflare Workers, Deno, Bun)
-- Use Web Streams API for streaming
-- Prefer `fetch` over platform-specific HTTP clients
-- Use Web Crypto API for cryptographic operations
+## Security Best Practices
 
-This instruction set emphasizes Hono's unique strengths: ultrafast performance, multi-runtime compatibility, excellent TypeScript support, and Web Standards compliance.
+### JWT Authentication
+**✅ Use Hono's JWT middleware:**
+```typescript
+import { jwt, sign, verify } from 'hono/jwt'
 
-Reference: [Hono Instructions](../references/hono-llms.md)
+// JWT middleware
+app.use('/api/*', jwt({
+  secret: process.env.JWT_SECRET!,
+  cookie: 'auth-token' // Optional: use cookies instead of headers
+}))
+
+// Sign tokens
+app.post('/login', async (c) => {
+  // Validate credentials...
+  const token = await sign(
+    { userId: user.id, exp: Math.floor(Date.now() / 1000) + 60 * 60 },
+    process.env.JWT_SECRET!
+  )
+  return c.json({ token })
+})
+```
+
+### CORS Configuration
+**✅ Configure CORS properly:**
+```typescript
+import { cors } from 'hono/cors'
+
+app.use('*', cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization']
+}))
+```
+
+## Performance Considerations
+
+### Efficient Routing
+**✅ Organize routes for optimal performance:**
+```typescript
+// Group related routes
+const apiRoutes = new Hono()
+  .get('/users', getAllUsers)
+  .post('/users', createUser)
+  .get('/users/:id', getUser)
+  .put('/users/:id', updateUser)
+  .delete('/users/:id', deleteUser)
+
+app.route('/api', apiRoutes)
+```
+
+### Context Variables
+**✅ Use context efficiently:**
+```typescript
+// Set context variables early in middleware chain
+app.use('*', async (c, next) => {
+  c.set('requestId', generateRequestId())
+  c.set('startTime', Date.now())
+  await next()
+})
+
+// Access in handlers
+app.get('/slow-endpoint', async (c) => {
+  const startTime = c.var.startTime
+  // Process...
+  const duration = Date.now() - startTime
+  c.header('X-Response-Time', `${duration}ms`)
+  return c.json({ data })
+})
+```
+
+## Testing Integration
+
+### Test with Real HTTP Requests
+**✅ Use Hono's testing utilities:**
+```typescript
+import { testClient } from 'hono/testing'
+
+// Test your app with real HTTP requests
+describe('API Tests', () => {
+  const client = testClient(app)
+  
+  test('GET /users', async () => {
+    const res = await client.users.$get()
+    expect(res.status).toBe(200)
+    
+    const data = await res.json()
+    expect(Array.isArray(data)).toBe(true)
+  })
+  
+  test('POST /users', async () => {
+    const res = await client.users.$post({
+      json: { name: 'John', email: 'john@example.com' }
+    })
+    expect(res.status).toBe(201)
+  })
+})
+```
+
+## Development Environment
+
+### Environment Configuration
+**✅ Handle environment variables properly:**
+```typescript
+type Bindings = {
+  DATABASE_URL: string
+  JWT_SECRET: string
+  NODE_ENV: string
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
+
+app.get('/health', (c) => {
+  return c.json({ 
+    status: 'ok',
+    env: c.env.NODE_ENV,
+    // Don't expose sensitive values
+    hasDb: !!c.env.DATABASE_URL,
+    hasJwt: !!c.env.JWT_SECRET
+  })
+})
+```
+
+## Common Anti-patterns to Avoid
+
+### ❌ Don't Force Express.js Patterns
+```typescript
+// Don't try to recreate Express middleware patterns
+// Use Hono's built-in middleware instead
+```
+
+### ❌ Don't Ignore Type Safety
+```typescript
+// Don't use 'any' types - leverage Hono's type system
+// Don't skip validation - use Hono's validators
+```
+
+### ❌ Don't Create Unnecessary Abstractions
+```typescript
+// Don't create complex class hierarchies
+// Keep it simple with Hono's functional approach
+```
+
+## Summary
+
+1. **Embrace Hono's Philosophy**: Use direct handlers, avoid unnecessary abstractions
+2. **Leverage Type Safety**: Use Hono's type system for end-to-end safety
+3. **Modular Architecture**: Use `app.route()` for larger applications
+4. **Built-in Features**: Prefer Hono's middleware and utilities
+5. **RPC Integration**: Chain methods for type-safe client-server communication
+6. **Proper Error Handling**: Use HTTPException and global error handlers
+7. **Security**: Use Hono's JWT and CORS middleware
+8. **Testing**: Write integration tests with real HTTP requests
+
+Following these practices ensures your Hono application is maintainable, type-safe, and performant while staying true to Hono's design philosophy.
+
+> Reference: [Complete Hono Documentation](../references/hono-llms.md)

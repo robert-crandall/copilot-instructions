@@ -1,85 +1,380 @@
-# GitHub Copilot General Instructions
+# Copilot Instructions
 
-## General Guidelines
+## Core Principles
 
-- Prefer modern ES6+ JavaScript/TypeScript patterns and syntax.
-- Use async/await instead of raw promises or callbacks.
-- Follow a functional programming approach where appropriate.
-- Use descriptive variable and function names.
-- Add comments for complex logic, but keep code self-documenting when possible.
-- Include type annotations in TypeScript code.
-- Write unit tests for new functionality.
+### 0. Development Flow
+- For new features requiring product planning:
+  - Refer to [create-prd.md](./instructions/create-prd.md) to create a PRD first
+  - Use [generate-tasks.md](./instructions/generate-tasks.md) to break down the PRD into actionable tasks
+  - Use [process-task-list.md](./instructions/process-task-list.md) to manage the task list and track progress
 
-## Code Style
+### 1. Context and Understanding
+- **Always read relevant files first** before making changes
+- Ask me to show you the codebase structure if you're unfamiliar with the project
+- Understand the existing patterns, conventions, and architecture before suggesting changes
+- When working on a feature, review related files, tests, and documentation
 
-- Use 2-space indentation.
-- Use semicolons at the end of statements.
-- Use single quotes for strings.
-- Prefer const over let. Avoid var.
-- Use arrow functions for callbacks.
-- Use template literals for string interpolation.
+### 2. Planning and Implementation (Single-Task Focus)
+- **ONE FEATURE AT A TIME**: Never work on multiple features simultaneously
+- **Integration-Test-Driven Development**:
+  1. Understand the feature requirements completely
+  2. Write integration test that makes real API calls BEFORE implementation
+  3. Implement feature to make the test pass
+  4. Verify all existing tests still pass
+  5. Only then consider the task complete
+- Break down complex features into smaller, testable increments
+- Each increment must have its own integration test
+- Explain your approach and test strategy before coding
+- Consider edge cases, error handling, and performance implications in tests
+- Think about backwards compatibility and migration paths
 
-## Project Structure
+### 3. Deep Thinking and Quality
+- Use "think hard" or "ultrathink" when I need particularly thoughtful solutions
+- Take time to consider multiple approaches and trade-offs
+- Don't rush to the first solution - explore alternatives
+- Consider the broader implications of changes across the codebase
 
-- Keep components small and focused on a single responsibility.
-- Place shared utilities in appropriate utility modules.
-- Organize code by feature rather than by type when possible.
-- Maintain clear separation between UI components and business logic.
+## Testing Strategy (Integration-First Approach)
 
-## Best Practices
+### Primary Testing Philosophy
+- **PRIMARY FOCUS**: Integration tests that make real API calls to actual endpoints
+- **Feature Development Workflow**:
+  1. Work on ONE task or feature at a time - no parallel development
+  2. Write integration test FIRST that makes actual HTTP requests to the API
+  3. Implement the feature to make the test pass
+  4. Ensure ALL existing tests still pass before considering task complete
+  5. Only move to next feature when current feature is fully tested and working
+- Testing assumes real database operations. If tests fail do to database issues, stop and alert me to fix the database first.
 
-### Function Design
+### Integration Test Requirements
+- Use Hono's testing utilities with real HTTP requests (not mocked)
+- Test complete request/response cycle including middleware
+- Include proper database setup/teardown using Drizzle
+- Test authentication, validation, and error handling in real scenarios
+- Verify actual database state changes after operations
 
-- Write small, single-purpose functions (max 20-30 lines).
-- Use pure functions when possible (no side effects).
-- Return early to avoid deep nesting.
-- Use meaningful parameter names and avoid boolean parameters.
-- Prefer function composition over complex conditional logic.
+### Test Completion Criteria
+- New feature test passes
+- ALL existing tests still pass
+- Feature works end-to-end with real API calls
+- Database operations are properly tested with actual data
 
-### Data and Identifiers
+### Testing Guidelines
+- **Unit Tests**: Defer until later in project - focus on integration coverage first
+- **Test Data Management**: Use proper test database setup/teardown between tests
+- **Never modify existing tests** unless specifically requested or they're broken by intentional changes
+- Run tests frequently during development
 
-- Use UUIDs for database primary keys instead of auto-incrementing integers.
-- Use semantic naming: `userId` instead of `id`, `createdAt` instead of `date`.
-- Prefer enums or constants over magic strings/numbers.
-- Use TypeScript interfaces for object shapes and API contracts.
-- Deleting data should be soft-deletion by default (e.g., `isDeleted` flag).
-- Use `null` for missing values, not `undefined`.
+## Code Quality Standards
 
-### Error Handling
+### Code Style and Conventions
+- Follow the existing code style and patterns in the project
+- Use consistent naming conventions
+- Write clear, self-documenting code with meaningful variable names
+- Add comments for complex logic or business rules
+- Follow language-specific best practices and idioms
 
-- Always handle errors explicitly - don't let them fail silently.
-- Use Result/Either patterns or try-catch with specific error types.
-- Provide meaningful error messages with context.
-- Log errors with sufficient detail for debugging.
-- Validate inputs at boundaries (API endpoints, function parameters).
+### Error Handling and Robustness
+- Implement proper error handling and validation
+- Consider what could go wrong and handle those cases gracefully
+- Use appropriate logging levels and meaningful error messages
+- Don't ignore errors or use generic catch-all handlers
 
-### Security
+## Development Workflow
 
-- Never trust user input - validate and sanitize all data.
-- Use parameterized queries to prevent SQL injection.
-- Implement proper authentication and authorization checks.
-- Avoid exposing sensitive data in client-side code.
-- Use environment variables for secrets and configuration.
+### File Management (Single-Feature Focus)
+- **Work on ONE feature at a time** - never make changes for multiple features simultaneously
+- Make targeted, focused changes for the current feature only
+- Suggest git commits before major refactoring
+- Keep related changes together in logical commits per feature
+- Don't modify unrelated files unless necessary for the current feature
+- **Test-First Rule**: Always write integration test before implementing feature
 
-### Performance
+### Debugging and Problem Solving
+- Start by understanding the problem thoroughly
+- Reproduce issues when possible
+- Use systematic debugging approaches
+- Check logs, error messages, and stack traces carefully
+- Test fixes thoroughly before considering them complete
 
-- Avoid premature optimization, but be aware of common performance pitfalls.
-- Use lazy loading for large datasets or expensive operations.
-- Implement proper pagination for list endpoints.
-- Cache expensive computations and database queries appropriately.
-- Use database indexes for frequently queried fields.
+### Documentation and Communication
+- Update documentation when making significant changes
+- Explain complex decisions and trade-offs
+- Keep README files and setup instructions current
+- Use clear commit messages that explain the "why" not just the "what"
 
-### Code Organization
+## Collaboration Guidelines
 
-- Use dependency injection for better testability.
-- Separate concerns: data access, business logic, and presentation.
-- Implement consistent error handling patterns across the application.
-- Use configuration objects instead of long parameter lists.
-- Follow consistent naming conventions throughout the codebase.
+### Communication Style
+- Ask clarifying questions when requirements are unclear
+- Explain your reasoning and approach
+- Suggest alternatives when you see potential issues
+- Be honest about limitations or uncertainties
+- Provide context for your recommendations
 
-## For specific technology stacks, see the following instructions:
+### Code Reviews and Feedback
+- Point out potential issues or improvements
+- Suggest more efficient or maintainable approaches
+- Consider security implications of changes
+- Think about scalability and performance impacts
 
-- [SvelteKit](instructions/sveltekit.instructions.md)
-- [TailwindCSS](instructions/tailwindcss.instructions.md)
-- [daisyUI](instructions/daisyui.instructions.md)
-- [Drizzle ORM](references/drizzle-llms.md)
+## Backend Technology Stack (Hono + PostgreSQL + Drizzle)
+
+### Technology Stack
+- **Backend Framework**: Hono (prefer first-party middleware)
+- **Database**: PostgreSQL with Drizzle ORM
+- **Type Safety**: Hono stacks for end-to-end type safety. See [Hono Stacks](https://hono.dev/docs/concepts/stacks) for more details.
+- **Middleware**: Use Hono's built-in middleware (JWT, logging, CORS) over third-party alternatives
+  - **JWT**: See [middleware/jwt](https://hono.dev/docs/middleware/builtin/jwt) and [helpers/jwt](https://hono.dev/docs/helpers/jwt) for authentication
+- **Project Structure**: Monorepo with backend/ folder containing the Hono API
+- **Frontend Integration**: Frontend can directly import from Hono stacks for type-safe API calls
+
+### Hono Best Practices
+
+#### Middleware Usage
+- **Always prefer Hono first-party middleware** over external libraries
+- Use `hono/jwt` for JWT authentication
+- Use `hono/logger` for request logging
+- Use `hono/cors` for CORS handling
+- These are all built in. Sample import:
+```typescript
+import { Hono } from 'hono'
+import { jwt } from 'hono/jwt'
+import type { JwtVariables } from 'hono/jwt'
+```
+- Chain middleware in logical order (auth, logging, CORS, etc.)
+- Create custom middleware for cross-cutting concerns specific to the app
+
+#### API Structure and Routing
+- Group related routes using `app.route()` for better organization
+- Use nested routing for complex API structures
+- Implement proper HTTP status codes and response formats
+- Leverage Hono's built-in validation and error handling
+- Use route-specific middleware where appropriate
+
+#### Type Safety with Hono Stacks
+- Define API types using Hono's type system
+- Export types from backend for frontend consumption
+- Use `hc` (Hono client) for type-safe API calls from frontend
+- Maintain strict TypeScript configuration
+- Define response schemas and validate them
+
+### Database and Drizzle Best Practices
+
+#### Schema Design
+- Use Drizzle's schema definition for all database models
+- Implement proper relationships using Drizzle's relational queries
+- Use migrations for all schema changes
+- Include proper indexes for performance-critical queries
+- Use TypeScript enums for database enums when appropriate
+
+#### Query Patterns
+- Use Drizzle's query builder for complex queries
+- Implement proper transaction handling for multi-step operations
+- Use prepared statements for frequently-executed queries
+- Implement proper connection pooling
+- Use Drizzle's relationship queries instead of manual joins when possible
+
+#### Database Connection Management
+- Use environment variables for database configuration
+- Implement proper connection pooling
+- Handle database connection errors gracefully
+- Use transactions for data consistency
+- Implement proper database seeding for development/testing
+
+### Development Environment
+- **Bun**: Use version 1.2.x for development
+- **Package Manager**: bun
+- **TypeScript**: Strict mode enabled
+- **Database**: PostgreSQL running in Docker
+- **Environment Variables**: Use .env files for local development
+- **Hot Reload**: Leverage Hono's development server features
+
+### Monorepo Conventions
+- Keep backend code in `backend/` directory
+- Export types and client utilities from backend for frontend use
+- Use consistent import paths across the monorepo
+- Implement shared utilities in a common location
+- Use workspace-level scripts for common operations
+
+### API Design Patterns
+- Follow RESTful conventions where appropriate
+- Use consistent response formats across endpoints
+- Implement proper error handling and status codes
+- Use middleware for authentication, validation, and logging
+- Group related functionality into route modules
+- Use Hono's context for request-scoped data
+
+---
+
+## Frontend Framework Guidelines
+
+### SvelteKit Best Practices (SPA Deployment)
+
+#### Deployment Configuration
+- **Target**: Single Page Application (SPA) deployment using `@sveltejs/adapter-static`
+- Configure `svelte.config.js` with `adapter: adapter({ fallback: 'index.html' })`
+- Set `prerender` to false for dynamic routes that need client-side routing
+- Use `ssr: false` in `+layout.ts` or specific pages when full SPA behavior is needed
+
+#### Project Structure and Organization
+- Use SvelteKit's file-based routing system effectively for SPA navigation
+- Organize components in logical directories (lib/components/, routes/, etc.)
+- Use `+page.svelte` for routes and `+layout.svelte` for shared layouts
+- Keep stores in `lib/stores/` and utilities in `lib/utils/`
+- Use `$lib` alias for clean imports throughout the project
+
+#### Type Safety and Integration
+- Import types directly from `backend/` using monorepo structure
+- Use Hono client (`hc`) for type-safe API calls in `+page.ts` or `+layout.ts`
+- Define proper TypeScript interfaces for component props
+- Use SvelteKit's generated types (`$app/` modules) appropriately
+- Leverage load functions for server-side data fetching when beneficial
+
+#### State Management
+- Use Svelte stores for global state management
+- Prefer derived stores for computed values
+- Use context API for component-specific shared state
+- Implement proper store subscriptions and cleanup
+- Use writable stores sparingly - prefer reactive declarations when possible
+
+#### Component Development
+- Keep components small and focused on single responsibilities
+- Use proper prop validation and default values
+- Implement consistent naming conventions for components and props
+- Use slots effectively for component composition
+- Prefer composition over inheritance patterns
+
+#### Data Fetching and API Integration (SPA Mode)
+- Use client-side data fetching in `onMount` or reactive statements for SPA behavior
+- Implement proper error handling for API calls with user-friendly error states
+- Use Hono client (`hc`) for all API communication with full type safety
+- Cache API responses using stores or browser storage when appropriate
+- Handle loading states and errors gracefully in components
+- Consider using load functions only when absolutely necessary (prefer client-side fetching)
+
+#### Responsive Design for iOS and Desktop
+- **Mobile-First Approach**: Design for iOS Safari first, then enhance for desktop
+- **Viewport Configuration**: Use proper viewport meta tag for iOS compatibility
+- **Touch-Friendly UI**: Ensure minimum 44px touch targets for iOS guidelines
+- **Safe Areas**: Handle iOS safe areas using CSS env() variables (safe-area-inset-*)
+- **Responsive Breakpoints**: Use consistent breakpoints (mobile: <768px, desktop: ≥768px)
+- **Flexible Layouts**: Use CSS Grid and Flexbox for responsive layouts
+- **Typography Scaling**: Implement responsive typography that works on both platforms
+- **Interactive Elements**: Ensure hover states work on desktop, touch states on mobile
+
+#### Progressive Web App (PWA) Implementation
+- **Service Worker**: Implement service worker for offline functionality and caching
+- **Web App Manifest**: Create comprehensive manifest.json for PWA installation
+- **iOS PWA Compatibility**: 
+  - Use proper apple-touch-icon sizes (180x180px minimum)
+  - Set apple-mobile-web-app-capable and apple-mobile-web-app-status-bar-style
+  - Ensure standalone display mode works properly on iOS 16+
+- **App Installation**: Provide clear installation prompts and instructions
+- **Offline Experience**: Design meaningful offline states and cached content
+- **Push Notifications**: Implement if needed (note iOS limitations for web apps)
+- **App-like Navigation**: Use SPA routing to maintain app-like feel without page refreshes
+
+#### Styling and UI System
+- Use SvelteKit's scoped styling by default
+- Implement consistent design system and component patterns
+- Use CSS custom properties for theming and iOS compatibility
+- Use Tailwind CSS for styling
+- **iOS-Specific Styling**:
+  - Handle iOS keyboard behavior and viewport changes
+  - Use appropriate iOS-style animations and transitions
+  - Implement proper focus states for accessibility
+  - Handle iOS Safari quirks (bottom bar, zoom behavior)
+- **Desktop Enhancements**:
+  - Implement hover states and keyboard navigation
+  - Use appropriate cursor styles
+  - Consider larger click targets and spacing
+- Ensure WCAG accessibility standards for both platforms
+
+#### Performance Optimization (SPA Focus)
+- **Bundle Optimization**: Use SvelteKit's code splitting for route-based chunks
+- **Lazy Loading**: Implement dynamic imports for non-critical components
+- **Asset Optimization**: Optimize images and assets for mobile and desktop viewing
+- **Memory Management**: Be careful with store subscriptions and component cleanup
+- **iOS Performance**: 
+  - Optimize for iOS Safari's memory constraints
+  - Use transform/opacity for animations (avoid layout thrashing)
+  - Minimize JavaScript bundle size for faster loading on mobile networks
+- **Caching Strategy**: Implement effective caching for API responses and static assets
+- **Loading States**: Provide immediate feedback for better perceived performance
+
+#### Development Workflow
+- Use SvelteKit's hot module replacement effectively
+- Implement proper error boundaries and error pages
+- Use SvelteKit's built-in dev tools and debugging features
+- Test components using Vitest or similar testing framework
+- Follow SvelteKit's conventions for environment variables and configuration
+
+#### Deployment and Build (SPA Configuration)
+- **Static Adapter**: Configure `@sveltejs/adapter-static` with proper fallback
+- **Build Optimization**: Ensure proper minification and asset optimization
+- **PWA Assets**: Generate all required PWA icons and splash screens
+- **Environment Configuration**: Handle API endpoints for different deployment environments
+- **iOS Testing**: Test thoroughly on actual iOS devices and Safari
+- **Service Worker Registration**: Ensure proper service worker registration and updates
+- **App Store Guidelines**: Follow PWA guidelines for potential App Store submission
+- **CDN Deployment**: Configure for static hosting with proper routing fallbacks
+
+---
+
+## Advanced Techniques
+
+### Security Considerations
+- Use Hono's JWT middleware for authentication with proper secret management
+- Validate all inputs using Hono's built-in validators or Zod
+- Use parameterized queries through Drizzle to prevent SQL injection
+- Implement proper CORS policies using hono/cors
+- Sanitize user inputs and validate against schema
+- Store sensitive configuration in environment variables, never in code
+
+### Maintenance and Refactoring
+- Prefer small, incremental improvements over large rewrites
+- Do not maintain backwards compatibility. Remove deprecated features and APIs. Everything is backed up in version control and should focus on the current state of the codebase, not on maintaining old features.
+- Update dependencies regularly and safely
+- Remove dead code and unused imports
+
+## Iteration and Improvement
+
+### Continuous Learning
+- Product requirements are in `/tasks/prd-*.md`. Review them to understand the product vision and goals.
+- Stay curious about new approaches and technologies
+- Learn from mistakes and improve processes
+- Keep up with best practices in the relevant technologies
+- Share knowledge and learn from team members
+- Use the file `/tasks/knowledge-base.md` to document useful patterns, learnings, tips, and tricks
+- Read the file `/tasks/knowledge-base.md` to learn about the latest patterns and practices in the codebase
+
+### Feedback Loop
+
+- Run tests frequently during development
+- Get early feedback on architectural decisions
+- Iterate based on code reviews and user feedback
+- Monitor and measure the impact of changes
+
+---
+
+## Usage Notes
+
+When working with me:
+1. **Focus on ONE task/feature at a time** - I will not work on multiple features simultaneously
+2. **Integration-test-first approach** - I will write tests that make real API calls before implementing
+3. **All tests must pass** - I will not consider any task complete until all tests pass
+4. **Be specific** about what single feature you want to achieve
+5. **Provide context** about the current state and desired outcome for that feature
+6. **Ask for explanations** when you want to understand the reasoning behind the test or implementation
+7. **Request alternatives** when you want to explore different approaches for the current feature
+8. **Give feedback** on what works well and what doesn't
+
+**My Development Process:**
+1. Understand the single feature/task requirements
+2. Write integration test that makes real HTTP requests to test the feature
+3. Implement the feature to make the test pass
+4. Verify ALL existing tests still pass
+5. Only then consider the feature complete and ready for the next task
+
+Remember: The goal is to build features incrementally with full integration test coverage, ensuring each feature works end-to-end before moving to the next one.
