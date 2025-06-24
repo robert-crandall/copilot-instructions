@@ -14,15 +14,23 @@
   - Integration tests should be written for each task as it is implemented.
 - For bug fixes:
   - Unit tests should be written to reproduce the bug
-- TODO: Add testing logic to this section
-- TODO: Add knowledge base management to this section
+- For testing:
+  - NEVER COPY BUSINESS LOGIC into a test file. Always import the business logic from the original source file.
+  - Use [hono.test.instructions.md](./testing/hono.test.instructions.md) when implementing backend features
+  - Use [sveltekit.test.instructions.md](./testing/sveltekit.test.instructions.md) when implementing frontend features
+  - Refer to [testing.instructions.md](./testing/testing.instructions.md) for general testing guidelines
+- Refer to the [knowledge base](../tasks/knowledge-base.md) for common patterns and practices
 
 ### 1. Context and Understanding
 - **Always read relevant files first** before making changes
+- **SEARCH EXTENSIVELY** for existing implementations before writing new code:
+  - Use semantic search: "How is authentication handled?"
+  - Use lexical search: `query:content:"validateUser"` or `query:symbol:UserValidator`
+  - Check related directories: `lib/`, `utils/`, `components/`, `types/`
+- **Map existing patterns**: Understand how similar features are implemented
+- **Identify reusable components**: Look for existing solutions before creating new ones
+- **Trace type definitions**: Follow imports to understand the single source of truth
 - Ask me to show you the codebase structure if you're unfamiliar with the project
-- Understand the existing patterns, conventions, and architecture before suggesting changes
-- When working on a feature, review related files, tests, and documentation
-- TODO: Emphasize Service Oriented Architecture (SOA) principles. Emphasize DRY.
 
 ### 2. Planning and Implementation (Single-Task Focus)
 - **ONE FEATURE AT A TIME**: Never work on multiple features simultaneously
@@ -90,6 +98,53 @@
 - Consider what could go wrong and handle those cases gracefully
 - Use appropriate logging levels and meaningful error messages
 - Don't ignore errors or use generic catch-all handlers
+
+### Code Reuse and Maintainability
+- **Single Source of Truth**: Every piece of logic, type, or component should have ONE authoritative location
+- **Import Over Duplicate**: Always import existing code rather than duplicating it
+- **Extend Over Rewrite**: Extend existing functionality rather than creating new implementations
+- **Abstract Common Patterns**: When you see repeated code, immediately extract it to shared utilities
+- **Consistent Import Paths**: Use consistent import patterns across the codebase
+  - Types: Import from backend or shared type locations
+  - Utilities: Import from `lib/utils/` or `backend/utils/`
+  - Components: Import from `lib/components/`
+- **Dependency Injection**: Use dependency injection patterns to avoid tight coupling
+
+## DRY and Code Reuse Principles
+
+### Before Writing New Code
+- **SEARCH FIRST**: Always search the codebase for existing implementations before writing new code
+- Use semantic code search to find similar functionality: "How is [functionality] implemented?"
+- Use lexical search to find specific patterns: `query:content:"function namePattern"`
+- Check for existing components, utilities, types, and patterns
+- Look in `lib/`, `utils/`, `components/`, and `shared/` directories first
+
+### Type Sharing and Imports
+- **Frontend MUST import types directly from backend**: `import type { UserType } from '../backend/types'`
+- **Never duplicate type definitions** - maintain single source of truth in backend
+- Use Hono stacks for end-to-end type safety
+- Import shared utilities and constants from their original location
+- Create shared types in `backend/types/` for cross-cutting concerns
+
+### Component and Utility Reuse
+- **Before creating new components**: Search for existing components with similar functionality
+- **Before writing utility functions**: Check `lib/utils/` and `backend/utils/` for existing implementations
+- **Extend existing components** rather than creating new ones when possible
+- **Abstract common patterns** into reusable utilities
+- Use composition over duplication for component variations
+
+### Copy/Paste is Forbidden
+- **NEVER copy/paste code** - this breaks maintainability and type safety
+- **NEVER duplicate logic** - extract to shared utilities instead
+- **NEVER duplicate types** - import from single source of truth
+- **NEVER duplicate components** - extend or compose existing ones
+- If you find yourself copying code, stop and refactor into reusable abstractions
+
+### Refactoring for DRY
+- When you identify duplicate code, immediately refactor it into shared utilities
+- Extract common patterns into reusable functions or components
+- Move shared logic to appropriate locations (`lib/`, `utils/`, `shared/`)
+- Update imports across the codebase when refactoring
 
 ## Development Workflow
 
@@ -319,6 +374,37 @@ import type { JwtVariables } from 'hono/jwt'
 - **Service Worker Registration**: Ensure proper service worker registration and updates
 - **App Store Guidelines**: Follow PWA guidelines for potential App Store submission
 - **CDN Deployment**: Configure for static hosting with proper routing fallbacks
+
+---
+
+## Code Discovery Workflow
+
+### Before Implementing Any Feature
+1. **Semantic Search**: Search for concepts related to your feature
+   - "How is user authentication implemented?"
+   - "How are forms validated in this codebase?"
+   - "How is data fetching handled?"
+
+2. **Lexical Search**: Search for specific patterns or function names
+   - `query:content:"validate" language:typescript`
+   - `query:symbol:UserService`
+   - `query:path:/.*utils.*/ content:"format"`
+
+3. **Type Discovery**: Find existing type definitions
+   - Search for related types: `query:content:"interface User"`
+   - Check backend types: `backend/types/` directory
+   - Look for Hono stack definitions
+
+4. **Component Discovery**: Find existing UI components
+   - Search component directory: `query:path:/.*components.*/`
+   - Look for similar UI patterns: `query:content:"button" path:/.*components.*/`
+   - Check for shared components: `lib/components/`
+
+### Implementation Decision Tree
+1. **Exact match exists**: Use the existing implementation
+2. **Similar functionality exists**: Extend or compose the existing solution
+3. **Partial match exists**: Extract common parts to shared utilities, extend for specific needs
+4. **No match exists**: Create new implementation, but design for reusability
 
 ---
 

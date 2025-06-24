@@ -1,282 +1,805 @@
-Testing helps you write and maintain your code and guard against regressions. Testing frameworks help you with that, allowing you to describe assertions or expectations about how your code should behave. Svelte is unopinionated about which testing framework you use — you can write unit tests, integration tests, and end-to-end tests using solutions like [Vitest](https://vitest.dev/), [Jasmine](https://jasmine.github.io/), [Cypress](https://www.cypress.io/) and [Playwright](https://playwright.dev/).
+# SvelteKit Testing Guide for Junior Developers
 
-## Unit and integration testing using Vitest
+This guide covers frontend testing strategies that complement your Hono backend integration tests, focusing on component integration, user interactions, and end-to-end workflows.
 
-Unit tests allow you to test small isolated parts of your code. Integration tests allow you to test parts of your application to see if they work together. If you're using Vite (including via SvelteKit), we recommend using [Vitest](https://vitest.dev/). You can use the Svelte CLI to [setup Vitest](/docs/cli/vitest) either during project creation or later on.
+## Overview
 
-To setup Vitest manually, first install it:
+Since your Hono backend already has comprehensive integration tests with real HTTP requests and database operations, the frontend testing strategy focuses on:
 
-```bash
-npm install -D vitest
-```
+- **Component Integration**: Test components with real API calls to your backend
+- **User Experience**: Test user interactions, form submissions, and UI logic
+- **End-to-End Workflows**: Test complete user journeys across your application
+- **Frontend-Specific Logic**: Test routing, state management, and client-side validation
 
-Then adjust your `vite.config.js`:
+## Testing Philosophy
 
-<!-- prettier-ignore -->
-```js
-/// file: vite.config.js
-import { defineConfig } from +++'vitest/config'+++;
+### ✅ What TO Test in Frontend
+- Component rendering with real API data
+- User interactions and form submissions  
+- Error handling and loading states
+- Routing and navigation behavior
+- Client-side validation (if any)
+- State management (stores, reactive declarations)
+- UI logic and user experience flows
 
-export default defineConfig({
-	// ...
-	// Tell Vitest to use the `browser` entry points in `package.json` files, even though it's running in Node
-	resolve: process.env.VITEST
-		? {
-				conditions: ['browser']
-			}
-		: undefined
-});
-```
+### ❌ What NOT to Test in Frontend
+- **Backend business logic** - Your Hono integration tests already cover this
+- **Database operations** - Covered by backend tests
+- **API endpoint logic** - Tested in your Hono integration tests
+- **Server-side validation** - Backend responsibility
 
-> [!NOTE] If loading the browser version of all your packages is undesirable, because (for example) you also test backend libraries, [you may need to resort to an alias configuration](https://github.com/testing-library/svelte-testing-library/issues/222#issuecomment-1909993331)
+### Key Principle: NO BUSINESS LOGIC IN FRONTEND TESTS
+Frontend tests should focus on UI behavior and user experience, not reimplementing backend logic.
 
-You can now write unit tests for code inside your `.js/.ts` files:
+## Setup
 
-```js
-/// file: multiplier.svelte.test.js
-import { flushSync } from 'svelte';
-import { expect, test } from 'vitest';
-import { multiplier } from './multiplier.svelte.js';
-
-test('Multiplier', () => {
-	let double = multiplier(0, 2);
-
-	expect(double.value).toEqual(0);
-
-	double.set(5);
-
-	expect(double.value).toEqual(10);
-});
-```
-
-```js
-/// file: multiplier.svelte.js
-/**
- * @param {number} initial
- * @param {number} k
- */
-export function multiplier(initial, k) {
-	let count = $state(initial);
-
-	return {
-		get value() {
-			return count * k;
-		},
-		/** @param {number} c */
-		set: (c) => {
-			count = c;
-		}
-	};
-}
-```
-
-### Using runes inside your test files
-
-Since Vitest processes your test files the same way as your source files, you can use runes inside your tests as long as the filename includes `.svelte`:
-
-```js
-/// file: multiplier.svelte.test.js
-import { flushSync } from 'svelte';
-import { expect, test } from 'vitest';
-import { multiplier } from './multiplier.svelte.js';
-
-test('Multiplier', () => {
-	let count = $state(0);
-	let double = multiplier(() => count, 2);
-
-	expect(double.value).toEqual(0);
-
-	count = 5;
-
-	expect(double.value).toEqual(10);
-});
-```
-
-```js
-/// file: multiplier.svelte.js
-/**
- * @param {() => number} getCount
- * @param {number} k
- */
-export function multiplier(getCount, k) {
-	return {
-		get value() {
-			return getCount() * k;
-		}
-	};
-}
-```
-
-If the code being tested uses effects, you need to wrap the test inside `$effect.root`:
-
-```js
-/// file: logger.svelte.test.js
-import { flushSync } from 'svelte';
-import { expect, test } from 'vitest';
-import { logger } from './logger.svelte.js';
-
-test('Effect', () => {
-	const cleanup = $effect.root(() => {
-		let count = $state(0);
-
-		// logger uses an $effect to log updates of its input
-		let log = logger(() => count);
-
-		// effects normally run after a microtask,
-		// use flushSync to execute all pending effects synchronously
-		flushSync();
-		expect(log.value).toEqual([0]);
-
-		count = 1;
-		flushSync();
-
-		expect(log.value).toEqual([0, 1]);
-	});
-
-	cleanup();
-});
-```
-
-```js
-/// file: logger.svelte.js
-/**
- * @param {() => any} getValue
- */
-export function logger(getValue) {
-	/** @type {any[]} */
-	let log = $state([]);
-
-	$effect(() => {
-		log.push(getValue());
-	});
-
-	return {
-		get value() {
-			return log;
-		}
-	};
-}
-```
-
-### Component testing
-
-It is possible to test your components in isolation using Vitest.
-
-> [!NOTE] Before writing component tests, think about whether you actually need to test the component, or if it's more about the logic _inside_ the component. If so, consider extracting out that logic to test it in isolation, without the overhead of a component
-
-To get started, install jsdom (a library that shims DOM APIs):
+### Required Dependencies
 
 ```bash
-npm install -D jsdom
+# Core testing dependencies
+bun add -D vitest jsdom @vitest/ui
+
+# Component testing
+bun add -D @testing-library/svelte @testing-library/jest-dom @testing-library/user-event
+
+# E2E testing
+bun add -D playwright @playwright/test
+
+# SvelteKit testing utilities
+bun add -D @sveltejs/adapter-static
 ```
 
-Then adjust your `vite.config.js`:
+### Vitest Configuration
 
-```js
-/// file: vite.config.js
-import { defineConfig } from 'vitest/config';
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config'
+import { sveltekit } from '@sveltejs/kit/vite'
 
 export default defineConfig({
-	plugins: [
-		/* ... */
-	],
-	test: {
-		// If you are testing components client-side, you need to setup a DOM environment.
-		// If not all your files should have this environment, you can use a
-		// `// @vitest-environment jsdom` comment at the top of the test files instead.
-		environment: 'jsdom'
-	},
-	// Tell Vitest to use the `browser` entry points in `package.json` files, even though it's running in Node
-	resolve: process.env.VITEST
-		? {
-				conditions: ['browser']
-			}
-		: undefined
-});
+  plugins: [sveltekit()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./tests/setup.ts'],
+    include: ['src/**/*.{test,spec}.{js,ts}'],
+  },
+  resolve: process.env.VITEST ? {
+    conditions: ['browser']
+  } : undefined
+})
 ```
 
-After that, you can create a test file in which you import the component to test, interact with it programmatically and write expectations about the results:
+### Test Setup
 
-```js
-/// file: component.test.js
-import { flushSync, mount, unmount } from 'svelte';
-import { expect, test } from 'vitest';
-import Component from './Component.svelte';
+```typescript
+// tests/setup.ts
+import '@testing-library/jest-dom'
+import { vi } from 'vitest'
 
-test('Component', () => {
-	// Instantiate the component using Svelte's `mount` API
-	const component = mount(Component, {
-		target: document.body, // `document` exists because of jsdom
-		props: { initial: 0 }
-	});
+// Mock SvelteKit modules for testing
+vi.mock('$app/environment', () => ({
+  browser: false,
+  dev: true,
+}))
 
-	expect(document.body.innerHTML).toBe('<button>0</button>');
+vi.mock('$app/navigation', () => ({
+  goto: vi.fn(),
+  invalidateAll: vi.fn(),
+  pushState: vi.fn(),
+  replaceState: vi.fn(),
+}))
 
-	// Click the button, then flush the changes so you can synchronously write expectations
-	document.body.querySelector('button').click();
-	flushSync();
+vi.mock('$app/stores', () => ({
+  page: {
+    subscribe: vi.fn(() => vi.fn())
+  },
+  navigating: {
+    subscribe: vi.fn(() => vi.fn())
+  }
+}))
 
-	expect(document.body.innerHTML).toBe('<button>1</button>');
-
-	// Remove the component from the DOM
-	unmount(component);
-});
+// Global test setup
+beforeEach(() => {
+  // Clear all mocks before each test
+  vi.clearAllMocks()
+})
 ```
 
-While the process is very straightforward, it is also low level and somewhat brittle, as the precise structure of your component may change frequently. Tools like [@testing-library/svelte](https://testing-library.com/docs/svelte-testing-library/intro/) can help streamline your tests. The above test could be rewritten like this:
+## Component Integration Testing
 
-```js
-/// file: component.test.js
-import { render, screen } from '@testing-library/svelte';
-import userEvent from '@testing-library/user-event';
-import { expect, test } from 'vitest';
-import Component from './Component.svelte';
+### Basic Component Testing with Real API Calls
 
-test('Component', async () => {
-	const user = userEvent.setup();
-	render(Component);
+```typescript
+// src/lib/components/UserProfile.test.ts
+import { render, screen, waitFor } from '@testing-library/svelte'
+import { userEvent } from '@testing-library/user-event'
+import { describe, it, expect, beforeEach } from 'vitest'
+import UserProfile from './UserProfile.svelte'
 
-	const button = screen.getByRole('button');
-	expect(button).toHaveTextContent(0);
+describe('UserProfile Component', () => {
+  const user = userEvent.setup()
 
-	await user.click(button);
-	expect(button).toHaveTextContent(1);
-});
+  it('should load and display user data from API', async () => {
+    render(UserProfile, {
+      props: { userId: 'test-user-123' }
+    })
+    
+    // Test loading state
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    
+    // Wait for real API call to complete
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+      expect(screen.getByText('john@example.com')).toBeInTheDocument()
+    }, { timeout: 5000 })
+  })
+
+  it('should handle API errors gracefully', async () => {
+    render(UserProfile, {
+      props: { userId: 'nonexistent-user' }
+    })
+    
+    await waitFor(() => {
+      expect(screen.getByText('User not found')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
+    })
+  })
+
+  it('should allow editing user information', async () => {
+    render(UserProfile, {
+      props: { userId: 'test-user-123' }
+    })
+    
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+    })
+    
+    // Click edit button
+    const editButton = screen.getByRole('button', { name: /edit/i })
+    await user.click(editButton)
+    
+    // Verify edit form appears
+    expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /email/i })).toBeInTheDocument()
+    
+    // Fill out form
+    const nameInput = screen.getByRole('textbox', { name: /name/i })
+    await user.clear(nameInput)
+    await user.type(nameInput, 'John Smith')
+    
+    // Submit form
+    const saveButton = screen.getByRole('button', { name: /save/i })
+    await user.click(saveButton)
+    
+    // Verify update (real API call to backend)
+    await waitFor(() => {
+      expect(screen.getByText('John Smith')).toBeInTheDocument()
+      expect(screen.getByText('Profile updated successfully')).toBeInTheDocument()
+    })
+  })
+})
 ```
 
-When writing component tests that involve two-way bindings, context or snippet props, it's best to create a wrapper component for your specific test and interact with that. `@testing-library/svelte` contains some [examples](https://testing-library.com/docs/svelte-testing-library/example).
+### Form Components with Validation
 
-## E2E tests using Playwright
+```typescript
+// src/lib/components/CreateUserForm.test.ts
+import { render, screen, waitFor } from '@testing-library/svelte'
+import { userEvent } from '@testing-library/user-event'
+import { describe, it, expect } from 'vitest'
+import CreateUserForm from './CreateUserForm.svelte'
 
-E2E (short for 'end to end') tests allow you to test your full application through the eyes of the user. This section uses [Playwright](https://playwright.dev/) as an example, but you can also use other solutions like [Cypress](https://www.cypress.io/) or [NightwatchJS](https://nightwatchjs.org/).
+describe('CreateUserForm Component', () => {
+  const user = userEvent.setup()
 
-You can use the Svelte CLI to [setup Playwright](/docs/cli/playwright) either during project creation or later on. You can also [set it up with `npm init playwright`](https://playwright.dev/docs/intro). Additionally, you may also want to install an IDE plugin such as [the VS Code extension](https://playwright.dev/docs/getting-started-vscode) to be able to execute tests from inside your IDE.
+  it('should validate form fields client-side', async () => {
+    render(CreateUserForm)
+    
+    const submitButton = screen.getByRole('button', { name: /create user/i })
+    await user.click(submitButton)
+    
+    // Test client-side validation
+    expect(screen.getByText('Name is required')).toBeInTheDocument()
+    expect(screen.getByText('Email is required')).toBeInTheDocument()
+  })
 
-If you've run `npm init playwright` or are not using Vite, you may need to adjust the Playwright config to tell Playwright what to do before running the tests - mainly starting your application at a certain port. For example:
+  it('should handle server validation errors', async () => {
+    render(CreateUserForm)
+    
+    // Fill form with invalid data that passes client validation
+    await user.type(screen.getByRole('textbox', { name: /name/i }), 'Test User')
+    await user.type(screen.getByRole('textbox', { name: /email/i }), 'existing@example.com')
+    
+    const submitButton = screen.getByRole('button', { name: /create user/i })
+    await user.click(submitButton)
+    
+    // Wait for server response (real API call)
+    await waitFor(() => {
+      expect(screen.getByText('Email already exists')).toBeInTheDocument()
+    })
+  })
 
-```js
-/// file: playwright.config.js
-const config = {
-	webServer: {
-		command: 'npm run build && npm run preview',
-		port: 4173
-	},
-	testDir: 'tests',
-	testMatch: /(.+\.)?(test|spec)\.[jt]s/
-};
-
-export default config;
+  it('should create user successfully', async () => {
+    const mockOnSuccess = vi.fn()
+    render(CreateUserForm, {
+      props: { onSuccess: mockOnSuccess }
+    })
+    
+    // Fill valid form data
+    await user.type(screen.getByRole('textbox', { name: /name/i }), 'New User')
+    await user.type(screen.getByRole('textbox', { name: /email/i }), 'newuser@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'validpassword123')
+    
+    const submitButton = screen.getByRole('button', { name: /create user/i })
+    await user.click(submitButton)
+    
+    // Wait for successful creation
+    await waitFor(() => {
+      expect(mockOnSuccess).toHaveBeenCalledWith({
+        id: expect.any(String),
+        name: 'New User',
+        email: 'newuser@example.com'
+      })
+    })
+  })
+})
 ```
 
-You can now start writing tests. These are totally unaware of Svelte as a framework, so you mainly interact with the DOM and write assertions.
+## Testing Svelte Runes and Reactive Logic
 
-```js
-// @errors: 2307 7031
-/// file: tests/hello-world.spec.js
-import { expect, test } from '@playwright/test';
+### Testing Reactive State
 
-test('home page has expected h1', async ({ page }) => {
-	await page.goto('/');
-	await expect(page.locator('h1')).toBeVisible();
-});
+```typescript
+// src/lib/stores/userStore.test.ts
+import { flushSync } from 'svelte'
+import { describe, it, expect } from 'vitest'
+import { userStore } from './userStore.svelte.js'
+
+describe('User Store', () => {
+  it('should manage user state reactively', () => {
+    const cleanup = $effect.root(() => {
+      const store = userStore()
+      
+      // Test initial state
+      expect(store.user).toBe(null)
+      expect(store.isLoading).toBe(false)
+      
+      // Test loading state
+      store.setLoading(true)
+      flushSync()
+      expect(store.isLoading).toBe(true)
+      
+      // Test setting user
+      const testUser = { id: '1', name: 'Test User', email: 'test@example.com' }
+      store.setUser(testUser)
+      flushSync()
+      
+      expect(store.user).toEqual(testUser)
+      expect(store.isLoading).toBe(false)
+    })
+    
+    cleanup()
+  })
+
+  it('should compute derived values correctly', () => {
+    const cleanup = $effect.root(() => {
+      const store = userStore()
+      
+      // Test computed property
+      expect(store.isLoggedIn).toBe(false)
+      
+      store.setUser({ id: '1', name: 'Test', email: 'test@example.com' })
+      flushSync()
+      
+      expect(store.isLoggedIn).toBe(true)
+    })
+    
+    cleanup()
+  })
+})
 ```
+
+### Testing Components with Effects
+
+```typescript
+// src/lib/components/AutoSave.test.ts
+import { render, screen } from '@testing-library/svelte'
+import { userEvent } from '@testing-library/user-event'
+import { flushSync } from 'svelte'
+import { describe, it, expect, vi } from 'vitest'
+import AutoSaveForm from './AutoSaveForm.svelte'
+
+describe('AutoSaveForm Component', () => {
+  it('should auto-save after user stops typing', async () => {
+    const user = userEvent.setup()
+    const mockSave = vi.fn()
+    
+    render(AutoSaveForm, {
+      props: { onSave: mockSave }
+    })
+    
+    const input = screen.getByRole('textbox')
+    
+    // Type some text
+    await user.type(input, 'Hello world')
+    
+    // Wait for debounced auto-save (component uses $effect with setTimeout)
+    await new Promise(resolve => setTimeout(resolve, 1100))
+    
+    expect(mockSave).toHaveBeenCalledWith('Hello world')
+  })
+})
+```
+
+## Page-Level Integration Testing
+
+### Testing SvelteKit Routes
+
+```typescript
+// src/routes/users/+page.test.ts
+import { render, screen, waitFor } from '@testing-library/svelte'
+import { describe, it, expect } from 'vitest'
+import UsersPage from './+page.svelte'
+import type { PageData } from './$types'
+
+describe('Users Page', () => {
+  it('should display users list from API', async () => {
+    const mockData: PageData = {
+      users: [] // Initial empty state
+    }
+    
+    render(UsersPage, {
+      props: { data: mockData }
+    })
+    
+    // Test loading state
+    expect(screen.getByText('Loading users...')).toBeInTheDocument()
+    
+    // Wait for real API call to populate data
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+      expect(screen.getByText('Jane Smith')).toBeInTheDocument()
+    })
+  })
+
+  it('should handle empty users list', async () => {
+    const mockData: PageData = {
+      users: []
+    }
+    
+    render(UsersPage, {
+      props: { data: mockData }
+    })
+    
+    await waitFor(() => {
+      expect(screen.getByText('No users found')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /add user/i })).toBeInTheDocument()
+    })
+  })
+})
+```
+
+## Authentication Flow Testing
+
+```typescript
+// src/lib/components/LoginForm.test.ts
+import { render, screen, waitFor } from '@testing-library/svelte'
+import { userEvent } from '@testing-library/user-event'
+import { describe, it, expect } from 'vitest'
+import LoginForm from './LoginForm.svelte'
+
+describe('LoginForm Component', () => {
+  const user = userEvent.setup()
+
+  it('should handle successful login', async () => {
+    const mockOnLogin = vi.fn()
+    render(LoginForm, {
+      props: { onLogin: mockOnLogin }
+    })
+    
+    // Fill login form
+    await user.type(screen.getByRole('textbox', { name: /email/i }), 'user@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'validpassword')
+    
+    const loginButton = screen.getByRole('button', { name: /sign in/i })
+    await user.click(loginButton)
+    
+    // Wait for real authentication API call
+    await waitFor(() => {
+      expect(mockOnLogin).toHaveBeenCalledWith({
+        user: expect.objectContaining({
+          email: 'user@example.com'
+        }),
+        token: expect.any(String)
+      })
+    })
+  })
+
+  it('should display login errors from API', async () => {
+    render(LoginForm)
+    
+    // Try invalid credentials
+    await user.type(screen.getByRole('textbox', { name: /email/i }), 'wrong@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'wrongpassword')
+    
+    const loginButton = screen.getByRole('button', { name: /sign in/i })
+    await user.click(loginButton)
+    
+    // Wait for API error response
+    await waitFor(() => {
+      expect(screen.getByText('Invalid email or password')).toBeInTheDocument()
+    })
+  })
+})
+```
+
+## API Client Testing
+
+```typescript
+// src/lib/api/client.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { api } from './client'
+
+describe('API Client Integration', () => {
+  it('should make type-safe requests to backend', async () => {
+    // Test that frontend client works with real Hono backend
+    const response = await api.users.$get()
+    expect(response.status).toBe(200)
+    
+    const users = await response.json()
+    expect(Array.isArray(users)).toBe(true)
+  })
+
+  it('should handle authentication flow', async () => {
+    // Test login through API client
+    const loginResponse = await api.auth.login.$post({
+      json: {
+        email: 'test@example.com',
+        password: 'testpassword'
+      }
+    })
+    
+    expect(loginResponse.status).toBe(200)
+    const { token, user } = await loginResponse.json()
+    
+    expect(typeof token).toBe('string')
+    expect(user.email).toBe('test@example.com')
+    
+    // Test authenticated request
+    const profileResponse = await api.auth.profile.$get({}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    
+    expect(profileResponse.status).toBe(200)
+  })
+
+  it('should handle API errors consistently', async () => {
+    const response = await api.users['nonexistent-id'].$get()
+    expect(response.status).toBe(404)
+    
+    const error = await response.json()
+    expect(error.message).toBeDefined()
+  })
+})
+```
+
+## End-to-End Testing with Playwright
+
+### Setup Playwright
+
+```typescript
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  
+  use: {
+    baseURL: 'http://localhost:4173',
+    trace: 'on-first-retry',
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+  ],
+
+  webServer: {
+    command: 'npm run build && npm run preview',
+    port: 4173,
+    reuseExistingServer: !process.env.CI,
+  },
+})
+```
+
+### Complete User Journey Tests
+
+```typescript
+// tests/e2e/user-management.spec.ts
+import { test, expect } from '@playwright/test'
+
+test.describe('User Management Workflow', () => {
+  test('complete user CRUD operations', async ({ page }) => {
+    // Login
+    await page.goto('/login')
+    await page.fill('[name="email"]', 'admin@example.com')
+    await page.fill('[name="password"]', 'adminpassword')
+    await page.click('button[type="submit"]')
+    
+    await expect(page).toHaveURL('/dashboard')
+    
+    // Navigate to users
+    await page.click('text=Users')
+    await expect(page).toHaveURL('/users')
+    
+    // Create new user
+    await page.click('text=Add User')
+    await page.fill('[name="name"]', 'Test User')
+    await page.fill('[name="email"]', 'testuser@example.com')
+    await page.fill('[name="password"]', 'testpassword123')
+    await page.click('button[type="submit"]')
+    
+    // Verify user appears in list
+    await expect(page.locator('text=Test User')).toBeVisible()
+    
+    // Edit user
+    await page.click('[data-testid="edit-user-testuser@example.com"]')
+    await page.fill('[name="name"]', 'Updated Test User')
+    await page.click('button[type="submit"]')
+    
+    // Verify update
+    await expect(page.locator('text=Updated Test User')).toBeVisible()
+    
+    // Delete user
+    await page.click('[data-testid="delete-user-testuser@example.com"]')
+    await page.click('text=Confirm Delete') // Confirmation dialog
+    
+    // Verify deletion
+    await expect(page.locator('text=Updated Test User')).not.toBeVisible()
+  })
+
+  test('handles form validation errors', async ({ page }) => {
+    await page.goto('/login')
+    await page.fill('[name="email"]', 'admin@example.com')
+    await page.fill('[name="password"]', 'adminpassword')
+    await page.click('button[type="submit"]')
+    
+    await page.goto('/users')
+    await page.click('text=Add User')
+    
+    // Submit empty form
+    await page.click('button[type="submit"]')
+    
+    // Check client-side validation
+    await expect(page.locator('text=Name is required')).toBeVisible()
+    await expect(page.locator('text=Email is required')).toBeVisible()
+    
+    // Fill with duplicate email
+    await page.fill('[name="name"]', 'Duplicate User')
+    await page.fill('[name="email"]', 'admin@example.com') // Already exists
+    await page.fill('[name="password"]', 'password123')
+    await page.click('button[type="submit"]')
+    
+    // Check server-side validation
+    await expect(page.locator('text=Email already exists')).toBeVisible()
+  })
+})
+```
+
+### Mobile-Specific E2E Tests
+
+```typescript
+// tests/e2e/mobile.spec.ts
+import { test, expect, devices } from '@playwright/test'
+
+test.use({ ...devices['iPhone 12'] })
+
+test.describe('Mobile User Experience', () => {
+  test('navigation works on mobile', async ({ page }) => {
+    await page.goto('/')
+    
+    // Test mobile menu
+    await page.click('[data-testid="mobile-menu-button"]')
+    await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible()
+    
+    await page.click('text=Users')
+    await expect(page).toHaveURL('/users')
+    
+    // Test responsive design
+    await expect(page.locator('[data-testid="users-grid"]')).toHaveClass(/mobile-grid/)
+  })
+
+  test('forms are touch-friendly', async ({ page }) => {
+    await page.goto('/users/create')
+    
+    // Test minimum touch target sizes (44px minimum)
+    const submitButton = page.locator('button[type="submit"]')
+    const boundingBox = await submitButton.boundingBox()
+    expect(boundingBox?.height).toBeGreaterThanOrEqual(44)
+    expect(boundingBox?.width).toBeGreaterThanOrEqual(44)
+  })
+})
+```
+
+## Test Organization and Best Practices
+
+### File Structure
+
+```
+src/
+├── lib/
+│   ├── components/
+│   │   ├── UserProfile.svelte
+│   │   ├── UserProfile.test.ts
+│   │   ├── CreateUserForm.svelte
+│   │   └── CreateUserForm.test.ts
+│   ├── stores/
+│   │   ├── userStore.svelte.js
+│   │   └── userStore.test.ts
+│   └── api/
+│       ├── client.ts
+│       └── client.test.ts
+├── routes/
+│   ├── users/
+│   │   ├── +page.svelte
+│   │   ├── +page.test.ts
+│   │   └── create/
+│   │       ├── +page.svelte
+│   │       └── +page.test.ts
+tests/
+├── setup.ts
+└── e2e/
+    ├── user-management.spec.ts
+    └── mobile.spec.ts
+```
+
+### Test Naming Conventions
+
+```typescript
+describe('ComponentName', () => {
+  describe('User Interactions', () => {
+    it('should handle click events correctly', async () => {})
+    it('should validate form input on submit', async () => {})
+  })
+
+  describe('API Integration', () => {
+    it('should load data from backend on mount', async () => {})
+    it('should handle API errors gracefully', async () => {})
+  })
+
+  describe('State Management', () => {
+    it('should update reactive state correctly', async () => {})
+  })
+})
+```
+
+### Custom Testing Utilities
+
+```typescript
+// tests/utils.ts
+import { render } from '@testing-library/svelte'
+import type { ComponentProps } from 'svelte'
+
+// Utility for rendering components with common providers
+export function renderWithProviders<T>(
+  Component: T,
+  props?: ComponentProps<T>,
+  options?: {
+    initialUser?: any
+    initialRoute?: string
+  }
+) {
+  // Setup common test providers (auth context, etc.)
+  return render(Component, {
+    props,
+    context: new Map([
+      ['user', options?.initialUser || null],
+      ['route', options?.initialRoute || '/']
+    ])
+  })
+}
+
+// Utility for waiting for API calls in tests
+export async function waitForApiCall(timeout = 5000) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout)
+  })
+}
+```
+
+## Running Tests
+
+### Package.json Scripts
+
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:all": "npm run test && npm run test:e2e"
+  }
+}
+```
+
+### Test Execution Commands
+
+```bash
+# Run unit/integration tests
+bun test
+
+# Run tests in watch mode during development
+bun test:watch
+
+# Run tests with UI for debugging
+bun test:ui
+
+# Run with coverage report
+bun test:coverage
+
+# Run E2E tests
+bun test:e2e
+
+# Run E2E tests with UI
+bun test:e2e:ui
+
+# Run all tests (CI pipeline)
+bun test:all
+```
+
+## Integration with Backend Tests
+
+### Test Data Management
+
+```typescript
+// tests/test-data.ts
+// Share test data setup with your Hono backend tests
+export const TEST_USERS = {
+  admin: {
+    email: 'admin@example.com',
+    password: 'adminpassword',
+    name: 'Admin User'
+  },
+  regular: {
+    email: 'user@example.com', 
+    password: 'userpassword',
+    name: 'Regular User'
+  }
+}
+
+// Ensure frontend tests use same test data as backend
+export async function setupTestData() {
+  // This should match your backend test setup
+  // Could call backend test setup endpoints
+}
+```
+
+## Key Principles Summary
+
+1. **Test User Experience, Not Implementation** - Focus on what users see and do
+2. **Use Real API Calls** - Don't mock your own backend, test the integration
+3. **Test Frontend Logic Only** - Don't duplicate backend business logic tests
+4. **Progressive Enhancement** - Test that features work without JavaScript first
+5. **Mobile-First Testing** - Ensure touch interactions and responsive design work
+6. **Accessibility Testing** - Test keyboard navigation and screen reader compatibility
+7. **Performance Awareness** - Test loading states and perceived performance
+
+This approach ensures your SvelteKit frontend is thoroughly tested while avoiding duplication with your comprehensive Hono backend integration tests. The focus remains on user experience, UI logic, and the integration between frontend and backend systems.
