@@ -54,35 +54,84 @@
 
 ## Testing Strategy (Integration-First Approach)
 
-### Primary Testing Philosophy
-- **PRIMARY FOCUS**: Integration tests that make real API calls to actual endpoints
-- **Feature Development Workflow**:
-  1. Work on ONE task or feature at a time - no parallel development
-  2. Write integration test FIRST that makes actual HTTP requests to the API
-  3. Implement the feature to make the test pass
-  4. Ensure ALL existing tests still pass before considering task complete
-  5. Only move to next feature when current feature is fully tested and working
-- Testing assumes real database operations. If tests fail do to database issues, stop and alert me to fix the database first.
+See [testing.instructions.md](./testing/testing.instructions.md) for general testing guidelines.
 
-### Integration Test Requirements
+### Overall Testing Philosophy
+- **Integration-First**: Primary testing through real HTTP requests and database operations
+- **Test-Driven Development**: Write integration tests BEFORE implementing features
+- **Real over Mock**: Use actual API calls, database operations, and user interactions
+- **NO BUSINESS LOGIC IN TESTS**: Import and use actual business logic, never reimplement
+- **Single Feature Focus**: Test one complete feature at a time before moving to the next
+
+### Testing Layers (Priority Order)
+
+#### 1. Backend Integration Tests (Hono) - PRIMARY
+- **Real HTTP requests** using `app.request()` or `testClient()` with type safety
+- **Actual database operations** with proper test database setup/teardown
+- **Complete middleware testing** including JWT auth, CORS, validation
+- **Authentication flows** using real login endpoints (not generated tokens)
+- **Error handling** with actual API error responses and status codes
+- See [hono.test.instructions.md](./testing/hono.test.instructions.md) for detailed guidance
+
+#### 2. Frontend Component Integration Tests (SvelteKit) - SECONDARY  
+- **Real API calls** to running backend during component tests
+- **User interaction testing** with @testing-library/svelte and real form submissions
+- **Loading states and error handling** from actual API responses
+- **Routing and navigation** behavior with SvelteKit's routing system
+- **Reactive state management** with Svelte stores and runes
+- See [sveltekit.test.instructions.md](./testing/sveltekit.test.instructions.md) for detailed guidance
+
+#### 3. End-to-End Tests (Playwright) - COMPREHENSIVE
+- **Complete user workflows** spanning multiple pages and features
+- **Cross-browser compatibility** and mobile responsiveness (iOS focus)
+- **Authentication and authorization** flows with real user sessions
+- **Performance and accessibility** validation for PWA requirements
+
+#### 4. Unit Tests (Minimal) - UTILITIES ONLY
+- **Pure functions** with complex algorithms or calculations
+- **Utility functions** used across multiple components
+- **Data transformation** and validation functions
+- **Critical business logic** that could break CI/CD if untested
+
+### Feature Development Workflow
+1. **Understand Requirements**: Break down feature into testable increments
+2. **Write Integration Test FIRST**: Create test that makes real HTTP requests to test the feature
+3. **Implement Feature**: Write code to make the integration test pass
+4. **Verify All Tests Pass**: Ensure no regressions in existing functionality
+5. **Complete Feature**: Only move to next feature when current is fully tested and working
+
+### Testing Requirements by Layer
+
+#### Backend (Hono) Integration Tests
+- See [hono.test.instructions.md](./testing/hono.test.instructions.md) for detailed guidance
 - Use Hono's testing utilities with real HTTP requests (not mocked)
 - Test complete request/response cycle including middleware
 - Include proper database setup/teardown using Drizzle
 - Test authentication, validation, and error handling in real scenarios
 - Verify actual database state changes after operations
-- TODO: Add Sveltekit testing guidelines for frontend integration
 
-### Test Completion Criteria
-- New feature test passes
-- ALL existing tests still pass
+#### Frontend (SvelteKit) Integration Tests
+- See [sveltekit.test.instructions.md](./testing/sveltekit.test.instructions.md) for detailed guidance
+- Test components with real API calls to running backend
+- Use @testing-library/svelte for user interactions
+- Test form submissions with actual server responses
+- Verify loading states and error handling from real API responses
+- Test routing and navigation behavior
+
+#### Test Completion Criteria
+- New feature integration test passes
+- ALL existing tests still pass (no regressions)
 - Feature works end-to-end with real API calls
 - Database operations are properly tested with actual data
+- Frontend components integrate correctly with backend APIs
 
-### Testing Guidelines
-- **Unit Tests**: Defer until later in project - focus on integration coverage first (TODO)
+### Key Testing Principles
+- **Real Database Operations**: Test with actual database connections, not mocks
+- **Type-Safe Testing**: Leverage Hono's type system for frontend-backend integration
+- **One Feature at a Time**: Never work on multiple features simultaneously
 - **Test Data Management**: Use proper test database setup/teardown between tests
-- **Never modify existing tests** unless specifically requested or they're broken by intentional changes
-- Run tests frequently during development
+- **Never Modify Existing Tests**: Unless specifically requested or broken by intentional changes
+- **Frequent Test Running**: Run tests continuously during development
 
 ## Code Quality Standards
 
