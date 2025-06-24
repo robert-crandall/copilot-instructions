@@ -7,12 +7,22 @@
   - Refer to [create-prd.md](./instructions/create-prd.md) to create a PRD first
   - Use [generate-tasks.md](./instructions/generate-tasks.md) to break down the PRD into actionable tasks
   - Use [process-task-list.md](./instructions/process-task-list.md) to manage the task list and track progress
+  - Integration tests should be written for each task as it is implemented.
+- For new features without a PRD:
+  - Use [generate-tasks.md](./instructions/generate-tasks.md) to break down the feature into actionable tasks
+  - Use [process-task-list.md](./instructions/process-task-list.md) to manage the task list and track progress
+  - Integration tests should be written for each task as it is implemented.
+- For bug fixes:
+  - Unit tests should be written to reproduce the bug
+- TODO: Add testing logic to this section
+- TODO: Add knowledge base management to this section
 
 ### 1. Context and Understanding
 - **Always read relevant files first** before making changes
 - Ask me to show you the codebase structure if you're unfamiliar with the project
 - Understand the existing patterns, conventions, and architecture before suggesting changes
 - When working on a feature, review related files, tests, and documentation
+- TODO: Emphasize Service Oriented Architecture (SOA) principles. Emphasize DRY.
 
 ### 2. Planning and Implementation (Single-Task Focus)
 - **ONE FEATURE AT A TIME**: Never work on multiple features simultaneously
@@ -52,6 +62,7 @@
 - Include proper database setup/teardown using Drizzle
 - Test authentication, validation, and error handling in real scenarios
 - Verify actual database state changes after operations
+- TODO: Add Sveltekit testing guidelines for frontend integration
 
 ### Test Completion Criteria
 - New feature test passes
@@ -60,7 +71,7 @@
 - Database operations are properly tested with actual data
 
 ### Testing Guidelines
-- **Unit Tests**: Defer until later in project - focus on integration coverage first
+- **Unit Tests**: Defer until later in project - focus on integration coverage first (TODO)
 - **Test Data Management**: Use proper test database setup/teardown between tests
 - **Never modify existing tests** unless specifically requested or they're broken by intentional changes
 - Run tests frequently during development
@@ -85,7 +96,6 @@
 ### File Management (Single-Feature Focus)
 - **Work on ONE feature at a time** - never make changes for multiple features simultaneously
 - Make targeted, focused changes for the current feature only
-- Suggest git commits before major refactoring
 - Keep related changes together in logical commits per feature
 - Don't modify unrelated files unless necessary for the current feature
 - **Test-First Rule**: Always write integration test before implementing feature
@@ -97,12 +107,6 @@
 - Check logs, error messages, and stack traces carefully
 - Test fixes thoroughly before considering them complete
 
-### Documentation and Communication
-- Update documentation when making significant changes
-- Explain complex decisions and trade-offs
-- Keep README files and setup instructions current
-- Use clear commit messages that explain the "why" not just the "what"
-
 ## Collaboration Guidelines
 
 ### Communication Style
@@ -111,12 +115,6 @@
 - Suggest alternatives when you see potential issues
 - Be honest about limitations or uncertainties
 - Provide context for your recommendations
-
-### Code Reviews and Feedback
-- Point out potential issues or improvements
-- Suggest more efficient or maintainable approaches
-- Consider security implications of changes
-- Think about scalability and performance impacts
 
 ## Backend Technology Stack (Hono + PostgreSQL + Drizzle)
 
@@ -226,7 +224,8 @@ import type { JwtVariables } from 'hono/jwt'
 
 #### Type Safety and Integration
 - Import types directly from `backend/` using monorepo structure
-- Use Hono client (`hc`) for type-safe API calls in `+page.ts` or `+layout.ts`
+- Use Hono client (`hc`) for type-safe API calls
+- ALL API calls should be made through `hc` for full type safety. ALL API calls should be made through an api client in a centralized location (e.g., `lib/api/`).
 - Define proper TypeScript interfaces for component props
 - Use SvelteKit's generated types (`$app/` modules) appropriately
 - Leverage load functions for server-side data fetching when beneficial
@@ -249,7 +248,7 @@ import type { JwtVariables } from 'hono/jwt'
 - Use client-side data fetching in `onMount` or reactive statements for SPA behavior
 - Implement proper error handling for API calls with user-friendly error states
 - Use Hono client (`hc`) for all API communication with full type safety
-- Cache API responses using stores or browser storage when appropriate
+- DO NOT CACHE API responses except authentication. The user should know if they are offline.
 - Handle loading states and errors gracefully in components
 - Consider using load functions only when absolutely necessary (prefer client-side fetching)
 
@@ -264,14 +263,15 @@ import type { JwtVariables } from 'hono/jwt'
 - **Interactive Elements**: Ensure hover states work on desktop, touch states on mobile
 
 #### Progressive Web App (PWA) Implementation
-- **Service Worker**: Implement service worker for offline functionality and caching
+- **Service Worker**: Implement service worker for notifications. Do not implement caching or offline support.
 - **Web App Manifest**: Create comprehensive manifest.json for PWA installation
 - **iOS PWA Compatibility**: 
   - Use proper apple-touch-icon sizes (180x180px minimum)
   - Set apple-mobile-web-app-capable and apple-mobile-web-app-status-bar-style
   - Ensure standalone display mode works properly on iOS 16+
-- **App Installation**: Provide clear installation prompts and instructions
-- **Offline Experience**: Design meaningful offline states and cached content
+- **App Installation**: Do not provide instructions for adding to home screen. The users already know this.
+- **Splash Screens**: Implement splash screens for iOS
+- **Offline Experience**: Offline mode is not required. Do not implement caching or offline support.
 - **Push Notifications**: Implement if needed (note iOS limitations for web apps)
 - **App-like Navigation**: Use SPA routing to maintain app-like feel without page refreshes
 
@@ -341,13 +341,13 @@ import type { JwtVariables } from 'hono/jwt'
 ## Iteration and Improvement
 
 ### Continuous Learning
-- Product requirements are in `/tasks/prd-*.md`. Review them to understand the product vision and goals.
+- Product requirements are in `../tasks/prd-*.md`. Review them to understand the product vision and goals.
 - Stay curious about new approaches and technologies
 - Learn from mistakes and improve processes
 - Keep up with best practices in the relevant technologies
 - Share knowledge and learn from team members
-- Use the file `/tasks/knowledge-base.md` to document useful patterns, learnings, tips, and tricks
-- Read the file `/tasks/knowledge-base.md` to learn about the latest patterns and practices in the codebase
+- Use the file [knowledge-base.md](../tasks/knowledge-base.md) to document useful patterns, learnings, tips, and tricks
+- Read the file [knowledge-base.md](../tasks/knowledge-base.md) to learn about the latest patterns and practices in the codebase
 
 ### Feedback Loop
 
