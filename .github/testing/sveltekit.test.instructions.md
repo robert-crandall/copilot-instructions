@@ -1,3 +1,8 @@
+---
+description: SvelteKit frontend testing guide for junior developers, focusing on integration with Hono backend
+applyTo: "frontend/**/*.{test,spec}.{js,ts,jsx,tsx,svelte}"
+---
+
 # SvelteKit Testing Guide for Junior Developers
 
 This guide covers frontend testing strategies that complement your Hono backend integration tests, focusing on component integration, user interactions, and end-to-end workflows.

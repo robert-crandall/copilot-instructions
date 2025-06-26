@@ -23,6 +23,7 @@
 
 ### 1. Context and Understanding
 - **Always read relevant files first** before making changes
+- **DRY (Don't Repeat Yourself)** is highly important. Do not duplicate code, types, or components.
 - **SEARCH EXTENSIVELY** for existing implementations before writing new code:
   - Use semantic search: "How is authentication handled?"
   - Use lexical search: `query:content:"validateUser"` or `query:symbol:UserValidator`
@@ -63,43 +64,6 @@ See [testing.instructions.md](./testing/testing.instructions.md) for general tes
 - **NO BUSINESS LOGIC IN TESTS**: Import and use actual business logic, never reimplement
 - **Single Feature Focus**: Test one complete feature at a time before moving to the next
 
-### Testing Layers (Priority Order)
-
-#### 1. Backend Integration Tests (Hono) - PRIMARY
-- **Real HTTP requests** using `app.request()` or `testClient()` with type safety
-- **Actual database operations** with proper test database setup/teardown
-- **Complete middleware testing** including JWT auth, CORS, validation
-- **Authentication flows** using real login endpoints (not generated tokens)
-- **Error handling** with actual API error responses and status codes
-- See [hono.test.instructions.md](./testing/hono.test.instructions.md) for detailed guidance
-
-#### 2. Frontend Component Integration Tests (SvelteKit) - SECONDARY  
-- **Real API calls** to running backend during component tests
-- **User interaction testing** with @testing-library/svelte and real form submissions
-- **Loading states and error handling** from actual API responses
-- **Routing and navigation** behavior with SvelteKit's routing system
-- **Reactive state management** with Svelte stores and runes
-- See [sveltekit.test.instructions.md](./testing/sveltekit.test.instructions.md) for detailed guidance
-
-#### 3. End-to-End Tests (Playwright) - COMPREHENSIVE
-- **Complete user workflows** spanning multiple pages and features
-- **Cross-browser compatibility** and mobile responsiveness (iOS focus)
-- **Authentication and authorization** flows with real user sessions
-- **Performance and accessibility** validation for PWA requirements
-
-#### 4. Unit Tests (Minimal) - UTILITIES ONLY
-- **Pure functions** with complex algorithms or calculations
-- **Utility functions** used across multiple components
-- **Data transformation** and validation functions
-- **Critical business logic** that could break CI/CD if untested
-
-### Feature Development Workflow
-1. **Understand Requirements**: Break down feature into testable increments
-2. **Write Integration Test FIRST**: Create test that makes real HTTP requests to test the feature
-3. **Implement Feature**: Write code to make the integration test pass
-4. **Verify All Tests Pass**: Ensure no regressions in existing functionality
-5. **Complete Feature**: Only move to next feature when current is fully tested and working
-
 ### Testing Requirements by Layer
 
 #### Backend (Hono) Integration Tests
@@ -132,6 +96,13 @@ See [testing.instructions.md](./testing/testing.instructions.md) for general tes
 - **Test Data Management**: Use proper test database setup/teardown between tests
 - **Never Modify Existing Tests**: Unless specifically requested or broken by intentional changes
 - **Frequent Test Running**: Run tests continuously during development
+
+### Feature Development Workflow
+1. **Understand Requirements**: Break down feature into testable increments
+2. **Write Integration Test FIRST**: Create test that makes real HTTP requests to test the feature
+3. **Implement Feature**: Write code to make the integration test pass
+4. **Verify All Tests Pass**: Ensure no regressions in existing functionality
+5. **Complete Feature**: Only move to next feature when current is fully tested and working
 
 ## Code Quality Standards
 
@@ -187,7 +158,7 @@ See [testing.instructions.md](./testing/testing.instructions.md) for general tes
 - **NEVER duplicate logic** - extract to shared utilities instead
 - **NEVER duplicate types** - import from single source of truth
 - **NEVER duplicate components** - extend or compose existing ones
-- If you find yourself copying code, stop and refactor into reusable abstractions
+- If you find yourself copying or duplicating code, stop and refactor into reusable abstractions
 
 ### Refactoring for DRY
 - When you identify duplicate code, immediately refactor it into shared utilities
@@ -232,6 +203,9 @@ See [testing.instructions.md](./testing/testing.instructions.md) for general tes
 - **Frontend Integration**: Frontend can directly import from Hono stacks for type-safe API calls
 
 ### Hono Best Practices
+
+- See [hono.instructions.md](./instructions/hono.instructions.md) for detailed Hono best practices
+- See [hono.llms.md](./references/hono.llms.md) for complete Hono documentation
 
 #### Middleware Usage
 - **Always prefer Hono first-party middleware** over external libraries
@@ -312,6 +286,9 @@ import type { JwtVariables } from 'hono/jwt'
 ## Frontend Framework Guidelines
 
 ### SvelteKit Best Practices (SPA Deployment)
+
+- See [svelte5.instructions.md](./instructions/svelte5.instructions.md) for SvelteKit best practices
+- See [sveltekit.llms.md](./references/sveltekit.llms.md) for complete SvelteKit documentation
 
 #### Deployment Configuration
 - **Target**: Single Page Application (SPA) deployment using `@sveltejs/adapter-static`

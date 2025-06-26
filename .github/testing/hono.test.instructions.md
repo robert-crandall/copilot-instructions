@@ -1,3 +1,8 @@
+---
+description: Hono testing guide for junior developers, focusing on integration testing with real HTTP requests and minimal unit testing.
+applyTo: "backend/**/*.{test,spec}.{js,ts,jsx,tsx,svelte}"
+---
+
 # Hono Testing Guide for Junior Developers
 
 This guide covers testing strategies and best practices for Hono applications, focusing on integration testing with real HTTP requests.
