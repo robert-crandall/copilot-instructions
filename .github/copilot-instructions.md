@@ -19,7 +19,7 @@
   - Use [hono.test.instructions.md](./testing/hono.test.instructions.md) when implementing backend features
   - Use [sveltekit.test.instructions.md](./testing/sveltekit.test.instructions.md) when implementing frontend features
   - Refer to [testing.instructions.md](./testing/testing.instructions.md) for general testing guidelines
-- Refer to the [knowledge base](../tasks/knowledge-base.md) for common patterns and practices
+- Refer to the [knowledge base](../copilot/knowledge-base.md) for common patterns and practices
 
 ### 1. Context and Understanding
 - **Always read relevant files first** before making changes
@@ -453,13 +453,13 @@ import type { JwtVariables } from 'hono/jwt'
 ## Iteration and Improvement
 
 ### Continuous Learning
-- Product requirements are in `../tasks/prd-*.md`. Review them to understand the product vision and goals.
+- Product requirements are in `../copilot/prd-*.md`. Review them to understand the product vision and goals.
 - Stay curious about new approaches and technologies
 - Learn from mistakes and improve processes
 - Keep up with best practices in the relevant technologies
 - Share knowledge and learn from team members
-- Use the file [knowledge-base.md](../tasks/knowledge-base.md) to document useful patterns, learnings, tips, and tricks
-- Read the file [knowledge-base.md](../tasks/knowledge-base.md) to learn about the latest patterns and practices in the codebase
+- Use the file [knowledge-base.md](../copilot/knowledge-base.md) to document useful patterns, learnings, tips, and tricks
+- Read the file [knowledge-base.md](../copilot/knowledge-base.md) to learn about the latest patterns and practices in the codebase
 
 ### Feedback Loop
 
