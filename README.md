@@ -39,26 +39,6 @@ Alternatively, you can copy the relevant files to your project:
 2. Copy `copilot-instructions.md` to this directory.
 3. Create a `.github/instructions` directory and copy relevant instruction files.
 
-### Option 3: Local Submodule
-
-You can add this repository as a Git submodule:
-
-```bash
-git submodule add https://github.com/YOUR_USERNAME/copilot-instructions.git .github/copilot-repo
-```
-
-Then create symlinks or reference files directly:
-
-```json
-{
-  "github.copilot.chat.codeGeneration.instructions": [
-    {
-      "file": ".github/copilot-repo/.github/copilot-instructions.md"
-    }
-  ]
-}
-```
-
 ## Available Instructions
 
 - **General**: Base coding standards for JS/TS projects
