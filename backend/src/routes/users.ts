@@ -10,13 +10,6 @@ import { registerSchema } from '../validation/users';
 
 const app = new Hono();
 
-// Check registration status endpoint
-app.get('/registration-status', (c) => {
-  return c.json({
-    enabled: env.ALLOW_REGISTRATION
-  });
-});
-
 // Check if registration is enabled
 app.get('/registration-status', async (c) => {
   return c.json({ enabled: env.ALLOW_REGISTRATION });

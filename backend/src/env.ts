@@ -5,6 +5,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   PORT: z.string().optional().default('3000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  ALLOW_REGISTRATION: z.string().transform((val) => val === 'true').default('true'),
 })
 
 export function loadEnv() {
