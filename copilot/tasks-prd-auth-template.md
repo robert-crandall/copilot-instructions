@@ -5,7 +5,7 @@ This task list is generated based on the requirements in the [Authentication Tem
 ## Features
 
 - [ ] 1.0 User Registration System
-  - [ ] 1.1 Set up user database schema using Drizzle ORM with fields for name, email, and password
+  - [x] 1.1 Set up user database schema using Drizzle ORM with fields for name, email, and password
   - [ ] 1.2 Create backend API endpoint for user registration
   - [ ] 1.3 Implement server-side validation for registration fields
   - [ ] 1.4 Add duplicate email check in registration process
