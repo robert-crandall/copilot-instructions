@@ -1,26 +1,11 @@
 {
   "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-  "github.copilot.chat.codeGeneration.instructions": [
-      {
-        "file": ".github/copilot-instructions.md"
-      },
-      {
-        "file": ".github/instructions/sveltekit.instructions.md"
-      },
-          {
-        "file": ".github/instructions/daisyui.instructions.md"
-      },
-      {
-        "file": ".github/instructions/tailwindcss.instructions.md"
-      }
-    ],
-    "github.copilot.chat.testGeneration.instructions": [
-      {
-        "file": ".github/testing/testing.instructions.md"
-      },
-      {
-        "file": ".github/testing/sveltekit.test.instructions.md"
-      }
-    ],
-  "chat.promptFiles": true,
+  "github.copilot.chat.testGeneration.instructions": [
+    {
+      "file": ".github/testing/hono.instructions.md"
+    },
+    {
+      "file": ".github/testing/sveltekit.test.instructions.md"
+    }
+  ],
 }
