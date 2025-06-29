@@ -927,4 +927,4 @@ The properties `form` and `data` have been removed from `use:enhance` callbacks,
 
 Forms containing `<input type="file">` must use `enctype="multipart/form-data"`.
 
-> Reference: [Complete SvelteKit Documentation](../references/sveltekit-llms.md)
+With these adjusted guidelines, your AI can now generate SvelteKit 2 code accurately while considering the migration changes.
