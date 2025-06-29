@@ -54,7 +54,9 @@ app.post('/', zValidator('json', registerSchema), async (c) => {
       { 
         id: newUser.id,
         email: newUser.email,
-        name: newUser.name
+        name: newUser.name,
+        iat: Math.floor(Date.now() / 1000), // issued at
+        exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // expires in 24 hours
       },
       env.JWT_SECRET
     );

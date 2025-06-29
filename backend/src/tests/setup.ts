@@ -4,7 +4,7 @@ import { beforeEach, afterAll } from 'vitest';
 import * as schema from '../db/schema';
 
 // Create test database connection
-const testDbUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/test_db';
+const testDbUrl = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5435/example_app';
 const testClient = postgres(testDbUrl);
 export const testDb = drizzle(testClient, { schema });
 
