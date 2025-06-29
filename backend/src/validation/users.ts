@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-// Validation schema for user registration
+// Base user validation schema
+export const userValidationSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+// Registration schema with detailed error messages
 export const registerSchema = z.object({
   name: z.string()
     .min(1, 'Name is required')
@@ -14,7 +21,7 @@ export const registerSchema = z.object({
     .min(6, 'Password must be at least 6 characters')
 });
 
-// Validation schema for user login
+// Login schema
 export const loginSchema = z.object({
   email: z.string()
     .min(1, 'Email is required')
@@ -25,3 +32,5 @@ export const loginSchema = z.object({
   
   rememberMe: z.boolean().optional().default(false)
 });
+
+export const updateUserValidationSchema = userValidationSchema.partial();

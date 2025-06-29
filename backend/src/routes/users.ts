@@ -6,7 +6,7 @@ import { env } from '../env';
 import { eq } from 'drizzle-orm';
 import { sign } from 'hono/jwt';
 import { hashPassword } from '../utils/auth';
-import { registerSchema } from '../validation/auth';
+import { registerSchema } from '../validation/users';
 
 const app = new Hono();
 
