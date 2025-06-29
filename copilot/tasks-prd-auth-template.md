@@ -4,19 +4,19 @@ This task list is generated based on the requirements in the [Authentication Tem
 
 ## Features
 
-- [ ] 1.0 User Registration System
+- [x] 1.0 User Registration System
   - [x] 1.1 Set up user database schema using Drizzle ORM with fields for name, email, and password
-  - [ ] 1.2 Create backend API endpoint for user registration
-  - [ ] 1.3 Implement server-side validation for registration fields
-  - [ ] 1.4 Add duplicate email check in registration process
-  - [ ] 1.5 Implement password hashing mechanism
-  - [ ] 1.6 Add environment variable check for `ALLOW_REGISTRATION` flag
-  - [ ] 1.7 Create frontend registration form component with all required fields
-  - [ ] 1.8 Implement client-side form validation for registration
-  - [ ] 1.9 Connect frontend form to backend API endpoint
-  - [ ] 1.10 Add error handling and user feedback for registration form
-  - [ ] 1.11 Create integration tests for registration API endpoint
-  - [ ] 1.12 Write E2E tests for the complete registration flow
+  - [x] 1.2 Create backend API endpoint for user registration
+  - [x] 1.3 Implement server-side validation for registration fields
+  - [x] 1.4 Add duplicate email check in registration process
+  - [x] 1.5 Implement password hashing mechanism
+  - [x] 1.6 Add environment variable check for `ALLOW_REGISTRATION` flag
+  - [x] 1.7 Create frontend registration form component with all required fields
+  - [x] 1.8 Implement client-side form validation for registration
+  - [x] 1.9 Connect frontend form to backend API endpoint
+  - [x] 1.10 Add error handling and user feedback for registration form
+  - [x] 1.11 Create integration tests for registration API endpoint
+  - [x] 1.12 Write E2E tests for the complete registration flow
 
 - [ ] 2.0 User Login System
   - [ ] 2.1 Create backend API endpoint for user login

@@ -4,7 +4,9 @@
     "dev": "bun run --hot src/index.ts",
     "check": "bunx tsc --noEmit",
     "db:migrate": "drizzle-kit migrate",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",
@@ -15,7 +17,8 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^24.0.7"
+    "@types/bun": "^1.2.17",
+    "@types/node": "^24.0.7",
+    "vitest": "^3.2.4"
   }
 }

@@ -1,17 +1,26 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
-import { db, userValidationSchema } from '../db';
+import { db } from '../db';
 import { users } from '../db/schema';
 import { env } from '../env';
 import { eq } from 'drizzle-orm';
 import { sign } from 'hono/jwt';
 import { hashPassword } from '../utils/auth';
-
-// Registration validator schema
-const registerSchema = userValidationSchema;
+import { registerSchema } from '../validation/auth';
 
 const app = new Hono();
+
+// Check registration status endpoint
+app.get('/registration-status', (c) => {
+  return c.json({
+    enabled: env.ALLOW_REGISTRATION
+  });
+});
+
+// Check if registration is enabled
+app.get('/registration-status', async (c) => {
+  return c.json({ enabled: env.ALLOW_REGISTRATION });
+});
 
 // User registration endpoint
 app.post('/', zValidator('json', registerSchema), async (c) => {
