@@ -1,39 +1,53 @@
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { existsSync } from 'fs';
+import { fileURLToPath } from 'url';
 
-// Load environment variables from parent directory .env files
-const parentDir = join(import.meta.dir, '../..');
+// Get the directory path in a way that works both with Bun and Node.js (Vitest)
+const __filename = typeof import.meta.url === 'string' 
+  ? fileURLToPath(import.meta.url) 
+  : '';
+const __dirname = __filename ? dirname(__filename) : process.cwd();
+const parentDir = join(__dirname, '../..');
 const defaultEnvPath = join(parentDir, '.env');
 const testEnvPath = join(parentDir, '.env.test');
 
-// Load .env file from parent directory if it exists
-if (existsSync(defaultEnvPath)) {
-  await Bun.file(defaultEnvPath).text().then(contents => {
+// Helper function to load env file that works in both Bun and Node.js
+async function loadEnvFile(filePath: string, overrideExisting = false) {
+  if (!existsSync(filePath)) return;
+  
+  try {
+    // Use Node.js fs module as a fallback for Vitest environment
+    let contents: string;
+    if (typeof Bun !== 'undefined') {
+      contents = await Bun.file(filePath).text();
+    } else {
+      // Node.js fallback for Vitest
+      const { readFileSync } = require('fs');
+      contents = readFileSync(filePath, 'utf-8');
+    }
+    
     for (const line of contents.split('\n')) {
       const [key, ...valueParts] = line.split('=');
       if (key && !key.startsWith('#') && valueParts.length > 0) {
         const value = valueParts.join('=').trim();
-        // Only set if not already defined
-        if (!process.env[key.trim()]) {
-          process.env[key.trim()] = value;
+        // Set env var based on override flag
+        const trimmedKey = key.trim();
+        if (overrideExisting || !process.env[trimmedKey]) {
+          process.env[trimmedKey] = value;
         }
       }
     }
-  });
+  } catch (error) {
+    console.error(`Error loading environment file ${filePath}:`, error);
+  }
 }
 
-// Load .env.test file from parent directory if environment is test
-if (process.env.NODE_ENV === 'test' && existsSync(testEnvPath)) {
-  await Bun.file(testEnvPath).text().then(contents => {
-    for (const line of contents.split('\n')) {
-      const [key, ...valueParts] = line.split('=');
-      if (key && !key.startsWith('#') && valueParts.length > 0) {
-        const value = valueParts.join('=').trim();
-        // Override with test values
-        process.env[key.trim()] = value;
-      }
-    }
-  });
+// Load .env file from parent directory (don't override existing vars)
+await loadEnvFile(defaultEnvPath, false);
+
+// Load .env.test file if in test environment (override existing vars)
+if (process.env.NODE_ENV === 'test') {
+  await loadEnvFile(testEnvPath, true);
 }
 
 export const env = {
