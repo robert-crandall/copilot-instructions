@@ -8,7 +8,6 @@ This repository serves as a central location for GitHub Copilot instruction file
 - `.github/instructions/`: Folder for specific technology or task instructions.
 - `.github/prompts/`: Folder for reusable prompt templates.
 - `.github/references/`: Folder for comprehensive documentation references that support the instruction files.
-- `sveltekit/`: Technology-specific documentation that can be referenced in instructions.
 
 ## How to Use
 
