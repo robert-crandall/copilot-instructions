@@ -459,7 +459,7 @@ src/
 ├── routes/
 │   ├── users.ts
 │   └── posts.ts
-├── __tests__/
+├── tests/
 │   ├── setup.ts
 │   ├── users.test.ts
 │   ├── posts.test.ts
