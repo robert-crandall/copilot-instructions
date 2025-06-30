@@ -1,6 +1,8 @@
 # Copilot Instructions Repository
 
-This repository serves as a central location for GitHub Copilot instruction files. These instructions help Copilot generate code that follows your preferred coding standards, patterns, and practices across different projects.
+This repository serves as an example of using Copilot Instructions files. It shows an example application, that allows user registration and login. This is done with a split backend/frontend architecture.
+
+All documentation for the technology stack is in `.github/instructions/*`, with references to full documentation at `.github/references/*`
 
 ## Structure
 
