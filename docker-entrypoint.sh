@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Starting Velvet Application..."
+echo "Starting Example Application..."
 
 # Parse DATABASE_URL to extract connection details
 if [ -z "$DATABASE_URL" ]; then
