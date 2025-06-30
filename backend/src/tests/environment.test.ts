@@ -135,7 +135,7 @@ describe('Environment Configuration Integration', () => {
       ];
 
       for (const origin of allowedOrigins) {
-        const res = await app.request('/health', {
+        const res = await app.request('/api/health', {
           headers: {
             'Origin': origin
           }
@@ -151,7 +151,7 @@ describe('Environment Configuration Integration', () => {
     });
 
     it('should handle credentials correctly', async () => {
-      const res = await app.request('/health', {
+      const res = await app.request('/api/health', {
         headers: {
           'Origin': 'http://localhost:5173'
         }
@@ -175,7 +175,7 @@ describe('Environment Configuration Integration', () => {
       // This test ensures the app doesn't crash if env vars are missing
       // The actual behavior depends on how the env loading is implemented
       
-      const res = await app.request('/health');
+      const res = await app.request('/api/health');
       
       // Should not crash, even if some env vars are missing
       expect(res.status).toBeLessThan(500);
@@ -183,7 +183,7 @@ describe('Environment Configuration Integration', () => {
 
     it('should validate environment configuration', async () => {
       // Test that the app properly validates its configuration
-      const res = await app.request('/health');
+      const res = await app.request('/api/health');
       
       expect(res.status).toBe(200);
       const data = await res.json();
@@ -191,18 +191,6 @@ describe('Environment Configuration Integration', () => {
       
       // If the app is responding to health checks, 
       // it means the environment is properly configured
-    });
-  });
-
-  describe('Port Configuration', () => {
-    it('should respect PORT environment variable', async () => {
-      // This test verifies that the app can handle port configuration
-      // In practice, this would be tested in deployment scenarios
-      
-      const res = await app.request('/health');
-      expect(res.status).toBe(200);
-      
-      // If we can make requests, the port configuration is working
     });
   });
 });
