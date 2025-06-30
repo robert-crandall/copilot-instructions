@@ -1,15 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import app from '../index';
 import { testDb, cleanDatabase, schema } from './setup';
 import { eq } from 'drizzle-orm';
 
 describe('Authentication Flow Integration Tests', () => {
-  beforeEach(async () => {
-    await cleanDatabase();
-  });
-
   describe('User Registration and Token Generation', () => {
     it('should complete full registration flow with valid JWT', async () => {
+      await cleanDatabase(); // Ensure clean state
+      
       const userData = {
         name: 'Auth Test User',
         email: 'auth@example.com',
@@ -46,7 +44,7 @@ describe('Authentication Flow Integration Tests', () => {
       expect(token.split('.')).toHaveLength(3); // JWT format: header.payload.signature
       
       // Verify user exists in database with hashed password
-      const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.id, user.id));
+      const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.id, user.id));
       expect(dbUsers).toHaveLength(1);
       
       const dbUser = dbUsers[0];
@@ -59,6 +57,8 @@ describe('Authentication Flow Integration Tests', () => {
     });
 
     it('should generate unique tokens for different users', async () => {
+      await cleanDatabase(); // Ensure clean state
+      
       const user1Data = {
         name: 'User One',
         email: 'user1@example.com',
@@ -101,11 +101,13 @@ describe('Authentication Flow Integration Tests', () => {
       expect(data1.user.email).not.toBe(data2.user.email);
 
       // Verify both users exist in database
-      const dbUsers = await testDb.select().from(schema.users);
+      const dbUsers = await testDb().select().from(schema.users);
       expect(dbUsers).toHaveLength(2);
     });
 
     it('should include user information in JWT payload', async () => {
+      await cleanDatabase(); // Ensure clean state
+      
       const userData = {
         name: 'JWT Payload Test',
         email: 'jwtpayload@example.com',
@@ -147,6 +149,8 @@ describe('Authentication Flow Integration Tests', () => {
 
   describe('Password Security', () => {
     it('should hash passwords with bcrypt', async () => {
+      await cleanDatabase(); // Ensure clean state
+      
       const userData = {
         name: 'Hash Test User',
         email: 'hash@example.com',
@@ -165,7 +169,7 @@ describe('Authentication Flow Integration Tests', () => {
       const responseData = await res.json();
 
       // Get user from database
-      const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.id, responseData.user.id));
+      const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.id, responseData.user.id));
       expect(dbUsers).toHaveLength(1);
       
       const dbUser = dbUsers[0];
@@ -190,7 +194,7 @@ describe('Authentication Flow Integration Tests', () => {
       expect(res2.status).toBe(201);
       const responseData2 = await res2.json();
 
-      const dbUsers2 = await testDb.select().from(schema.users).where(eq(schema.users.id, responseData2.user.id));
+      const dbUsers2 = await testDb().select().from(schema.users).where(eq(schema.users.id, responseData2.user.id));
       const dbUser2 = dbUsers2[0];
 
       // Same password should produce different hashes (due to salt)
@@ -198,6 +202,8 @@ describe('Authentication Flow Integration Tests', () => {
     });
 
     it('should handle special characters in passwords', async () => {
+      await cleanDatabase(); // Ensure clean state
+      
       const specialPasswords = [
         'p@ssw0rd!',
       ];
@@ -221,7 +227,7 @@ describe('Authentication Flow Integration Tests', () => {
         const responseData = await res.json();
 
         // Verify user was created and password was hashed
-        const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.id, responseData.user.id));
+        const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.id, responseData.user.id));
         expect(dbUsers).toHaveLength(1);
         
         const dbUser = dbUsers[0];
@@ -240,7 +246,7 @@ describe('Authentication Flow Integration Tests', () => {
       };
 
       // Generate multiple tokens to test randomness
-      const tokens = [];
+      const tokens: string[] = [];
       for (let i = 0; i < 5; i++) {
         await cleanDatabase(); // Clean between iterations
         
@@ -333,7 +339,7 @@ describe('Authentication Flow Integration Tests', () => {
       expect(conflictResponses).toHaveLength(2);
 
       // Verify only one user exists in database
-      const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.email, userData.email));
+      const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.email, userData.email));
       expect(dbUsers).toHaveLength(1);
     });
 
@@ -356,7 +362,7 @@ describe('Authentication Flow Integration Tests', () => {
       const responseData = await res.json();
 
       // Verify response data matches database data
-      const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.id, responseData.user.id));
+      const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.id, responseData.user.id));
       expect(dbUsers).toHaveLength(1);
       
       const dbUser = dbUsers[0];

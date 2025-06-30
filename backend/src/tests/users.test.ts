@@ -49,7 +49,7 @@ describe('Users API Integration Tests', () => {
       expect(typeof responseData.token).toBe('string');
 
       // Verify user was actually created in database
-      const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.email, userData.email));
+      const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.email, userData.email));
       expect(dbUsers).toHaveLength(1);
       expect(dbUsers[0].name).toBe(userData.name);
       expect(dbUsers[0].email).toBe(userData.email);
@@ -91,7 +91,7 @@ describe('Users API Integration Tests', () => {
       expect(errorData.error).toContain('Email already in use');
 
       // Verify only one user exists in database
-      const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.email, userData.email));
+      const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.email, userData.email));
       expect(dbUsers).toHaveLength(1);
     });
 
@@ -115,7 +115,7 @@ describe('Users API Integration Tests', () => {
       expect(errorData).toHaveProperty('error');
 
       // Verify no user was created in database
-      const dbUsers = await testDb.select().from(schema.users);
+      const dbUsers = await testDb().select().from(schema.users);
       expect(dbUsers).toHaveLength(0);
     });
 
@@ -141,7 +141,7 @@ describe('Users API Integration Tests', () => {
         expect(errorData).toHaveProperty('error');
 
         // Verify no user was created in database
-        const dbUsers = await testDb.select().from(schema.users);
+        const dbUsers = await testDb().select().from(schema.users);
         expect(dbUsers).toHaveLength(0);
         
         // Clean up for next iteration
@@ -169,7 +169,7 @@ describe('Users API Integration Tests', () => {
       expect(errorData).toHaveProperty('error');
 
       // Verify no user was created in database
-      const dbUsers = await testDb.select().from(schema.users);
+      const dbUsers = await testDb().select().from(schema.users);
       expect(dbUsers).toHaveLength(0);
     });
 
@@ -193,7 +193,7 @@ describe('Users API Integration Tests', () => {
       expect(errorData).toHaveProperty('error');
 
       // Verify no user was created in database
-      const dbUsers = await testDb.select().from(schema.users);
+      const dbUsers = await testDb().select().from(schema.users);
       expect(dbUsers).toHaveLength(0);
     });
 
@@ -209,7 +209,7 @@ describe('Users API Integration Tests', () => {
       expect(res.status).toBe(400);
 
       // Verify no user was created in database
-      const dbUsers = await testDb.select().from(schema.users);
+      const dbUsers = await testDb().select().from(schema.users);
       expect(dbUsers).toHaveLength(0);
     });
 
@@ -233,10 +233,9 @@ describe('Users API Integration Tests', () => {
         const responseData = await res.json();
         expect(responseData).toHaveProperty('user');
         expect(responseData).toHaveProperty('token');
-        
-        // Verify user was created in database
-        const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.email, userData.email));
-        expect(dbUsers).toHaveLength(1);
+           // Verify user was created in database
+      const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.email, userData.email));
+      expect(dbUsers).toHaveLength(1);
       }
     });
   });
@@ -295,7 +294,7 @@ describe('Users API Integration Tests', () => {
       expect(res.status).toBe(201);
 
       // Check database directly
-      const dbUsers = await testDb.select().from(schema.users).where(eq(schema.users.email, userData.email));
+      const dbUsers = await testDb().select().from(schema.users).where(eq(schema.users.email, userData.email));
       expect(dbUsers).toHaveLength(1);
       
       const dbUser = dbUsers[0];
