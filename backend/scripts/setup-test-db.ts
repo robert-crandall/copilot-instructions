@@ -60,12 +60,13 @@ async function main() {
     const dc = spawnSync([
       'docker-compose',
       '-f',
-      path.resolve(__dirname, '../../docker-compose.test.yml'),
+      path.resolve(__dirname, '../../docker-compose.yml'),
       'up',
       '-d',
+      'test-db', // Only start the test-db service
     ]);
     if (dc.exitCode !== 0) {
-      console.error('docker-compose up failed:', dc.stderr?.toString() || dc.error);
+      console.error('docker-compose up failed:', dc.stderr?.toString() || 'Unknown error');
       process.exit(1);
     }
     console.log('Cleaning test database...');

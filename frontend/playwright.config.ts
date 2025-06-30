@@ -47,7 +47,7 @@ export default defineConfig({
 	webServer: [
 		{
 			// Start test database
-			command: 'docker-compose -f ../docker-compose.test.yml up test-db -d',
+			command: 'docker-compose -f ../docker-compose.yml up test-db -d',
 			port: 5435,
 			reuseExistingServer: !process.env.CI,
 			timeout: 30000
