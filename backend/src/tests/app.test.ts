@@ -4,7 +4,7 @@ import app from '../index';
 describe('App Integration Tests', () => {
   describe('Health Check', () => {
     it('should return health status', async () => {
-      const res = await app.request('/health');
+      const res = await app.request('/api/health');
       
       expect(res.status).toBe(200);
       const data = await res.json();
@@ -31,7 +31,7 @@ describe('App Integration Tests', () => {
 
   describe('Middleware Integration', () => {
     it('should include CORS headers for all routes', async () => {
-      const routes = ['/health', '/api/users/registration-status'];
+      const routes = ['/api/health', '/api/users/registration-status'];
       
       for (const route of routes) {
         const res = await app.request(route, {
@@ -70,7 +70,7 @@ describe('App Integration Tests', () => {
     });
 
     it('should reject requests from non-allowed origins', async () => {
-      const res = await app.request('/health', {
+      const res = await app.request('/api/health', {
         headers: {
           'Origin': 'https://malicious-site.com'
         }
@@ -83,12 +83,12 @@ describe('App Integration Tests', () => {
 
   describe('Content-Type Handling', () => {
     it('should handle requests without Content-Type', async () => {
-      const res = await app.request('/health');
+      const res = await app.request('/api/health');
       expect(res.status).toBe(200);
     });
 
     it('should return JSON content-type for JSON responses', async () => {
-      const res = await app.request('/health');
+      const res = await app.request('/api/health');
       expect(res.status).toBe(200);
       
       const contentType = res.headers.get('Content-Type') || res.headers.get('content-type');
@@ -98,12 +98,12 @@ describe('App Integration Tests', () => {
 
   describe('Request Method Handling', () => {
     it('should handle GET requests', async () => {
-      const res = await app.request('/health', { method: 'GET' });
+      const res = await app.request('/api/health', { method: 'GET' });
       expect(res.status).toBe(200);
     });
 
     it('should handle HEAD requests', async () => {
-      const res = await app.request('/health', { method: 'HEAD' });
+      const res = await app.request('/api/health', { method: 'HEAD' });
       expect([200, 405]).toContain(res.status); // Either works or method not allowed
     });
 
@@ -111,7 +111,7 @@ describe('App Integration Tests', () => {
       const unsupportedMethods = ['PUT', 'DELETE', 'PATCH'];
       
       for (const method of unsupportedMethods) {
-        const res = await app.request('/health', { method });
+        const res = await app.request('/api/health', { method });
         expect(res.status).toBe(404); // Hono returns 404 for unsupported methods
       }
     });
@@ -185,7 +185,7 @@ describe('App Integration Tests', () => {
   describe('Response Format Consistency', () => {
     it('should return consistent JSON structure for successful responses', async () => {
       const routes = [
-        '/health',
+        '/api/health',
         '/api/users/registration-status'
       ];
 
