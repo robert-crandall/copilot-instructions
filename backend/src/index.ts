@@ -24,12 +24,19 @@ app.use('*', cors({
   credentials: true,
 }));
 
-// Health check endpoint
-app.get('/health', (c) => {
-  return c.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// Chain routes for RPC compatibility
+const routes = app
+  // Health check endpoints (both for backward compatibility)
+  .get('/health', (c) => {
+    return c.json({ status: 'ok', timestamp: new Date().toISOString() });
+  })
+  .get('/api/health', (c) => {
+    return c.json({ status: 'ok', timestamp: new Date().toISOString() });
+  })
+  // Mount API routes
+  .route('/api/users', usersRoutes);
 
-// Mount API routes
-app.route('/api/users', usersRoutes);
+// Export the app type for RPC
+export type AppType = typeof routes;
 
 export default app;

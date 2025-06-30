@@ -363,4 +363,184 @@ describe('Users API Integration Tests', () => {
       expect(res.status).toBe(404); // Hono returns 404 for unsupported methods
     });
   });
+
+  describe('POST /api/users/login', () => {
+    it('should login a user successfully', async () => {
+      // First create a user
+      const userData = {
+        name: 'Jane Doe',
+        email: 'jane.doe@example.com',
+        password: 'password123'
+      };
+
+      const registerRes = await app.request('/api/users', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      expect(registerRes.status).toBe(201);
+
+      // Now login with the created user
+      const loginData = {
+        email: userData.email,
+        password: userData.password,
+        rememberMe: false
+      };
+
+      const loginRes = await app.request('/api/users/login', {
+        method: 'POST',
+        body: JSON.stringify(loginData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      expect(loginRes.status).toBe(200);
+      const responseData = await loginRes.json();
+      
+      // Check response structure
+      expect(responseData).toHaveProperty('user');
+      expect(responseData).toHaveProperty('token');
+      expect(responseData.user).toHaveProperty('id');
+      expect(responseData.user).toHaveProperty('name', userData.name);
+      expect(responseData.user).toHaveProperty('email', userData.email);
+      expect(responseData.user).toHaveProperty('createdAt');
+      expect(responseData.user).not.toHaveProperty('password'); // Password should not be returned
+      expect(typeof responseData.token).toBe('string');
+    });
+
+    it('should reject login with invalid email', async () => {
+      const loginData = {
+        email: 'nonexistent@example.com',
+        password: 'password123'
+      };
+
+      const res = await app.request('/api/users/login', {
+        method: 'POST',
+        body: JSON.stringify(loginData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      expect(res.status).toBe(401);
+      const data = await res.json();
+      expect(data).toHaveProperty('error');
+      expect(data.error).toBe('Invalid email or password');
+    });
+
+    it('should reject login with invalid password', async () => {
+      // First create a user
+      const userData = {
+        name: 'John Test',
+        email: 'john.test@example.com',
+        password: 'correct123'
+      };
+
+      const registerRes = await app.request('/api/users', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      expect(registerRes.status).toBe(201);
+
+      // Try to login with wrong password
+      const loginData = {
+        email: userData.email,
+        password: 'wrong123'
+      };
+
+      const loginRes = await app.request('/api/users/login', {
+        method: 'POST',
+        body: JSON.stringify(loginData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      expect(loginRes.status).toBe(401);
+      const data = await loginRes.json();
+      expect(data).toHaveProperty('error');
+      expect(data.error).toBe('Invalid email or password');
+    });
+
+    it('should handle rememberMe option correctly', async () => {
+      // First create a user
+      const userData = {
+        name: 'Remember Test',
+        email: 'remember.test@example.com',
+        password: 'password123'
+      };
+
+      const registerRes = await app.request('/api/users', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      expect(registerRes.status).toBe(201);
+
+      // Login with rememberMe: true
+      const loginData = {
+        email: userData.email,
+        password: userData.password,
+        rememberMe: true
+      };
+
+      const loginRes = await app.request('/api/users/login', {
+        method: 'POST',
+        body: JSON.stringify(loginData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      expect(loginRes.status).toBe(200);
+      const responseData = await loginRes.json();
+      expect(responseData).toHaveProperty('token');
+      expect(typeof responseData.token).toBe('string');
+    });
+
+    it('should reject invalid JSON in login request', async () => {
+      const res = await app.request('/api/users/login', {
+        method: 'POST',
+        body: '{ invalid json',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should validate required fields for login', async () => {
+      const testCases = [
+        { email: '', password: 'password123' }, // Missing email
+        { email: 'test@example.com', password: '' }, // Missing password
+        { email: '', password: '' }, // Missing both
+        { password: 'password123' }, // No email field
+        { email: 'test@example.com' }, // No password field
+      ];
+
+      for (const loginData of testCases) {
+        const res = await app.request('/api/users/login', {
+          method: 'POST',
+          body: JSON.stringify(loginData),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        expect(res.status).toBe(400);
+      }
+    });
+  });
 });

@@ -28,10 +28,10 @@
 		authStore.setLoading(true);
 
 		try {
-			const data = await authApi.register(event.detail);
+			const response = await authApi.register(event.detail);
 
 			// Update auth store with user and token
-			authStore.setAuth(data.user, data.token);
+			authStore.setAuth(response.user, response.token);
 
 			// Redirect to home page or dashboard
 			goto('/');

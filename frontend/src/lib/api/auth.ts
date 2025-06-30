@@ -1,36 +1,10 @@
-import { browser } from '$app/environment';
+import { api } from '../api';
 
-// Base API URL
-const API_BASE = browser ? '/api' : 'http://localhost:3000/api';
-
-// Auth API Types
-export interface LoginRequest {
-	email: string;
-	password: string;
-	rememberMe?: boolean;
-}
-
-export interface RegisterRequest {
-	name: string;
-	email: string;
-	password: string;
-}
-
-export interface AuthResponse {
-	user: {
-		id: string;
-		name: string;
-		email: string;
-		createdAt: string;
-	};
-	token: string;
-}
-
-// API client for authentication
+// Type-safe authentication API using Hono client
 export const authApi = {
 	// Check if registration is enabled
 	async getRegistrationStatus(): Promise<{ enabled: boolean }> {
-		const response = await fetch(`${API_BASE}/users/registration-status`);
+		const response = await api.api.users['registration-status'].$get();
 		if (!response.ok) {
 			throw new Error('Failed to check registration status');
 		}
@@ -38,38 +12,70 @@ export const authApi = {
 	},
 
 	// Register a new user
-	async register(data: RegisterRequest): Promise<AuthResponse> {
-		const response = await fetch(`${API_BASE}/users`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(data)
+	async register(data: { name: string; email: string; password: string }): Promise<{
+		user: {
+			id: string;
+			name: string;
+			email: string;
+			createdAt: string;
+		};
+		token: string;
+	}> {
+		const response = await api.api.users.$post({
+			json: data
 		});
 
+		const result = await response.json();
+
 		if (!response.ok) {
-			const errorData = await response.json();
-			throw new Error(errorData.error || 'Registration failed');
+			// Type narrowing: if response is not ok, result has error property
+			const errorResult = result as { error: string };
+			throw new Error(errorResult.error || 'Registration failed');
 		}
 
-		return response.json();
+		// Type narrowing: if response is ok, result has user and token
+		return result as {
+			user: {
+				id: string;
+				name: string;
+				email: string;
+				createdAt: string;
+			};
+			token: string;
+		};
 	},
 
 	// Login
-	async login(data: LoginRequest): Promise<AuthResponse> {
-		const response = await fetch(`${API_BASE}/users/login`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(data)
+	async login(data: { email: string; password: string; rememberMe?: boolean }): Promise<{
+		user: {
+			id: string;
+			name: string;
+			email: string;
+			createdAt: string;
+		};
+		token: string;
+	}> {
+		const response = await api.api.users.login.$post({
+			json: data
 		});
 
+		const result = await response.json();
+
 		if (!response.ok) {
-			const errorData = await response.json();
-			throw new Error(errorData.error || 'Login failed');
+			// Type narrowing: if response is not ok, result has error property
+			const errorResult = result as { error: string };
+			throw new Error(errorResult.error || 'Login failed');
 		}
 
-		return response.json();
+		// Type narrowing: if response is ok, result has user and token
+		return result as {
+			user: {
+				id: string;
+				name: string;
+				email: string;
+				createdAt: string;
+			};
+			token: string;
+		};
 	}
 };
