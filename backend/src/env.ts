@@ -6,6 +6,7 @@ const envSchema = z.object({
   PORT: z.string().optional().default('3000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   ALLOW_REGISTRATION: z.string().transform((val) => val === 'true').default('true'),
+  FRONTEND_URL: z.string().url().default('http://localhost:3000'),
 })
 
 export function loadEnv() {

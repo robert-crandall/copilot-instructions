@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
+import { serveStatic } from 'hono/bun';
 import usersRoutes from './routes/users';
 
 // Create main app instance
@@ -26,15 +27,45 @@ app.use('*', cors({
 
 // Chain routes for RPC compatibility
 const routes = app
-  // Health check endpoints (both for backward compatibility)
-  .get('/health', (c) => {
-    return c.json({ status: 'ok', timestamp: new Date().toISOString() });
-  })
+  // Health check endpoints
   .get('/api/health', (c) => {
     return c.json({ status: 'ok', timestamp: new Date().toISOString() });
   })
   // Mount API routes
   .route('/api/users', usersRoutes);
+
+// Serve static files from SvelteKit build output
+// Skip API routes and serve static assets first
+app.use('*', async (c, next) => {
+  const path = c.req.path;
+  
+  // Skip static serving for API routes
+  if (path.startsWith('/api/')) {
+    await next();
+    return;
+  }
+  
+  // Try to serve static files (JS, CSS, images, etc.)
+  const staticHandler = serveStatic({
+    root: '../frontend',
+    onNotFound: () => {
+      // Don't log here, just continue to next middleware
+    }
+  });
+  
+  return staticHandler(c, next);
+});
+
+// SPA fallback - serve index.html for all remaining non-API routes
+app.get('*', serveStatic({ 
+  path: '../frontend/index.html',
+  onFound: (path, c) => {
+    console.log(`🏠 Serving SPA for: ${c.req.path}`);
+  },
+  onNotFound: (path, c) => {
+    console.error(`❌ Frontend not found: ${path}`);
+  }
+}));
 
 // Export the app type for RPC
 export type AppType = typeof routes;
