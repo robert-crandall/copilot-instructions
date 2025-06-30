@@ -53,22 +53,66 @@ async function runSeed() {
   }
 }
 
+async function checkDatabaseConnection() {
+  try {
+    console.log('Checking database connection...');
+    const testPool = new Pool({ 
+      connectionString: env.DATABASE_URL,
+      // Short timeout for quick connection check
+      connectionTimeoutMillis: 5000,
+      idleTimeoutMillis: 1000,
+    });
+    
+    await testPool.query('SELECT 1');
+    await testPool.end();
+    console.log('✅ Database is already online');
+    return true;
+  } catch (err) {
+    console.log('❌ Database not accessible:', err.message);
+    return false;
+  }
+}
+
+async function startDatabaseIfNeeded() {
+  const isOnline = await checkDatabaseConnection();
+  
+  if (isOnline) {
+    console.log('🔄 Using existing database connection');
+    return;
+  }
+  
+  console.log('🐳 Starting test database container with docker-compose...');
+  const dc = spawnSync([
+    'docker-compose',
+    '-f',
+    path.resolve(__dirname, '../../docker-compose.yml'),
+    'up',
+    '-d',
+    'test-db', // Only start the test-db service
+  ]);
+  
+  if (dc.exitCode !== 0) {
+    const errorOutput = dc.stderr ? String(dc.stderr) : 'Unknown error';
+    console.error('❌ docker-compose up failed:', errorOutput);
+    process.exit(1);
+  }
+  
+  // Wait a moment for the database to start up
+  console.log('⏳ Waiting for database to be ready...');
+  await new Promise(resolve => setTimeout(resolve, 3000));
+  
+  // Verify the database is now accessible
+  const isNowOnline = await checkDatabaseConnection();
+  if (!isNowOnline) {
+    console.error('❌ Database still not accessible after starting container');
+    process.exit(1);
+  }
+}
+
 async function main() {
   try {
-    // Start Docker Compose for test DB
-    console.log('Starting test database container with docker-compose...');
-    const dc = spawnSync([
-      'docker-compose',
-      '-f',
-      path.resolve(__dirname, '../../docker-compose.yml'),
-      'up',
-      '-d',
-      'test-db', // Only start the test-db service
-    ]);
-    if (dc.exitCode !== 0) {
-      console.error('docker-compose up failed:', dc.stderr?.toString() || 'Unknown error');
-      process.exit(1);
-    }
+    // Check if database is online, start if needed
+    await startDatabaseIfNeeded();
     console.log('Cleaning test database...');
     await cleanDatabase();
     console.log('Applying migrations...');
