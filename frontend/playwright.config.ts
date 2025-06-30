@@ -75,9 +75,9 @@ export default defineConfig({
 		},
 		{
 			// Start frontend dev server
-			command: 'bun run dev --port 4173',
+			command: 'bun run build && bun run preview',
 			port: 4173,
-			reuseExistingServer: !process.env.CI,
+			reuseExistingServer: false,
 			timeout: 30000
 		}
 	]
