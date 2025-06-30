@@ -2,7 +2,6 @@
 // This script uses the actual API endpoints to create test data
 
 import { TEST_CONFIG } from './test-config';
-import { cleanupTestDb } from '../../../backend/tests/helpers';
 
 const API_BASE_URL = TEST_CONFIG.API_BASE_URL;
 
@@ -81,22 +80,22 @@ async function createTestUser() {
 }
 
 async function clearExistingData(authToken: string) {
-  console.log('Clearing existing test data...');
+	console.log('Clearing existing test data...');
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/test/cleanup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Optionally add an auth header if you want extra security
-        // 'Authorization': `Bearer ${authToken}`
-      }
-    });
-    if (!response.ok) throw new Error(`Cleanup failed: ${response.statusText}`);
-    console.log('✅ Existing data cleared');
-  } catch (error) {
-    console.log('⚠️ Could not clear all existing data, continuing...');
-  }
+	try {
+		const response = await fetch(`${API_BASE_URL}/api/test/cleanup`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+				// Optionally add an auth header if you want extra security
+				// 'Authorization': `Bearer ${authToken}`
+			}
+		});
+		if (!response.ok) throw new Error(`Cleanup failed: ${response.statusText}`);
+		console.log('✅ Existing data cleared');
+	} catch (error) {
+		console.log('⚠️ Could not clear all existing data, continuing...');
+	}
 }
 
 async function seedTestDataViaAPI() {
@@ -113,7 +112,7 @@ async function seedTestDataViaAPI() {
 
 		// Clear existing data
 		await clearExistingData(authToken);
-    console.log('✅ Existing data cleared');
+		console.log('✅ Existing data cleared');
 	} catch (error) {
 		console.error('❌ Error seeding test data:', error);
 		throw error;

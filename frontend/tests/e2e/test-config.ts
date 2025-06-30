@@ -14,7 +14,7 @@ export const TEST_CONFIG = {
 	USER: {
 		email: 'user@example.com',
 		password: 'password123',
-    username: 'testuser',
+		username: 'testuser'
 	},
 
 	// Test Timeouts

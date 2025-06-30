@@ -32,6 +32,9 @@ cd "../frontend"
 bun run build
 echo "- Backend tests..."
 cd "../backend"
-bun test
+bun run test
+echo "- Frontend tests..."
+cd "../frontend"
+bun run test:e2e
 
 print_section "All checks completed successfully! ✅"
