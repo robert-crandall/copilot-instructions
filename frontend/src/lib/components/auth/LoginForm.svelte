@@ -122,18 +122,19 @@
 		</div>
 
 		<div class="form-control">
-			<label class="cursor-pointer label">
+			<label class="label cursor-pointer">
 				<span class="label-text">Remember me</span>
-				<input type="checkbox" bind:checked={rememberMe} class="checkbox checkbox-primary" disabled={loading} />
+				<input
+					type="checkbox"
+					bind:checked={rememberMe}
+					class="checkbox checkbox-primary"
+					disabled={loading}
+				/>
 			</label>
 		</div>
 
 		<div class="form-control mt-6">
-			<button
-				type="submit"
-				class="btn btn-primary w-full"
-				disabled={loading}
-			>
+			<button type="submit" class="btn btn-primary w-full" disabled={loading}>
 				{#if loading}
 					<span class="loading loading-spinner loading-sm"></span>
 				{/if}

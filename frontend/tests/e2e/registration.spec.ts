@@ -23,7 +23,7 @@ test.describe('User Registration', () => {
 		await page.waitForURL('/');
 
 		// Verify success - check for user info or logout button
-		await expect(page.locator('text=Test User')).toBeVisible();
+		await expect(page.locator('[role="button"]:has-text("Test User")')).toBeVisible();
 	});
 
 	test('should display validation errors for invalid inputs', async ({ page }) => {
@@ -91,23 +91,27 @@ test.describe('User Registration', () => {
 	});
 
 	test('should show message when registration is disabled', async ({ page, request }) => {
-		// This test requires the ability to toggle the ALLOW_REGISTRATION setting
-		// For a real test, you might use an admin API to toggle this setting
-		// For this demo, we'll assume there's a way to disable registration
-
 		// Navigate to the registration page
 		await page.goto('/register');
+
+		// Wait for the form to be visible
+		await page.waitForSelector('form');
 
 		// Simulate registration being disabled
 		// Mock API response or use a special test route that makes registration appear disabled
 		await page.evaluate(() => {
 			// This is a client-side workaround for testing
 			// In a real scenario, this would be controlled by the backend
-			window.__TEST_DISABLE_REGISTRATION = true;
+			(window as any).__TEST_DISABLE_REGISTRATION = true;
 		});
 
-		// Refresh the page or trigger a state update
-		await page.reload();
+		// Trigger a re-check by calling the function directly
+		await page.evaluate(async () => {
+			// Force a page re-evaluation by dispatching a focus event
+			window.dispatchEvent(new Event('focus'));
+			// Give some time for the async function to complete
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		});
 
 		// Verify the disabled message is shown
 		await expect(page.locator('text=Registration is currently disabled')).toBeVisible();

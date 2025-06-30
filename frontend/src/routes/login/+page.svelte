@@ -9,17 +9,19 @@
 	let error: string | null = null;
 
 	// Handle login
-	async function handleLogin(event: CustomEvent<{ email: string; password: string; rememberMe: boolean }>) {
+	async function handleLogin(
+		event: CustomEvent<{ email: string; password: string; rememberMe: boolean }>
+	) {
 		const { email, password, rememberMe } = event.detail;
 		loading = true;
 		error = null;
 
 		try {
 			const response = await authApi.login({ email, password, rememberMe });
-			
+
 			// Store the token and user data
 			authStore.setAuth(response.user, response.token);
-			
+
 			// Redirect to dashboard or home page
 			goto('/');
 		} catch (err) {
@@ -35,14 +37,10 @@
 	<meta name="description" content="Sign in to your account" />
 </svelte:head>
 
-<div class="min-h-screen bg-base-200 flex items-center justify-center">
-	<div class="card w-full max-w-md shadow-xl bg-base-100">
+<div class="bg-base-200 flex min-h-screen items-center justify-center">
+	<div class="card bg-base-100 w-full max-w-md shadow-xl">
 		<div class="card-body">
-			<LoginForm 
-				{loading} 
-				{error} 
-				on:login={handleLogin} 
-			/>
+			<LoginForm {loading} {error} on:login={handleLogin} />
 		</div>
 	</div>
 </div>

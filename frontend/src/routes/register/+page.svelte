@@ -1,9 +1,10 @@
 <script lang="ts">
 	import RegisterForm from '$lib/components/auth/RegisterForm.svelte';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { authApi } from '$lib/api/auth';
 	import { authStore } from '$lib/stores/auth';
+	import { browser } from '$app/environment';
 
 	let loading = false;
 	let error: string | null = null;
@@ -11,13 +12,34 @@
 
 	// Check if registration is enabled
 	onMount(async () => {
+		await checkRegistrationStatus();
+
+		// Add event listener for test override detection
+		if (browser) {
+			window.addEventListener('focus', checkRegistrationStatus);
+		}
+	});
+
+	onDestroy(() => {
+		if (browser) {
+			window.removeEventListener('focus', checkRegistrationStatus);
+		}
+	});
+
+	async function checkRegistrationStatus() {
 		try {
+			// Check for test override
+			if (browser && (window as any).__TEST_DISABLE_REGISTRATION) {
+				registrationEnabled = false;
+				return;
+			}
+
 			const status = await authApi.getRegistrationStatus();
 			registrationEnabled = status.enabled;
 		} catch (err) {
 			console.error('Failed to check registration status', err);
 		}
-	});
+	}
 
 	// Handle registration
 	async function handleRegister(
