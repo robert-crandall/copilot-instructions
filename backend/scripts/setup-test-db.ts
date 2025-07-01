@@ -1,5 +1,4 @@
 import { env } from '../src/env';
-import { spawnSync } from 'bun';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
@@ -68,51 +67,55 @@ async function checkDatabaseConnection() {
     console.log('✅ Database is already online');
     return true;
   } catch (err) {
-    console.log('❌ Database not accessible:', err.message);
+    console.log('❌ Database not accessible:', (err as Error).message);
     return false;
   }
 }
 
-async function startDatabaseIfNeeded() {
+async function createDatabaseIfNeeded() {
+  // Parse the DATABASE_URL to get connection details
+  const dbUrl = new URL(env.DATABASE_URL);
+  const dbName = dbUrl.pathname.slice(1); // Remove leading '/'
+  
+  // Create connection to postgres database (not the target database)
+  const postgresUrl = new URL(env.DATABASE_URL);
+  postgresUrl.pathname = '/postgres';
+  
+  const adminPool = new Pool({ connectionString: postgresUrl.toString() });
+  
+  try {
+    // Check if target database exists
+    const result = await adminPool.query(
+      'SELECT 1 FROM pg_database WHERE datname = $1',
+      [dbName]
+    );
+    
+    if (result.rows.length === 0) {
+      console.log(`🗃️ Creating database '${dbName}'...`);
+      await adminPool.query(`CREATE DATABASE "${dbName}"`);
+      console.log('✅ Database created successfully');
+    } else {
+      console.log(`🔄 Database '${dbName}' already exists`);
+    }
+  } catch (err) {
+    console.error('❌ Error creating database:', (err as Error).message);
+    throw err;
+  } finally {
+    await adminPool.end();
+  }
+  
+  // Now verify we can connect to the target database
   const isOnline = await checkDatabaseConnection();
-  
-  if (isOnline) {
-    console.log('🔄 Using existing database connection');
-    return;
-  }
-  
-  console.log('🐳 Starting test database container with docker-compose...');
-  const dc = spawnSync([
-    'docker-compose',
-    '-f',
-    path.resolve(__dirname, '../../docker-compose.yml'),
-    'up',
-    '-d',
-    'test-db', // Only start the test-db service
-  ]);
-  
-  if (dc.exitCode !== 0) {
-    const errorOutput = dc.stderr ? String(dc.stderr) : 'Unknown error';
-    console.error('❌ docker-compose up failed:', errorOutput);
-    process.exit(1);
-  }
-  
-  // Wait a moment for the database to start up
-  console.log('⏳ Waiting for database to be ready...');
-  await new Promise(resolve => setTimeout(resolve, 3000));
-  
-  // Verify the database is now accessible
-  const isNowOnline = await checkDatabaseConnection();
-  if (!isNowOnline) {
-    console.error('❌ Database still not accessible after starting container');
+  if (!isOnline) {
+    console.error('❌ Cannot connect to target database after creation');
     process.exit(1);
   }
 }
 
 async function main() {
   try {
-    // Check if database is online, start if needed
-    await startDatabaseIfNeeded();
+    // Create database if needed (assumes PostgreSQL server is running)
+    await createDatabaseIfNeeded();
     console.log('Cleaning test database...');
     await cleanDatabase();
     console.log('Applying migrations...');
