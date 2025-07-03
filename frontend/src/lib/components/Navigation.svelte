@@ -1,37 +1,43 @@
 <script lang="ts">
-import { authStore, type User } from '$lib/stores/auth';
-import { goto } from '$app/navigation';
-import { onMount } from 'svelte';
+	import { authStore, type User } from '$lib/stores/auth';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
-let user: User | null = null;
-let token: string | null = null;
-let menuOpen = false;
+	let user: User | null = null;
+	let token: string | null = null;
+	let menuOpen = false;
 
-// Close menu on outside click
-function handleClickOutside(event: MouseEvent) {
-	const menu = document.getElementById('nav-menu');
-	const button = document.getElementById('nav-menu-btn');
-	if (menuOpen && menu && !menu.contains(event.target as Node) && button && !button.contains(event.target as Node)) {
-		menuOpen = false;
+	// Close menu on outside click
+	function handleClickOutside(event: MouseEvent) {
+		const menu = document.getElementById('nav-menu');
+		const button = document.getElementById('nav-menu-btn');
+		if (
+			menuOpen &&
+			menu &&
+			!menu.contains(event.target as Node) &&
+			button &&
+			!button.contains(event.target as Node)
+		) {
+			menuOpen = false;
+		}
 	}
-}
 
-onMount(() => {
-	document.addEventListener('mousedown', handleClickOutside);
-	return () => document.removeEventListener('mousedown', handleClickOutside);
-});
+	onMount(() => {
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	});
 
-// Subscribe to auth store
-authStore.subscribe((state) => {
-	user = state.user;
-	token = state.token;
-});
+	// Subscribe to auth store
+	authStore.subscribe((state) => {
+		user = state.user;
+		token = state.token;
+	});
 
-// Handle logout
-function handleLogout() {
-	authStore.clearAuth();
-	goto('/');
-}
+	// Handle logout
+	function handleLogout() {
+		authStore.clearAuth();
+		goto('/');
+	}
 </script>
 
 <header
@@ -56,7 +62,7 @@ function handleLogout() {
 			<!-- Hamburger menu button -->
 			<button
 				id="nav-menu-btn"
-				class="ml-2 flex h-10 w-10 items-center justify-center rounded-full border border-base-200 bg-base-100 text-base-content hover:bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary"
+				class="border-base-200 bg-base-100 text-base-content hover:bg-base-200 focus:ring-primary ml-2 flex h-10 w-10 items-center justify-center rounded-full border focus:ring-2 focus:outline-none"
 				aria-label={menuOpen ? 'Close menu' : 'Open menu'}
 				aria-expanded={menuOpen}
 				aria-controls="nav-menu"
@@ -64,10 +70,37 @@ function handleLogout() {
 			>
 				{#if !menuOpen}
 					<!-- Lucide Menu Icon -->
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="lucide lucide-menu"
+						><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line
+							x1="4"
+							y1="18"
+							x2="20"
+							y2="18"
+						/></svg
+					>
 				{:else}
 					<!-- Lucide X Icon -->
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="lucide lucide-x"
+						><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg
+					>
 				{/if}
 			</button>
 
@@ -75,7 +108,7 @@ function handleLogout() {
 			{#if menuOpen}
 				<ul
 					id="nav-menu"
-					class="absolute right-6 top-16 z-40 w-64 rounded-xl border border-base-200 bg-base-100 py-2 shadow-lg animate-in fade-in slide-in-from-top-2"
+					class="border-base-200 bg-base-100 animate-in fade-in slide-in-from-top-2 absolute top-16 right-6 z-40 w-64 rounded-xl border py-2 shadow-lg"
 					tabindex="-1"
 					aria-label="User menu"
 				>
@@ -88,7 +121,20 @@ function handleLogout() {
 							on:click={handleLogout}
 						>
 							<!-- Lucide LogOut Icon -->
-							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out text-base-content/70 group-hover/item:text-red-500"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="20"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								class="lucide lucide-log-out text-base-content/70 group-hover/item:text-red-500"
+								><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline
+									points="16 17 21 12 16 7"
+								/><line x1="21" y1="12" x2="9" y2="12" /></svg
+							>
 							Sign out
 						</button>
 					</li>
