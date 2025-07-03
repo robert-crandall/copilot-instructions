@@ -19,7 +19,6 @@
 </svelte:head>
 
 <div class="from-base-100 to-base-200/30 flex min-h-screen flex-col bg-gradient-to-br">
-
 	<!-- Main content -->
 	<main class="flex flex-1 flex-col items-center justify-center px-6 py-20">
 		{#if user}

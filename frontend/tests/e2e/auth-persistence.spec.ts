@@ -11,26 +11,26 @@ test.describe('Authentication Persistence', () => {
 		const email = `persistence-${Date.now()}@example.com`;
 		const password = 'password123';
 		const name = 'Persistence Test';
-		
+
 		// Step 1: Register a new user
 		await page.goto('/register');
 		await page.waitForSelector('form', { timeout: TEST_CONFIG.TIMEOUTS.PAGE_LOAD });
-		
+
 		await page.fill('#name', name);
 		await page.fill('#email', email);
 		await page.fill('#password', password);
-		
+
 		await page.click('button[type="submit"]');
 		await page.waitForURL('/', { timeout: TEST_CONFIG.TIMEOUTS.LOGIN });
-		
-		// Verify successful login after registration
-		await expect(page.locator('text=You\'re successfully logged in to your account.')).toBeVisible();
-		
-    // Go to a different page and back
-    await page.goto('about:blank');
-    await page.goto('/');
 
-    // Verify still logged in
-		await expect(page.locator('text=You\'re successfully logged in to your account.')).toBeVisible();
+		// Verify successful login after registration
+		await expect(page.locator("text=You're successfully logged in to your account.")).toBeVisible();
+
+		// Go to a different page and back
+		await page.goto('about:blank');
+		await page.goto('/');
+
+		// Verify still logged in
+		await expect(page.locator("text=You're successfully logged in to your account.")).toBeVisible();
 	});
 });
