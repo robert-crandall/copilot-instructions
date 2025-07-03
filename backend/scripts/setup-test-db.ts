@@ -5,9 +5,12 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import fs from 'fs';
 import path from 'path';
 
-// 1. Load env vars
-env.NODE_ENV = 'test';
-process.env.NODE_ENV = 'test'; // Ensure NODE_ENV is set to 'test' for migrations
+// Check for force flag in command line arguments
+const forceRun = process.argv.includes('--force');
+
+if (process.env.NODE_ENV !== 'test' && !forceRun) {
+  throw new Error('This script must be run in a test environment or with --force flag');
+}
 
 // 2. Connect to DB
 const pool = new Pool({ connectionString: env.DATABASE_URL });

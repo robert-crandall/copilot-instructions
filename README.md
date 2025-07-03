@@ -8,29 +8,31 @@ All documentation for the technology stack is in `.github/instructions/*`, with 
 
 - `.github/copilot-instructions.md`: Main instructions file that applies globally.
 - `.github/instructions/`: Folder for specific technology or task instructions.
-- `.github/prompts/`: Folder for reusable prompt templates.
 - `.github/references/`: Folder for comprehensive documentation references that support the instruction files.
 
 ## How to Use
 
-### Option 1: Direct Reference
+Copilot does best in an opinionated environment. This repo is an example of an opinionated application.
 
-You can reference these instruction files directly in your projects without copying them:
+You can setup the database from this app by using `bun run backend/scripts/setup-test-db.ts --force`
 
-1. Set up your project's GitHub Copilot settings to use instruction files:
-   ```json
-   {
-     "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-     "github.copilot.chat.codeGeneration.instructions": [
-       {
-         "file": "https://raw.githubusercontent.com/YOUR_USERNAME/copilot-instructions/main/.github/copilot-instructions.md"
-       },
-       {
-         "file": "https://raw.githubusercontent.com/YOUR_USERNAME/copilot-instructions/main/.github/instructions/sveltekit.instructions.md"
-       }
-     ]
-   }
-   ```
+### Including Instructions
+
+Copilot will read `instructions` file that match files, based on the `applyTo` section of the file.
+
+To attach files manually, add this into your `settings.json`
+
+```json
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "file": "copilot/knowledge-base.md"
+    },
+    {
+      "text": "When answering questions about frameworks, libraries, or APIs, use Context7 to retrieve current documentation rather than relying on training data.",
+    }
+  ],
+```
 
 ### Option 2: Copy to Your Project
 
@@ -45,25 +47,15 @@ Alternatively, you can copy the relevant files to your project:
 - **General**: Base coding standards for JS/TS projects
 - **SvelteKit**: Best practices for SvelteKit development
 - **TailwindCSS**: Guidelines for using Tailwind CSS (including v4)
-- **daisyUI**: Component-based design patterns with daisyUI 5
 - **Testing**: Minimal unit testing approach with E2E focus
-- **Drizzle ORM**: Best practices for database operations with Drizzle
 
 ## Reference Documentation
+
+**Note**: After setting up Context7 MCP, I haven't needed these files as much.
 
 The `.github/references/` directory contains comprehensive documentation that supports the instruction files:
 
 - **tailwindcss-llms.md**: Complete Tailwind CSS utility documentation and examples
 - **tailwindcss4-llms.md**: Tailwind CSS v4 specific features and migration guide
-- **daiyui-llms.md**: Complete daisyUI 5 component documentation and usage patterns
 
 These reference files provide detailed context that Copilot can use when the instruction files reference them, ensuring more accurate and comprehensive code generation.
-
-## Contributing
-
-Feel free to add new instruction files or update existing ones. Follow these guidelines:
-
-1. Keep instructions concise and focused.
-2. Use the front matter with `applyTo` patterns to target specific file types.
-3. Provide code examples where helpful.
-4. Organize instructions by technology or concern.
