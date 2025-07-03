@@ -37,7 +37,7 @@
 </script>
 
 <div class="min-h-screen">
-	<div class="container mx-auto p-4">
+	<main class="container mx-auto p-4">
 		<div class="hero">
 			<div class="hero-content text-center">
 				<div class="max-w-md">
@@ -205,5 +205,5 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</main>
 </div>

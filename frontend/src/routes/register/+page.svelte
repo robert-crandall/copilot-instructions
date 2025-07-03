@@ -72,7 +72,7 @@
 	<title>Register | Auth Template</title>
 </svelte:head>
 
-<div class="hero min-h-screen">
+<main class="hero min-h-screen">
 	<div class="hero-content flex-col lg:flex-row-reverse">
 		<div class="card w-full max-w-md bg-base-100 shadow-xl">
 			<div class="card-body">
@@ -87,4 +87,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</main>
