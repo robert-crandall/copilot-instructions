@@ -4,20 +4,27 @@
 # Stage 1: Install backend dependencies (reused across stages)
 FROM oven/bun:1-alpine AS backend-deps
 
-WORKDIR /app/backend
+WORKDIR /app
 
-# Copy backend package files and install dependencies
-COPY backend/package.json backend/bun.lock* ./
-RUN bun install
+# Copy workspace configuration and lock file
+COPY package.json bun.lock* ./
+COPY backend/package.json ./backend/
+
+# Install backend dependencies
+WORKDIR /app/backend
+RUN bun install --frozen-lockfile
 
 # Stage 2: Prepare backend types for frontend
 FROM oven/bun:1-alpine AS backend-types
 
 WORKDIR /app
 
+# Copy workspace configuration and lock file
+COPY package.json bun.lock* ./
+
 # Copy backend dependencies from previous stage
 COPY --from=backend-deps /app/backend/node_modules ./backend/node_modules
-COPY backend/package.json backend/bun.lock* ./backend/
+COPY backend/package.json ./backend/
 
 # Copy backend source code (needed for type exports)
 COPY backend/ ./backend/
@@ -27,13 +34,16 @@ FROM oven/bun:1-alpine AS frontend-builder
 
 WORKDIR /app
 
+# Copy workspace configuration and lock file
+COPY package.json bun.lock* ./
+
 # Copy backend types/models that frontend needs
 COPY --from=backend-types /app/backend ./backend
 
 # Setup frontend
-COPY frontend/package.json frontend/bun.lock* ./frontend/
+COPY frontend/package.json ./frontend/
 WORKDIR /app/frontend
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Copy frontend source code
 COPY frontend/ ./
@@ -53,9 +63,12 @@ RUN apk add --no-cache \
 # Create app directory
 WORKDIR /app
 
+# Copy workspace configuration and lock file
+COPY package.json bun.lock* ./
+
 # Copy backend dependencies from the dedicated deps stage
 COPY --from=backend-deps /app/backend/node_modules ./backend/node_modules
-COPY backend/package.json backend/bun.lock* ./backend/
+COPY backend/package.json ./backend/
 
 # Copy backend source code
 COPY backend/ ./backend/
