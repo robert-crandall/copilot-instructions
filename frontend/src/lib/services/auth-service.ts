@@ -3,7 +3,7 @@ import { api } from '../api';
 
 // Interface for the JWT payload
 interface JWTPayload {
-  id: string;
+  userId: string;
   email: string;
   name: string;
   exp: number;
@@ -65,7 +65,7 @@ export function initializeAuth(): Promise<void> {
     
     // Reconstruct user object from token payload
     const user: User = {
-      id: payload.id,
+      userId: payload.userId,
       name: payload.name,
       email: payload.email,
       createdAt: new Date(payload.iat * 1000).toISOString() // Convert iat to ISO string

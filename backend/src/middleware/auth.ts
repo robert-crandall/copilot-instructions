@@ -34,7 +34,7 @@ export const jwtAuth = async (c: Context, next: Next) => {
       const payload = await verify(token, JWT_SECRET) as any
       
       // Validate required fields - support both id and userId fields for compatibility
-      const userId = payload.id || payload.userId;
+      const userId = payload.userId;
       if (!userId || !payload.email) {
         throw new HTTPException(401, { message: 'Invalid token payload' })
       }

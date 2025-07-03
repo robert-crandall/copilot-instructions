@@ -51,8 +51,7 @@ const app = new Hono()
       // Generate JWT token - include both id and userId for compatibility
       const token = await sign(
         { 
-          id: newUser.id,
-          userId: newUser.id, // Add userId for middleware compatibility
+          userId: newUser.id,
           email: newUser.email,
           name: newUser.name,
           iat: Math.floor(Date.now() / 1000), // issued at
@@ -94,8 +93,7 @@ const app = new Hono()
       const expirationTime = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 24 hours
       const token = await sign(
         { 
-          id: user.id,
-          userId: user.id, // Add userId for middleware compatibility
+          userId: user.id,
           email: user.email,
           name: user.name,
           iat: Math.floor(Date.now() / 1000), // issued at
@@ -106,7 +104,7 @@ const app = new Hono()
 
       return c.json({ 
         user: {
-          id: user.id,
+          userId: user.id,
           name: user.name,
           email: user.email,
           createdAt: user.createdAt,
