@@ -25,22 +25,12 @@
 <!-- Route protection logic -->
 <ProtectedRoutes />
 
-<div class="flex min-h-screen flex-col antialiased">
+<div class="flex min-h-screen flex-col antialiased bg-base-200">
 	<Navigation />
 	{@render children()}
 </div>
 
 <style>
-	:global(body) {
-		background: linear-gradient(
-			to bottom right,
-			hsl(210 20% 98%),
-			hsl(210 20% 97%),
-			hsl(210 20% 95%)
-		);
-		min-height: 100vh;
-	}
-
 	:global(button, a) {
 		transition: all 0.2s ease;
 	}

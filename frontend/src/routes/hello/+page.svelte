@@ -36,8 +36,8 @@
 	}
 </script>
 
-<div class="bg-base-200">
-	<div class="container mx-auto p-4 min-h-screen">
+<div class="min-h-screen">
+	<div class="container mx-auto p-4">
 		<div class="hero">
 			<div class="hero-content text-center">
 				<div class="max-w-md">

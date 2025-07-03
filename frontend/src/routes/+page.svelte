@@ -18,9 +18,10 @@
 	<title>Home | Auth Template</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-base-100 to-base-200">
+<div class="min-h-screen">
 	<!-- Main content -->
-	<main class="flex flex-1 flex-col items-center justify-center px-6 py-20">
+	<main class="container mx-auto p-4">
+		<div class="flex flex-1 flex-col items-center justify-center py-20">
 		{#if user}
 			<!-- Logged-in View -->
 			<section class="flex w-full max-w-2xl flex-col items-center">
@@ -173,5 +174,6 @@
 				</div>
 			</section>
 		{/if}
+		</div>
 	</main>
 </div>
