@@ -42,10 +42,10 @@
 			<div class="hero-content text-center">
 				<div class="max-w-md">
 					<div class="badge badge-primary mb-4">Authenticated Page</div>
-					<h1 class="text-3xl font-bold mb-6">Hello World Example</h1>
+					<h1 class="mb-6 text-3xl font-bold">Hello World Example</h1>
 
 					{#if loading}
-						<div class="card bg-base-100 shadow-xl mb-6">
+						<div class="card bg-base-100 mb-6 shadow-xl">
 							<div class="card-body items-center">
 								<span class="loading loading-spinner loading-lg text-primary"></span>
 								<p>Loading...</p>
@@ -55,7 +55,7 @@
 						<div class="alert alert-error mb-6">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
-								class="stroke-current shrink-0 h-6 w-6"
+								class="h-6 w-6 shrink-0 stroke-current"
 								fill="none"
 								viewBox="0 0 24 24"
 							>
@@ -69,11 +69,11 @@
 							<span>Error: {error}</span>
 						</div>
 					{:else}
-						<div class="card bg-base-100 shadow-xl mb-6">
+						<div class="card bg-base-100 mb-6 shadow-xl">
 							<div class="card-body">
 								<h2 class="card-title justify-center text-xl">{message}</h2>
-								
-								<div class="stats stats-vertical lg:stats-horizontal shadow mt-4">
+
+								<div class="stats stats-vertical lg:stats-horizontal mt-4 shadow">
 									<div class="stat">
 										<div class="stat-title">User ID</div>
 										<div class="stat-value text-lg">{id}</div>
@@ -89,7 +89,7 @@
 										xmlns="http://www.w3.org/2000/svg"
 										fill="none"
 										viewBox="0 0 24 24"
-										class="stroke-current shrink-0 w-6 h-6"
+										class="h-6 w-6 shrink-0 stroke-current"
 									>
 										<path
 											stroke-linecap="round"
@@ -98,7 +98,10 @@
 											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 										/>
 									</svg>
-									<span>This page is protected by JWT authentication. You can only see this content if you're logged in.</span>
+									<span
+										>This page is protected by JWT authentication. You can only see this content if
+										you're logged in.</span
+									>
 								</div>
 							</div>
 						</div>
@@ -106,9 +109,19 @@
 
 					<div class="card-actions justify-center">
 						<a href="/" class="btn btn-outline">
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<path d="m12 19-7-7 7-7"/>
-								<path d="M19 12H5"/>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="m12 19-7-7 7-7" />
+								<path d="M19 12H5" />
 							</svg>
 							Back to Home
 						</a>
@@ -119,8 +132,8 @@
 
 		<!-- DaisyUI Components Showcase -->
 		<div class="divider text-2xl font-bold">DaisyUI Components Showcase</div>
-		
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+		<div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 			<!-- Buttons Card -->
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">

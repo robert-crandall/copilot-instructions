@@ -8,10 +8,10 @@ test.describe('Navigation Menu', () => {
 		await page.fill('#email', TEST_CONFIG.USER.email);
 		await page.fill('#password', TEST_CONFIG.USER.password);
 		await page.click('button[type="submit"]');
-		
+
 		// Wait for successful login and redirect
 		await expect(page).toHaveURL('/');
-		
+
 		// Ensure we have a logged-in state
 		await expect(page.locator('text=Welcome back')).toBeVisible({ timeout: 10000 });
 	});
@@ -27,10 +27,10 @@ test.describe('Navigation Menu', () => {
 
 		// Click to open menu
 		await menuButton.click();
-		
+
 		// Menu should now be visible
 		await expect(menu).toBeVisible();
-		
+
 		// Verify menu content
 		await expect(menu.locator('text=Signed in as')).toBeVisible();
 		await expect(menu.locator(`text=${TEST_CONFIG.USER.email}`)).toBeVisible();
@@ -38,7 +38,7 @@ test.describe('Navigation Menu', () => {
 
 		// Click button again to close menu
 		await menuButton.click();
-		
+
 		// Menu should be hidden again
 		await expect(menu).not.toBeVisible();
 	});
@@ -53,7 +53,7 @@ test.describe('Navigation Menu', () => {
 
 		// For details/summary, clicking the button again closes it
 		await menuButton.click();
-		
+
 		// Menu should be closed
 		await expect(menu).not.toBeVisible();
 	});
@@ -68,7 +68,7 @@ test.describe('Navigation Menu', () => {
 
 		// Click logout
 		await menu.locator('text=Sign out').click();
-		
+
 		// Should redirect to home page and show unauthenticated state
 		await expect(page).toHaveURL('/');
 		await expect(page.locator('text=Modern Auth Template')).toBeVisible();
@@ -85,13 +85,13 @@ test.describe('Navigation Menu', () => {
 
 		// Click to open menu
 		await menuButton.click();
-		
+
 		// Should still show the svg icon
 		await expect(menuButton.locator('svg')).toBeVisible();
 
 		// Click to close menu
 		await menuButton.click();
-		
+
 		// Should still show the svg icon
 		await expect(menuButton.locator('svg')).toBeVisible();
 	});
@@ -104,7 +104,7 @@ test.describe('Navigation Menu', () => {
 		await menuButton.focus();
 		await expect(menuButton).toBeFocused();
 
-		// Press Enter to open menu  
+		// Press Enter to open menu
 		await page.keyboard.press('Enter');
 		await expect(menu).toBeVisible();
 
@@ -117,7 +117,7 @@ test.describe('Navigation Menu', () => {
 test.describe('Navigation Menu - Guest User', () => {
 	test('should not show menu button when not logged in', async ({ page }) => {
 		await page.goto('/');
-		
+
 		// Should not see menu button
 		const menuButton = page.locator('#nav-menu-btn');
 		await expect(menuButton).not.toBeVisible();

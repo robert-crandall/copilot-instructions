@@ -25,7 +25,7 @@
 <!-- Route protection logic -->
 <ProtectedRoutes />
 
-<div class="flex min-h-screen flex-col antialiased bg-base-200">
+<div class="bg-base-200 flex min-h-screen flex-col antialiased">
 	<Navigation />
 	{@render children()}
 </div>

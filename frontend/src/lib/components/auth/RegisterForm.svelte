@@ -78,8 +78,8 @@
 </script>
 
 <div class="w-full max-w-md">
-	<div class="text-center mb-6">
-		<h1 class="text-3xl font-bold mb-2">Create account</h1>
+	<div class="mb-6 text-center">
+		<h1 class="mb-2 text-3xl font-bold">Create account</h1>
 		<p class="text-base-content/70">Join today to get started</p>
 	</div>
 
@@ -95,7 +95,7 @@
 				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"
-				class="w-5 h-5"
+				class="h-5 w-5"
 			>
 				<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
 				<path d="M12 9v4"></path>
@@ -117,7 +117,7 @@
 				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"
-				class="w-5 h-5"
+				class="h-5 w-5"
 			>
 				<circle cx="12" cy="12" r="10" />
 				<line x1="12" x2="12" y1="8" y2="12" />

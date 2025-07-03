@@ -60,8 +60,8 @@
 </script>
 
 <div class="w-full max-w-md">
-	<div class="text-center mb-6">
-		<h1 class="text-3xl font-bold mb-2">Welcome back</h1>
+	<div class="mb-6 text-center">
+		<h1 class="mb-2 text-3xl font-bold">Welcome back</h1>
 		<p class="text-base-content/70">Sign in to continue to your account</p>
 	</div>
 
@@ -77,7 +77,7 @@
 				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"
-				class="w-5 h-5"
+				class="h-5 w-5"
 			>
 				<circle cx="12" cy="12" r="10" />
 				<line x1="12" x2="12" y1="8" y2="12" />
@@ -112,9 +112,7 @@
 		<div class="form-control">
 			<label class="label" for="password">
 				<span class="label-text">Password</span>
-				<button type="button" class="label-text-alt link link-primary">
-					Forgot password?
-				</button>
+				<button type="button" class="label-text-alt link link-primary"> Forgot password? </button>
 			</label>
 			<input
 				type="password"
@@ -147,11 +145,7 @@
 		</div>
 
 		<div class="form-control mt-6">
-			<button
-				type="submit"
-				class="btn btn-primary w-full"
-				disabled={loading}
-			>
+			<button type="submit" class="btn btn-primary w-full" disabled={loading}>
 				{#if loading}
 					<span class="loading loading-spinner loading-sm"></span>
 				{/if}
@@ -164,9 +158,7 @@
 		<div class="text-center">
 			<p class="text-base-content/70">
 				Don't have an account?
-				<a href="/register" class="link link-primary font-medium">
-					Create one now
-				</a>
+				<a href="/register" class="link link-primary font-medium"> Create one now </a>
 			</p>
 		</div>
 	</form>

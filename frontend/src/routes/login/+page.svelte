@@ -39,13 +39,11 @@
 
 <main class="hero min-h-screen">
 	<div class="hero-content flex-col lg:flex-row-reverse">
-		<div class="card w-full max-w-md bg-base-100 shadow-xl">
+		<div class="card bg-base-100 w-full max-w-md shadow-xl">
 			<div class="card-body">
 				<!-- Logo at the top -->
 				<div class="mb-4 text-center">
-					<a href="/" class="btn btn-ghost text-2xl font-bold text-gradient">
-						Auth Template
-					</a>
+					<a href="/" class="btn btn-ghost text-gradient text-2xl font-bold"> Auth Template </a>
 				</div>
 
 				<LoginForm {loading} {error} on:login={handleLogin} />
