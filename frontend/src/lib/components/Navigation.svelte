@@ -1,31 +1,10 @@
 <script lang="ts">
 	import { authStore, type User } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import ThemeSwitcher from './ThemeSwitcher.svelte';
 
 	let user: User | null = null;
 	let token: string | null = null;
-	let menuOpen = false;
-
-	// Close menu on outside click
-	function handleClickOutside(event: MouseEvent) {
-		const menu = document.getElementById('nav-menu');
-		const button = document.getElementById('nav-menu-btn');
-		if (
-			menuOpen &&
-			menu &&
-			!menu.contains(event.target as Node) &&
-			button &&
-			!button.contains(event.target as Node)
-		) {
-			menuOpen = false;
-		}
-	}
-
-	onMount(() => {
-		document.addEventListener('mousedown', handleClickOutside);
-		return () => document.removeEventListener('mousedown', handleClickOutside);
-	});
 
 	// Subscribe to auth store
 	authStore.subscribe((state) => {
@@ -41,115 +20,78 @@
 </script>
 
 <header
-	class="border-base-200/60 bg-base-100 bg-base-100/90 sticky top-0 z-30 flex items-center justify-between border-b px-6 py-3 shadow-sm backdrop-blur-sm"
+	class="navbar bg-base-100 border-b border-base-300 shadow-sm"
 >
-	<a
-		href="/"
-		class="text-base-content flex items-center gap-2 text-xl font-semibold hover:opacity-80"
-	>
-		<span class="bg-gradient-to-r from-blue-600 to-purple-500 bg-clip-text text-transparent"
-			>Auth Template</span
+	<div class="navbar-start">
+		<a
+			href="/"
+			class="btn btn-ghost text-xl font-semibold"
 		>
-	</a>
-	<nav class="flex items-center gap-4">
-		{#if user}
-			<a
-				href="/hello"
-				class="text-base-content px-4 py-2 font-medium transition hover:text-blue-600"
-				>Hello World</a
+			<span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+				>Auth Template</span
 			>
-
-			<!-- Hamburger menu button -->
-			<button
-				id="nav-menu-btn"
-				class="border-base-200 bg-base-100 text-base-content hover:bg-base-200 focus:ring-primary ml-2 flex h-10 w-10 items-center justify-center rounded-full border focus:ring-2 focus:outline-none"
-				aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-				aria-expanded={menuOpen}
-				aria-controls="nav-menu"
-				on:click={() => (menuOpen = !menuOpen)}
-			>
-				{#if !menuOpen}
-					<!-- Lucide Menu Icon -->
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="lucide lucide-menu"
-						><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line
-							x1="4"
-							y1="18"
-							x2="20"
-							y2="18"
-						/></svg
-					>
-				{:else}
-					<!-- Lucide X Icon -->
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="lucide lucide-x"
-						><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg
-					>
-				{/if}
-			</button>
-
-			<!-- Hamburger menu dropdown -->
-			{#if menuOpen}
-				<ul
-					id="nav-menu"
-					class="border-base-200 bg-base-100 animate-in fade-in slide-in-from-top-2 absolute top-16 right-6 z-40 w-64 rounded-xl border py-2 shadow-lg"
-					tabindex="-1"
-					aria-label="User menu"
+		</a>
+	</div>
+	
+	<div class="navbar-end">
+		<div class="flex items-center gap-2">
+			<!-- Theme Switcher -->
+			<ThemeSwitcher />
+			
+			{#if user}
+				<a
+					href="/hello"
+					class="btn btn-ghost"
+					>Hello World</a
 				>
-					<li class="text-base-content/60 border-base-200 mb-1 border-b px-3 py-2 text-xs">
-						Signed in as <span class="text-base-content font-semibold">{user.email}</span>
-					</li>
-					<li>
-						<button
-							class="hover:bg-base-200 text-base-content group/item flex w-full items-center gap-2 px-4 py-2 text-left"
-							on:click={handleLogout}
-						>
-							<!-- Lucide LogOut Icon -->
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="20"
-								height="20"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								class="lucide lucide-log-out text-base-content/70 group-hover/item:text-red-500"
-								><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline
-									points="16 17 21 12 16 7"
-								/><line x1="21" y1="12" x2="9" y2="12" /></svg
+
+				<!-- User Menu Dropdown -->
+				<div class="dropdown dropdown-end">
+					<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+						<div class="w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-sm">
+							{user.name[0].toUpperCase()}
+						</div>
+					</div>
+					<ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52" role="menu">
+						<li class="menu-title">
+							<span>Signed in as {user.email}</span>
+						</li>
+						<li>
+							<button
+								class="text-error"
+								on:click={handleLogout}
 							>
-							Sign out
-						</button>
-					</li>
-				</ul>
+								<!-- Lucide LogOut Icon -->
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="lucide lucide-log-out"
+									><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline
+										points="16 17 21 12 16 7"
+									/><line x1="21" y1="12" x2="9" y2="12" /></svg
+								>
+								Sign out
+							</button>
+						</li>
+					</ul>
+				</div>
+			{:else}
+				<a
+					href="/login"
+					class="btn btn-ghost">Login</a
+				>
+				<a
+					href="/register"
+					class="btn btn-primary"
+					>Register</a
+				>
 			{/if}
-		{:else}
-			<a
-				href="/login"
-				class="text-base-content px-4 py-2 font-medium transition hover:text-blue-600">Login</a
-			>
-			<a
-				href="/register"
-				class="rounded-full bg-gradient-to-br from-blue-500 to-purple-600 px-5 py-2 font-medium text-white shadow-sm transition-all hover:scale-105 hover:shadow active:scale-95"
-				>Register</a
-			>
-		{/if}
-	</nav>
+		</div>
+	</div>
 </header>
