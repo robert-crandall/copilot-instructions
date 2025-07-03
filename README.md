@@ -22,7 +22,9 @@ This template tries to address several Agentic coding weaknesses:
   - "Instructions" for creating a PRD, generating tasks, and process task list. TODO: move to prompts?
 3. Weak GPT4.1 mode. Addressed with:
   - Chat Mode for 4.1. Thanks to `burkeholland`! [source](https://gist.github.com/burkeholland/a232b706994aa2f4b2ddd3d97b11f9a7)
-
+4. Creates new terminals that conflict with each other (Copilot only?)
+  - See `scripts/start-dev.js`. This checks if the backend or frontend are already in use, and skips if they are. This should make Copilot behave better.
+  
 ## How to Use
 
 Copilot does best in an opinionated environment. This repo is an example of an opinionated application.
