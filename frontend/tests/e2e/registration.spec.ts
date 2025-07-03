@@ -22,8 +22,8 @@ test.describe('User Registration', () => {
 		// Wait for registration to complete and redirect to home page
 		await page.waitForURL('/');
 
-		// Verify success - check for user info or logout button
-		await expect(page.locator('[role="button"]:has-text("Test User")')).toBeVisible();
+		// Verify success - check for success message on the home page
+		await expect(page.locator('text=You\'re successfully logged in to your account.')).toBeVisible();
 	});
 
 	test('should display validation errors for invalid inputs', async ({ page }) => {
@@ -72,8 +72,15 @@ test.describe('User Registration', () => {
 		// Wait for registration to complete
 		await page.waitForURL('/');
 
-		// Sign out
-		await page.click('text=Log out');
+		// Sign out by clearing localStorage (more reliable than UI interactions)
+		await page.evaluate(() => {
+			localStorage.removeItem('token');
+			// Force page reload to apply the logout
+			window.location.href = '/';
+		});
+		
+		// Wait for the redirect to complete
+		await page.waitForURL('/');
 
 		// Try to register with the same email
 		await page.goto('/register');
