@@ -48,7 +48,7 @@ const app = new Hono()
           createdAt: users.createdAt,
         });
 
-      // Generate JWT token - include both id and userId for compatibility
+      // Generate JWT token
       const token = await sign(
         { 
           userId: newUser.id,
@@ -104,7 +104,7 @@ const app = new Hono()
 
       return c.json({ 
         user: {
-          userId: user.id,
+          id: user.id,
           name: user.name,
           email: user.email,
           createdAt: user.createdAt,

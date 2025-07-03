@@ -5,7 +5,7 @@ import { get } from 'svelte/store';
 // Type definition for the hello response
 export interface HelloResponse {
   message: string;
-  userId: string;
+  id: string;
   timestamp: string;
 }
 

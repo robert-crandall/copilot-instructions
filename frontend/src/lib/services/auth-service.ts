@@ -65,7 +65,7 @@ export function initializeAuth(): Promise<void> {
     
     // Reconstruct user object from token payload
     const user: User = {
-      userId: payload.userId,
+      id: payload.userId,
       name: payload.name,
       email: payload.email,
       createdAt: new Date(payload.iat * 1000).toISOString() // Convert iat to ISO string

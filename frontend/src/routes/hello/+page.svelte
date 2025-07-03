@@ -4,7 +4,7 @@
 
   // State variables
   let message = 'Loading...';
-  let userId = '';
+  let id = '';
   let timestamp = '';
   let loading = true;
   let error: string | null = null;
@@ -15,7 +15,7 @@
       loading = true;
       const response = await helloApi.getHello();
       message = response.message;
-      userId = response.userId;
+      id = response.id;
       timestamp = response.timestamp;
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'Failed to load hello message';
@@ -56,7 +56,7 @@
           <div class="text-lg font-medium">{message}</div>
           
           <div class="mt-4 text-sm text-gray-600">
-            <p class="mb-1"><span class="font-semibold">User ID:</span> {userId}</p>
+            <p class="mb-1"><span class="font-semibold">User ID:</span> {id}</p>
             <p><span class="font-semibold">Timestamp:</span> {formatDate(timestamp)}</p>
           </div>
         </div>

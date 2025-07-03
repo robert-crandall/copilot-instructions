@@ -14,7 +14,7 @@ const app = new Hono()
       
       return c.json({
         message: `Hello, ${jwtPayload.email}!`,
-        userId,
+        id: userId, // Send as id instead of userId
         timestamp: new Date().toISOString()
       });
     } catch (error) {

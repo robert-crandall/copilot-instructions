@@ -136,6 +136,29 @@ const response = await api.route.$get({
 - **JWT token field names**: When working with JWT tokens, ensure consistency between token creation and validation:
   - Use `userId` field in JWT tokens
 
+### User ID Field Naming Convention
+
+We follow a standardized approach for user identification fields across the system:
+
+- **Database schema**: Uses `id` as the primary key field
+- **JWT tokens**: Use `userId` field internally for compatibility
+- **Backend API responses**: Always return `id` field for consistency
+- **Frontend models**: Use `id` consistently
+
+When working with JWT payload, remember to map the field name:
+
+```typescript
+// Map userId from JWT payload to id in our User model
+const user: User = {
+  id: payload.userId || '', // JWT payload uses userId
+  name: payload.name,
+  email: payload.email,
+  // other fields...
+};
+```
+
+This standardization simplifies our codebase by using a single field name (`id`) throughout our API responses and frontend models.
+
 ### Database Design
 - UUID primary keys for all entities
 - Proper foreign key relationships
