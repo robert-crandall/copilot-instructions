@@ -48,10 +48,11 @@ const app = new Hono()
           createdAt: users.createdAt,
         });
 
-      // Generate JWT token
+      // Generate JWT token - include both id and userId for compatibility
       const token = await sign(
         { 
           id: newUser.id,
+          userId: newUser.id, // Add userId for middleware compatibility
           email: newUser.email,
           name: newUser.name,
           iat: Math.floor(Date.now() / 1000), // issued at
@@ -94,6 +95,7 @@ const app = new Hono()
       const token = await sign(
         { 
           id: user.id,
+          userId: user.id, // Add userId for middleware compatibility
           email: user.email,
           name: user.name,
           iat: Math.floor(Date.now() / 1000), // issued at

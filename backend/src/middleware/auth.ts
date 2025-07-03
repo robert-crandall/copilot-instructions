@@ -33,20 +33,21 @@ export const jwtAuth = async (c: Context, next: Next) => {
     try {
       const payload = await verify(token, JWT_SECRET) as any
       
-      // Validate required fields
-      if (!payload.userId || !payload.email) {
+      // Validate required fields - support both id and userId fields for compatibility
+      const userId = payload.id || payload.userId;
+      if (!userId || !payload.email) {
         throw new HTTPException(401, { message: 'Invalid token payload' })
       }
       
       const jwtPayload: JWTPayload = {
-        userId: payload.userId,
+        userId: userId,
         email: payload.email,
         exp: payload.exp
       }
       
       // Set user info in context for use in route handlers
       c.set('jwtPayload', jwtPayload)
-      c.set('userId', payload.userId)
+      c.set('userId', userId)
       
       await next()
     } catch (jwtError) {

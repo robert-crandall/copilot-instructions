@@ -19,17 +19,23 @@ export const helloApi = {
       throw new Error('Authentication required');
     }
     
-    const response = await api.api.hello.$get({
-      headers: {
-        Authorization: `Bearer ${token}`
+    try {
+      const response = await api.api.hello.$get({
+        header: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+  
+      if (!response.ok) {
+        console.error('Hello API error:', response.status, response.statusText);
+        const result = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error((result as any).error || `Error ${response.status}: ${response.statusText}`);
       }
-    });
-
-    if (!response.ok) {
-      const result = await response.json();
-      throw new Error((result as any).error || 'Failed to fetch hello message');
+  
+      return response.json();
+    } catch (error) {
+      console.error('Hello API request failed:', error);
+      throw error;
     }
-
-    return response.json();
   }
 };

@@ -44,8 +44,6 @@ The `handleApiError` utility:
 
 ### Testing Philosophy: NO MOCKS
 
-**Date Added: June 29, 2025**
-
 Tests should use real instances instead of mocks whenever possible:
 
 - **✅ DO**: Use real database connections with test databases
@@ -112,6 +110,31 @@ catch (error) {
 - RESTful endpoints where appropriate
 - Consistent response structure with `success`, `data`, `error` fields
 - Use HTTP status codes appropriately
+
+### Hono Client Usage
+
+The Hono client has a specific API that differs from standard fetch API:
+
+- **Use `header` (singular) not `headers` (plural)** when setting HTTP headers with the Hono client:
+
+```typescript
+// CORRECT: Use 'header' (singular) with Hono client
+const response = await api.route.$get({
+  header: {
+    Authorization: `Bearer ${token}`
+  }
+});
+
+// INCORRECT: Don't use 'headers' (plural) with Hono client
+const response = await api.route.$get({
+  headers: { // This won't work with Hono client
+    Authorization: `Bearer ${token}`
+  }
+});
+```
+
+- **JWT token field names**: When working with JWT tokens, ensure consistency between token creation and validation:
+  - Use `userId` field in JWT tokens
 
 ### Database Design
 - UUID primary keys for all entities
