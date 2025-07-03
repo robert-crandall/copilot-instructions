@@ -10,8 +10,8 @@ export async function loginUser(page: Page): Promise<void> {
 	await page.goto('/login');
 
 	// Fill out the login form with test credentials from config
-	await page.fill('input[name="email"]', TEST_CONFIG.USER.email);
-	await page.fill('input[name="password"]', TEST_CONFIG.USER.password);
+	await page.fill('input[id="email"]', TEST_CONFIG.USER.email);
+	await page.fill('input[id="password"]', TEST_CONFIG.USER.password);
 
 	// Submit the form
 	await page.click('button[type="submit"]');

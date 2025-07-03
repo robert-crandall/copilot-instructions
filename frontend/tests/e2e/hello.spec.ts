@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import { loginUser } from './test-helpers';
 
 test.describe('Hello World Page', () => {
-	// Test that the hello page redirects to login when not authenticated
 	test('redirects to login when not authenticated', async ({ page }) => {
 		// Navigate to the hello page
 		await page.goto('/hello');
