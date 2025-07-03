@@ -103,7 +103,7 @@
 				<label for="password" class="block text-sm font-medium">
 					Password
 				</label>
-				<a href="#" class="text-sm text-brand-600 hover:text-brand-500">Forgot password?</a>
+				<button type="button" class="text-sm text-brand-600 hover:text-brand-500">Forgot password?</button>
 			</div>
 			<input
 				type="password"
