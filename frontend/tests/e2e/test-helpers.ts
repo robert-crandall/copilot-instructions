@@ -6,19 +6,19 @@ import { TEST_CONFIG } from './test-config';
  * Helper function to login a test user
  */
 export async function loginUser(page: Page): Promise<void> {
-  // Go to login page
-  await page.goto('/login');
-  
-  // Fill out the login form with test credentials from config
-  await page.fill('input[name="email"]', TEST_CONFIG.USER.email);
-  await page.fill('input[name="password"]', TEST_CONFIG.USER.password);
-  
-  // Submit the form
-  await page.click('button[type="submit"]');
-  
-  // Wait for navigation to complete
-  await page.waitForURL('/');
-  
-  // Verify we're logged in
-  await expect(page.locator('text=Welcome back')).toBeVisible();
+	// Go to login page
+	await page.goto('/login');
+
+	// Fill out the login form with test credentials from config
+	await page.fill('input[name="email"]', TEST_CONFIG.USER.email);
+	await page.fill('input[name="password"]', TEST_CONFIG.USER.password);
+
+	// Submit the form
+	await page.click('button[type="submit"]');
+
+	// Wait for navigation to complete
+	await page.waitForURL('/');
+
+	// Verify we're logged in
+	await expect(page.locator('text=Welcome back')).toBeVisible();
 }

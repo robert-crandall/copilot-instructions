@@ -42,12 +42,16 @@
 		<!-- Logo at the top -->
 		<div class="mb-8 text-center">
 			<a href="/" class="inline-flex items-center gap-2 text-2xl font-bold">
-				<span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-500 to-secondary-500">Auth Template</span>
+				<span class="from-brand-500 to-secondary-500 bg-gradient-to-r bg-clip-text text-transparent"
+					>Auth Template</span
+				>
 			</a>
 		</div>
-		
+
 		<!-- Card with login form -->
-		<div class="bg-base-100 rounded-xl shadow-lg border border-base-200/60 backdrop-blur-sm overflow-hidden">
+		<div
+			class="bg-base-100 border-base-200/60 overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm"
+		>
 			<LoginForm {loading} {error} on:login={handleLogin} />
 		</div>
 	</div>

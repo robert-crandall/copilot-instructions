@@ -20,7 +20,7 @@
 	});
 </script>
 
-<div class="antialiased min-h-screen flex flex-col">
+<div class="flex min-h-screen flex-col antialiased">
 	{@render children()}
 </div>
 
