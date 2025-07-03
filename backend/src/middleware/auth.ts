@@ -6,8 +6,7 @@ import { HTTPException } from 'hono/http-exception'
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this'
 
 export interface JWTPayload {
-  id?: string    // New primary field
-  userId?: string // For backward compatibility
+  id: string
   email: string
   exp: number
 }
@@ -41,7 +40,7 @@ export const jwtAuth = async (c: Context, next: Next) => {
       }
       
       const jwtPayload: JWTPayload = {
-        userId: userId,
+        id: userId,
         email: payload.email,
         exp: payload.exp
       }
