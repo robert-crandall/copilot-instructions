@@ -46,7 +46,21 @@ export default {
 	},
 	plugins: [
 		require('@tailwindcss/typography'),
-		require('@tailwindcss/forms')
-		// Add other plugins here
-	]
+		require('@tailwindcss/forms'),
+		require('daisyui')
+	],
+	daisyui: {
+		themes: [
+			'light',
+			'dark', 
+			'dim'
+		],
+		darkTheme: 'dark',
+		base: true,
+		styled: true,
+		utils: true,
+		prefix: '',
+		logs: true,
+		themeRoot: ':root'
+	}
 };

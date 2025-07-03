@@ -84,71 +84,72 @@
 	</div>
 
 	{#if !registrationEnabled}
-		<div class="mb-6 rounded-lg border-l-4 border-amber-500 bg-amber-50 p-4">
-			<div class="flex items-start">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					class="mt-0.5 mr-3 text-amber-500"
-				>
-					<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
-					></path>
-					<path d="M12 9v4"></path>
-					<path d="M12 17h.01"></path>
-				</svg>
-				<span class="text-amber-700">Registration is currently disabled</span>
-			</div>
+		<div class="alert alert-warning mb-6">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="shrink-0"
+			>
+				<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
+				></path>
+				<path d="M12 9v4"></path>
+				<path d="M12 17h.01"></path>
+			</svg>
+			<span>Registration is currently disabled</span>
 		</div>
 	{/if}
 
 	{#if error}
-		<div class="mb-6 rounded-lg border-l-4 border-red-500 bg-red-50 p-4">
-			<div class="flex items-start">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					class="mt-0.5 mr-3 text-red-500"
-				>
-					<circle cx="12" cy="12" r="10" />
-					<line x1="12" x2="12" y1="8" y2="12" />
-					<line x1="12" x2="12.01" y1="16" y2="16" />
-				</svg>
-				<span class="text-red-700">{error}</span>
-			</div>
+		<div class="alert alert-error mb-6">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="shrink-0"
+			>
+				<circle cx="12" cy="12" r="10" />
+				<line x1="12" x2="12" y1="8" y2="12" />
+				<line x1="12" x2="12.01" y1="16" y2="16" />
+			</svg>
+			<span>{error}</span>
 		</div>
 	{/if}
 
 	<form on:submit|preventDefault={handleSubmit} class="space-y-6">
-		<div>
-			<label for="name" class="mb-2 block text-sm font-medium"> Full Name </label>
+		<div class="form-control">
+			<label class="label" for="name">
+				<span class="label-text">Full Name</span>
+			</label>
 			<input
 				type="text"
 				id="name"
 				bind:value={name}
 				on:blur={validateName}
 				placeholder="John Doe"
-				class="border-base-300 focus:ring-brand-500 focus:border-brand-500 w-full rounded-lg border px-4 py-3 focus:ring-2 focus:outline-none"
+				class="input input-bordered w-full"
+				class:input-error={nameError}
 				disabled={loading || !registrationEnabled}
 				min="1"
 				max="100"
 				autocomplete="name"
 			/>
 			{#if nameError}
-				<p class="mt-1.5 text-sm text-red-600">{nameError}</p>
+				<div class="label">
+					<span class="label-text-alt text-error">{nameError}</span>
+				</div>
 			{/if}
 		</div>
 
