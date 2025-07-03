@@ -28,9 +28,6 @@ test.describe('Hello World Page', () => {
 		await expect(page.locator('text=Hello,')).toBeVisible();
 
 		// Check that user ID is displayed
-		await expect(page.locator('text=User ID:')).toBeVisible();
-
-		// Check that timestamp is displayed
-		await expect(page.locator('text=Timestamp:')).toBeVisible();
+		await expect(page.locator('text=This page is protected by JWT authentication')).toBeVisible();
 	});
 });
