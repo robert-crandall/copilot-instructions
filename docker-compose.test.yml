@@ -5,8 +5,6 @@ services:
       POSTGRES_DB: example_app
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
-    ports:
-      - "5435:5432"
 
   example-app:
     build:
