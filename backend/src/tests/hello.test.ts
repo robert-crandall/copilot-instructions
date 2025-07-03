@@ -25,9 +25,9 @@ describe('Hello API', () => {
 
   // Test authenticated endpoint
   it('should return hello message for authenticated user', async () => {
-    // Make request with JWT token
+    // Make request with JWT token - note: Hono client uses 'header' (singular)
     const res = await client.api.hello.$get({
-      headers: {
+      header: {
         Authorization: `Bearer ${validToken}`
       }
     });
@@ -37,7 +37,7 @@ describe('Hello API', () => {
     const data = await res.json();
     
     expect(data).toHaveProperty('message');
-    expect(data).toHaveProperty('userId', testUser.userId);
+    expect(data).toHaveProperty('id', testUser.userId); // Now checking for 'id' instead of 'userId'
     expect(data).toHaveProperty('timestamp');
     expect(data.message).toContain(testUser.email);
   });
@@ -53,7 +53,7 @@ describe('Hello API', () => {
   it('should return 401 for invalid token', async () => {
     // Make request with invalid JWT token
     const res = await client.api.hello.$get({
-      headers: {
+      header: {
         Authorization: 'Bearer invalid.token.here'
       }
     });

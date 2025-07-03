@@ -3,7 +3,8 @@ import { api } from '../api';
 
 // Interface for the JWT payload
 interface JWTPayload {
-	userId: string;
+	id?: string; // Primary field for consistency
+	userId?: string; // For backward compatibility
 	email: string;
 	name: string;
 	exp: number;
@@ -65,7 +66,7 @@ export function initializeAuth(): Promise<void> {
 
 		// Reconstruct user object from token payload
 		const user: User = {
-			id: payload.userId,
+			id: payload.id || payload.userId || '', // Try id first, then fall back to userId
 			name: payload.name,
 			email: payload.email,
 			createdAt: new Date(payload.iat * 1000).toISOString() // Convert iat to ISO string

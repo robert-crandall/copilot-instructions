@@ -6,7 +6,8 @@ import { HTTPException } from 'hono/http-exception'
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this'
 
 export interface JWTPayload {
-  userId: string
+  id?: string    // New primary field
+  userId?: string // For backward compatibility
   email: string
   exp: number
 }
@@ -34,7 +35,7 @@ export const jwtAuth = async (c: Context, next: Next) => {
       const payload = await verify(token, JWT_SECRET) as any
       
       // Validate required fields - support both id and userId fields for compatibility
-      const userId = payload.userId;
+      const userId = payload.id || payload.userId;
       if (!userId || !payload.email) {
         throw new HTTPException(401, { message: 'Invalid token payload' })
       }
