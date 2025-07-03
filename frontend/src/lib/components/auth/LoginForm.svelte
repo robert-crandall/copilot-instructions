@@ -60,90 +60,102 @@
 </script>
 
 <div class="mx-auto w-full max-w-md p-4">
-	<h2 class="mb-6 text-center text-2xl font-bold">Sign In</h2>
+	<div class="text-center mb-8">
+		<h1 class="text-3xl font-bold mb-2">Welcome back</h1>
+		<p class="text-base-content/70">Sign in to continue to your account</p>
+	</div>
 
 	{#if error}
-		<div class="alert alert-error mb-4">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-6 w-6 shrink-0 stroke-current"
-				fill="none"
-				viewBox="0 0 24 24"
-				><path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-				/></svg
-			>
-			<span>{error}</span>
+		<div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
+			<div class="flex items-start">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500 mt-0.5 mr-3">
+					<circle cx="12" cy="12" r="10"/>
+					<line x1="12" x2="12" y1="8" y2="12"/>
+					<line x1="12" x2="12.01" y1="16" y2="16"/>
+				</svg>
+				<span class="text-red-700">{error}</span>
+			</div>
 		</div>
 	{/if}
 
-	<form on:submit|preventDefault={handleSubmit} class="space-y-4">
-		<div class="form-control">
-			<label for="email" class="label">
-				<span class="label-text">Email</span>
+	<form on:submit|preventDefault={handleSubmit} class="space-y-6">
+		<div>
+			<label for="email" class="block text-sm font-medium mb-2">
+				Email address
 			</label>
 			<input
 				type="email"
 				id="email"
 				bind:value={email}
 				on:blur={validateEmail}
-				placeholder="Enter your email address"
-				class="input input-bordered w-full"
+				placeholder="you@example.com"
+				class="w-full px-4 py-3 rounded-lg border border-base-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
 				disabled={loading}
+				autocomplete="email"
 			/>
 			{#if emailError}
-				<div class="label">
-					<span class="label-text-alt text-error">{emailError}</span>
-				</div>
+				<p class="mt-1.5 text-sm text-red-600">{emailError}</p>
 			{/if}
 		</div>
 
-		<div class="form-control">
-			<label for="password" class="label">
-				<span class="label-text">Password</span>
-			</label>
+		<div>
+			<div class="flex justify-between items-center mb-2">
+				<label for="password" class="block text-sm font-medium">
+					Password
+				</label>
+				<a href="#" class="text-sm text-brand-600 hover:text-brand-500">Forgot password?</a>
+			</div>
 			<input
 				type="password"
 				id="password"
 				bind:value={password}
 				on:blur={validatePassword}
-				placeholder="Enter your password"
-				class="input input-bordered w-full"
+				placeholder="••••••••"
+				class="w-full px-4 py-3 rounded-lg border border-base-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
 				disabled={loading}
+				autocomplete="current-password"
 			/>
 			{#if passwordError}
-				<div class="label">
-					<span class="label-text-alt text-error">{passwordError}</span>
-				</div>
+				<p class="mt-1.5 text-sm text-red-600">{passwordError}</p>
 			{/if}
 		</div>
 
-		<div class="form-control">
-			<label class="label cursor-pointer">
-				<span class="label-text">Remember me</span>
-				<input
-					type="checkbox"
-					bind:checked={rememberMe}
-					class="checkbox checkbox-primary"
-					disabled={loading}
-				/>
+		<div class="flex items-center">
+			<input
+				id="remember"
+				type="checkbox"
+				bind:checked={rememberMe}
+				class="h-4 w-4 rounded border-base-300 text-brand-600 focus:ring-brand-500"
+				disabled={loading}
+			/>
+			<label for="remember" class="ml-2 block text-sm">
+				Remember me for 30 days
 			</label>
 		</div>
 
-		<div class="form-control mt-6">
-			<button type="submit" class="btn btn-primary w-full" disabled={loading}>
+		<div>
+			<button 
+				type="submit" 
+				class="hover-lift w-full py-3 bg-gradient-to-br from-brand-500 to-brand-600 text-white font-medium rounded-lg shadow flex items-center justify-center" 
+				disabled={loading}
+			>
 				{#if loading}
-					<span class="loading loading-spinner loading-sm"></span>
+					<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					</svg>
 				{/if}
-				Sign In
+				Sign in
 			</button>
 		</div>
 
-		<div class="mt-4 text-center">
-			<p>Don't have an account? <a href="/register" class="link link-primary">Create one</a></p>
+		<div class="mt-6 text-center">
+			<p class="text-base-content/70">
+				Don't have an account?
+				<a href="/register" class="font-medium text-brand-600 hover:text-brand-500">
+					Create one now
+				</a>
+			</p>
 		</div>
 	</form>
 </div>

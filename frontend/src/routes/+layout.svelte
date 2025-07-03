@@ -21,4 +21,26 @@
 	});
 </script>
 
-{@render children()}
+<div class="antialiased min-h-screen flex flex-col">
+	{@render children()}
+</div>
+
+<style>
+	:global(body) {
+		background: linear-gradient(
+			to bottom right,
+			hsl(210 20% 98%),
+			hsl(210 20% 97%),
+			hsl(210 20% 95%)
+		);
+		min-height: 100vh;
+	}
+
+	:global(button, a) {
+		transition: all 0.2s ease;
+	}
+
+	:global(h1, h2, h3, h4, h5, h6) {
+		line-height: 1.2;
+	}
+</style>

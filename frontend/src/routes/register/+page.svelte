@@ -72,8 +72,18 @@
 	<title>Register | Auth Template</title>
 </svelte:head>
 
-<div class="flex min-h-screen items-center justify-center">
+<div class="flex min-h-screen items-center justify-center px-4 py-12">
 	<div class="w-full max-w-md">
-		<RegisterForm {loading} {error} {registrationEnabled} on:register={handleRegister} />
+		<!-- Logo at the top -->
+		<div class="mb-8 text-center">
+			<a href="/" class="inline-flex items-center gap-2 text-2xl font-bold">
+				<span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-500 to-secondary-500">Auth Template</span>
+			</a>
+		</div>
+		
+		<!-- Card with registration form -->
+		<div class="bg-base-100 rounded-xl shadow-lg border border-base-200/60 backdrop-blur-sm overflow-hidden">
+			<RegisterForm {loading} {error} {registrationEnabled} on:register={handleRegister} />
+		</div>
 	</div>
 </div>
