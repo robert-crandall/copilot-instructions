@@ -24,6 +24,9 @@
 	</a>
 	<nav class="flex items-center gap-4">
 		{#if user}
+			<!-- Main navigation links when authenticated -->
+			<a href="/hello" class="px-4 py-2 font-medium text-base-content hover:text-blue-600 transition">Hello World</a>
+			
 			<div class="relative group">
 				<button class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-base-200 transition text-base-content font-medium">
 					<span class="font-medium">{user.name}</span>
