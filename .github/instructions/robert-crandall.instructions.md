@@ -8,8 +8,6 @@ applyTo: "**/*"
 ## UI/Design Guidelines
 
 - Use a consistent color palette across the application.
-- Use daisyUI for color and theme management
-- Target a clean, modern aesthetic with a focus on usability. Examples of good design are Superlist, Linear, and GitHub.
 - Use Lucide Icons (https://lucide.dev) for all icon needs.
 - Never use emojis in production UI - they're inconsistent across platforms.
 - Choose semantic icon names that clearly represent their function.
