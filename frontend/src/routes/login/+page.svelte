@@ -37,9 +37,21 @@
 	<meta name="description" content="Sign in to your account" />
 </svelte:head>
 
-<div class="bg-base-200 flex min-h-screen items-center justify-center">
-	<div class="card bg-base-100 w-full max-w-md shadow-xl">
-		<div class="card-body">
+<div class="flex min-h-screen items-center justify-center px-4 py-12">
+	<div class="w-full max-w-md">
+		<!-- Logo at the top -->
+		<div class="mb-8 text-center">
+			<a href="/" class="inline-flex items-center gap-2 text-2xl font-bold">
+				<span class="from-brand-500 to-secondary-500 bg-gradient-to-r bg-clip-text text-transparent"
+					>Auth Template</span
+				>
+			</a>
+		</div>
+
+		<!-- Card with login form -->
+		<div
+			class="bg-base-100 border-base-200/60 overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm"
+		>
 			<LoginForm {loading} {error} on:login={handleLogin} />
 		</div>
 	</div>

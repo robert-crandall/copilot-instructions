@@ -3,22 +3,49 @@
 	import { onMount } from 'svelte';
 	import { authStore } from '$lib/stores/auth';
 	import { browser } from '$app/environment';
+	import { initializeAuth } from '$lib/services/auth-service';
+	import ProtectedRoutes from '$lib/components/ProtectedRoutes.svelte';
+	import Navigation from '$lib/components/Navigation.svelte';
 
 	let { children } = $props();
 
 	// Initialize auth store on mount
-	onMount(() => {
+	onMount(async () => {
 		if (browser) {
-			const token = localStorage.getItem('token');
-			if (token) {
-				// TODO: Validate token with backend and get user info
-				// For now, just mark as initialized
-				authStore.setInitialized(true);
-			} else {
+			try {
+				await initializeAuth();
+			} catch (error) {
+				console.error('Failed to initialize authentication:', error);
 				authStore.setInitialized(true);
 			}
 		}
 	});
 </script>
 
-{@render children()}
+<!-- Route protection logic -->
+<ProtectedRoutes />
+
+<div class="flex min-h-screen flex-col antialiased">
+	<Navigation />
+	{@render children()}
+</div>
+
+<style>
+	:global(body) {
+		background: linear-gradient(
+			to bottom right,
+			hsl(210 20% 98%),
+			hsl(210 20% 97%),
+			hsl(210 20% 95%)
+		);
+		min-height: 100vh;
+	}
+
+	:global(button, a) {
+		transition: all 0.2s ease;
+	}
+
+	:global(h1, h2, h3, h4, h5, h6) {
+		line-height: 1.2;
+	}
+</style>

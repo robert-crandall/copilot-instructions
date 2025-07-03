@@ -6,7 +6,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "test:setup": "bun run scripts/setup-test-db.ts",
-    "test": "bun run test:setup && bun test",
+    "test": "NODE_ENV=test bun run test:setup && bun test",
     "test:watch": "vitest",
     "test:only": "vitest run"
   },
