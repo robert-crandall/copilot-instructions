@@ -27,9 +27,8 @@ INTJ user - clean, efficient interfaces. Avoid flashy elements.
 - Never use emojis in production UI - they're inconsistent across platforms.
 - Choose semantic icon names that clearly represent their function.
 - Use consistent icon sizes throughout the application (typically 16px, 20px, 24px).
-- Use modals sparingly. These are good for quick actions. They are not good for complex forms or workflows.
+- Use modals only for confirmation dialogs or critical actions that require user attention.
 - Create new pages for edit or new actions instead of using modals or in-line editing.
-- Use confirmation dialogs for destructive actions only.
 - Cards should be linked to their detail view like mobile apps. Do not include a "view" link or button inside the card.
 
 ## Target Browsers

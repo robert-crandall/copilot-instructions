@@ -1,46 +1,51 @@
-# Copilot Instructions
+# Copilot Instructions for This Project
 
-## How We Work: The Core Philosophy
+You are assisting with the development of a solo-developer, full-stack TypeScript web app using the T3 stack:
 
-Our goal is to build robust, maintainable features with a consistent and predictable workflow. Follow these core principles above all else.
+- Next.js (App Router)
+- TypeScript
+- tRPC
+- Prisma (PostgreSQL)
+- Zod
+- Tailwind CSS, with DaisyUI for Material Design
 
-### 1. One Feature at a Time
+## Project Philosophy
 
-- We work on one and only one feature from start to finish.
-- Do not make changes unrelated to the current feature. This keeps our commits focused and our work testable.
+- Minimize code duplication between backend, frontend, and tests.
+- Prioritize developer speed and flow — this project will be largely co-developed with LLMs like Copilot or Cursor.
+- Use type-safe patterns. Zod schemas should be shared and reused across layers.
+- The UI uses Tailwind CSS with DaisyUI for Material Design components.
 
-### 2. The Feature Development Cycle
+## Testing Philosophy
 
-Every new feature **must** follow this specific, sequential order. Do not skip or reorder steps. Each step must be completed before starting the next.
+- Focus on **testing meaningful user flows**.
+- Only write tests for things a user would actually see or care about.
 
-- Features have multiple tasks. Read **all** feature tasks before starting any work.
-- Features are not complete until tests are written and pass. ALL tests must pass before merging.
+### ✅ Test These
 
-### 3. Document Key Decisions
+- Form submission and visible success/failure messages
+- Session-aware UI (e.g. login/logout behavior)
+- Theme toggle (dark/light/system) from the user's perspective
+- Completing a task and seeing XP granted
+- Creating a post and seeing it rendered on the homepage
+- Routing between authenticated views (e.g. protected routes)
 
-- To ensure consistency, we document important architectural patterns and decisions.
-- When you encounter a situation with multiple valid approaches, make a decision, and then **document it following [self-improve.instructions.md](./instructions/self-improve.instructions.md)**.
+### ❌ Do Not Test These
 
----
+- UI styling or layout details (e.g. spacing, color)
+- Third-party libraries (e.g. Material UI, NextAuth) — unless integrating custom logic
+- Database queries (assume Prisma works)
+- Internal helper functions (formatters, string functions, etc.)
+- Static type validation (assume Zod works)
 
-## Guiding Principles
+## Development Guidelines
 
-These are the fundamental rules that support our development process.
+- Use `tRPC` for all backend logic; avoid REST or GraphQL.
+- Always co-locate Zod schemas and use them for validation + type inference.
+- Keep code readable and practical — avoid abstractions unless they reduce duplication.
+- Prefer simple, self-contained components and pages.
+- Avoid overengineering. This is a personal project, not a product for scale.
 
-### Search First, Code Second
+## Tone
 
-- **DRY (Don't Repeat Yourself) is our most important code quality rule.**
-- **Before writing any code**, search the repository for existing implementations. Look for reusable components, utilities, and types.
-- Use semantic search for concepts (`"How is authentication handled?"`) and lexical search for specifics (`symbol:UserValidator`).
-
-### Single Source of Truth for Types
-
-- **NEVER duplicate types.** SvelteKit server modules are the single source of truth.
-- Client-side code **MUST** import all API and data types directly from server modules (`+page.server.ts`, `+layout.server.ts`, API routes).
-- This is critical for maintaining end-to-end type safety. If you have a type error, fix it by importing the correct type from the server side.
-
-### Rigorous, Layered Testing
-
-- **Testing is a required step for user features.** E2E tests are required for all user-facing features.
-- Our primary focus is on **integration tests** that use real database connections and make real HTTP requests.
-- Business logic should be imported into tests, **never copied or reimplemented**.
+You’re not building a startup MVP. You’re helping a solo dev build a vibe-coded productivity RPG. Optimize for clarity, simplicity, and developer momentum.
