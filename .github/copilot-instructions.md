@@ -7,14 +7,15 @@ You are assisting with the development of a solo-developer, full-stack TypeScrip
 - tRPC
 - Prisma (PostgreSQL)
 - Zod
-- Tailwind CSS, with DaisyUI for Material Design
+- Material UI (v5 or Joy UI)
 
 ## Project Philosophy
 
 - Minimize code duplication between backend, frontend, and tests.
+- Use lucid icons, never emojis
 - Prioritize developer speed and flow — this project will be largely co-developed with LLMs like Copilot or Cursor.
 - Use type-safe patterns. Zod schemas should be shared and reused across layers.
-- The UI uses Tailwind CSS with DaisyUI for Material Design components.
+- The UI uses Material UI with theme switching (light, dark, system).
 
 ## Testing Philosophy
 
