@@ -7,10 +7,10 @@ This document outlines the requirements for a streamlined authentication system 
 ## Goals
 
 1. Create a minimal but complete authentication system with registration and login capabilities
-2. Implement comprehensive end-to-end testing covering both backend and frontend
+2. Implement testing covering both backend and frontend
 3. Establish a reusable template that can serve as a foundation for future applications
-4. Demonstrate best practices for integration between Hono backend and SvelteKit frontend
-5. Provide a secure authentication implementation using JWT
+4. Demonstrate best practices for integration between Hono backend and React tRPC frontend
+5. Show a simple CRUD application by allowing the user to micro-blog. This should support creating, reading, updating, and deleting blog content.
 
 ## User Stories
 
@@ -18,6 +18,7 @@ This document outlines the requirements for a streamlined authentication system 
 2. **Login:** As a registered user, I want to log in to the application, so that I can access my account.
 3. **Remembered Login:** As a returning user, I want the option to stay logged in, so that I don't have to re-enter my credentials every time I visit the site.
 4. **Registration Restriction:** As a system administrator, I want to control when user registration is available, so that I can manage access to the application.
+5. **Microblog:** As a user, I want to post, update, read, and delete microblog content, so I can share my thoughts with the world.
 
 ## Functional Requirements
 
@@ -70,11 +71,11 @@ This document outlines the requirements for a streamlined authentication system 
 ## Design Considerations
 
 1. Follow mobile-first design approach as specified in the coding instructions.
+2. Use TailwindCSS for styling.
 2. Use daisyUI for component styling.
 3. Implement a clean, minimalist interface focusing on usability.
 4. Provide clear visual feedback for form validation errors.
 5. Ensure all UI elements meet minimum touch target size requirements (44px) for mobile devices.
-6. Follow existing color palette and design system as specified in robert-crandall.instructions.md.
 
 ## Technical Considerations
 
@@ -85,13 +86,12 @@ This document outlines the requirements for a streamlined authentication system 
    - Implement proper validation using Hono's built-in validators
 
 2. **Frontend:**
-   - Use SvelteKit configured for SPA deployment
+   - Use React with tRPC configured for SPA deployment
    - Configure for iOS Safari compatibility (iOS 16+)
    - Implement client-side form validation
    - Store JWT token securely (localStorage for "remember me", otherwise sessionStorage)
 
 3. **Testing:**
-   - Implement complete end-to-end testing as specified in hono.test.instructions.md and sveltekit.test.instructions.md
    - Test all user flows using real HTTP requests and browser interactions
    - Include both happy path and error case testing
    - Test both backend API endpoints and frontend interactions
