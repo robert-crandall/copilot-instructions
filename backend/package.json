@@ -3,25 +3,25 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "bun run src/db/migrate.ts",
+    "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "build": "bun build src/index.ts --outdir ./dist --target bun",
     "start": "bun run dist/index.js"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.7.2",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.0",
+    "drizzle-orm": "^0.44.3",
     "hono": "^4.8.5",
-    "@hono/zod-validator": "^0.5.1",
-    "drizzle-orm": "^0.42.0",
     "postgres": "^3.4.7",
-    "zod": "^3.24.1",
-    "bcryptjs": "^2.4.3",
-    "uuid": "^9.0.1",
-    "dotenv": "^16.4.5"
+    "uuid": "^11.1.0",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/uuid": "^9.0.8",
-    "drizzle-kit": "^0.30.0"
+    "@types/bun": "^1.2.19",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/uuid": "^10.0.0",
+    "drizzle-kit": "^0.31.4"
   }
 }
