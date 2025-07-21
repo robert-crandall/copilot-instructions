@@ -65,55 +65,38 @@ git clone <repository-url>
 cd microblog-template
 
 # Install dependencies for all packages
-cd backend && npm install  # or bun install
-cd ../frontend && npm install  # or bun install
-cd ../shared && npm install  # or bun install
+npm run install:all
 ```
 
 ### 2. Database Setup
 
 ```bash
-# Start PostgreSQL (example using Docker)
-docker run --name postgres-microblog -e POSTGRES_PASSWORD=password -e POSTGRES_DB=microblog -p 5432:5432 -d postgres:15
+# Quick setup (see DATABASE_SETUP.md for detailed instructions)
 
-# Or use your existing PostgreSQL installation
-createdb microblog
+# Copy and configure environment file
+cp backend/.env.example backend/.env
+# Edit backend/.env with your database credentials
+
+# Set up database with automated script
+npm run setup-db:force
+
+# For test environment
+cp backend/.env.example backend/.env.test
+# Edit backend/.env.test with test database credentials
+npm run setup-db:test
 ```
 
-### 3. Environment Configuration
+**📖 For detailed database setup instructions, see [DATABASE_SETUP.md](DATABASE_SETUP.md)**
+
+### 3. Start Development Servers
 
 ```bash
-# Copy example environment file
-cd backend
-cp .env.example .env
-
-# Edit .env with your database credentials
-DATABASE_URL=postgresql://username:password@localhost:5432/microblog
-JWT_SECRET=your-super-secret-jwt-key-here-make-it-long-and-random
-ALLOW_REGISTRATION=true
-NODE_ENV=development
-PORT=3001
-```
-
-### 4. Database Migration
-
-```bash
-# Generate and run migrations
-cd backend
-npm run db:generate
-npm run db:migrate
-```
-
-### 5. Start Development Servers
-
-```bash
-# Terminal 1: Start backend server
-cd backend
+# Start both backend and frontend
 npm run dev
 
-# Terminal 2: Start frontend server  
-cd frontend
-npm run dev
+# Or start individually:
+npm run dev:backend  # Backend at http://localhost:3001
+npm run dev:frontend # Frontend at http://localhost:5173
 ```
 
 The application will be available at:

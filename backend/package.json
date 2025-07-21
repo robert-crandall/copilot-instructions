@@ -6,7 +6,10 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "build": "bun build src/index.ts --outdir ./dist --target bun",
-    "start": "bun run dist/index.js"
+    "start": "bun run dist/index.js",
+    "test": "chmod +x test.sh && ./test.sh",
+    "test:watch": "bun test --watch",
+    "test:direct": "bun test"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.2",

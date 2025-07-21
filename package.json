@@ -1,0 +1,53 @@
+{
+  "name": "microblog-template",
+  "version": "1.0.0",
+  "description": "Full-stack microblogging app template with authentication",
+  "private": true,
+  "scripts": {
+    "install:all": "cd backend && bun install && cd ../frontend && bun install && cd ../shared && bun install && cd ../scripts && bun install",
+    "db:setup": "cd scripts && bun run setup-db.ts",
+    "db:setup:force": "bun run scripts/setup-db.ts --force",
+    "db:setup:reset": "bun run scripts/setup-db.ts --reset --force",
+    "db:setup:test": "NODE_ENV=test bun run scripts/setup-db.ts",
+    "db:setup:test-reset": "NODE_ENV=test bun run scripts/setup-db.ts --reset",
+    "dev:backend": "cd backend && bun run dev",
+    "dev:frontend": "cd frontend && bun run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:backend": "cd backend && bun run build",
+    "build:frontend": "cd frontend && bun run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "test:backend": "cd backend && bun run test",
+    "test": "npm run test:backend",
+    "db:generate": "cd backend && bun run db:generate",
+    "db:migrate": "cd backend && bun run db:migrate",
+    "db:studio": "cd backend && bun run db:studio"
+  },
+  "workspaces": [
+    "backend",
+    "frontend", 
+    "shared",
+    "scripts"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/microblog-template.git"
+  },
+  "keywords": [
+    "microblog",
+    "authentication",
+    "hono",
+    "react",
+    "typescript",
+    "postgresql",
+    "drizzle",
+    "tailwindcss"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
