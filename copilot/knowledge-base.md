@@ -96,10 +96,25 @@ catch (error) {
 }
 ```
 
-### Monorepo Structure
-- Backend and frontend in same repo for tight coupling
-- Frontend imports backend types directly
-- Shared utilities when beneficial
+### Monorepo Structure & Type Safety Philosophy
+
+**Why Direct Type Imports Are Correct for Hono Stacks**
+
+Our architecture intentionally uses direct type imports from backend to frontend. This is not a code smell or temporary solution - it's the **recommended and optimal pattern** for Hono Stacks:
+
+- **Backend and frontend in same repo for tight coupling**
+- **Frontend imports backend types directly**: `import type { AppType } from '../../backend/src/index'`
+- **Single source of truth**: Backend exports all API types, frontend imports them
+- **Shared utilities when beneficial**
+
+**Benefits of this approach:**
+- Automatic end-to-end type safety without manual schema definitions
+- No OpenAPI/JSON Schema duplication or synchronization issues
+- Compile-time validation of API contracts
+- Refactoring safety - type changes propagate automatically
+- Zero additional tooling or code generation needed
+
+This tight coupling is **intentional** and provides better developer experience than traditional REST API patterns.
 
 ### State Management
 - Use Svelte stores for global state
@@ -111,7 +126,197 @@ catch (error) {
 - Consistent response structure with `success`, `data`, `error` fields
 - Use HTTP status codes appropriately
 
-### Hono Client Usage
+### Hono RPC vs Traditional REST APIs
+
+**Why We Use Hono RPC Pattern Instead of OpenAPI/REST**
+
+Traditional REST APIs require maintaining separate type definitions:
+- Backend defines API endpoints and data models
+- Frontend creates separate TypeScript interfaces
+- OpenAPI schemas for documentation and validation
+- Manual synchronization between all three
+
+**Problems with traditional approach:**
+- Type definitions get out of sync
+- Runtime errors from mismatched interfaces  
+- Manual maintenance of multiple sources of truth
+- Complex code generation pipelines
+- Breaking changes aren't caught at compile time
+
+**Hono RPC eliminates these problems:**
+
+```typescript
+// Backend: Define once with Zod validation
+const createUserSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+});
+
+const routes = app
+  .post('/users', zValidator('json', createUserSchema), async (c) => {
+    const data = c.req.valid('json'); // Fully typed
+    return c.json({ success: true, user: newUser });
+  });
+
+export type AppType = typeof routes; // Single type export
+```
+
+```typescript
+// Frontend: Import and use with full type safety
+import type { AppType } from '../../../backend/src/index';
+import { hc } from 'hono/client';
+
+const api = hc<AppType>(baseUrl);
+
+// Fully typed - no manual interface definitions needed
+const response = await api.users.$post({
+  json: { name: 'John', email: 'john@example.com' }
+});
+const data = await response.json(); // Typed automatically
+```
+
+**Key advantages:**
+- **Single source of truth**: Types defined once in backend
+- **Automatic propagation**: Changes flow from backend to frontend
+- **Compile-time safety**: Mismatched types cause TypeScript errors
+- **No code generation**: Direct import of runtime types
+- **Refactoring safety**: Rename detection works across full stack
+- **Developer experience**: IntelliSense works perfectly
+
+**When to use this pattern:**
+- ✅ Monorepo with TypeScript frontend and backend
+- ✅ Rapid development with frequent API changes
+- ✅ Strong type safety requirements
+- ✅ Small to medium team with shared codebase ownership
+
+**When traditional REST might be better:**
+- ❌ Multi-language clients requiring OpenAPI
+- ❌ External API consumers needing documentation
+- ❌ Separate teams maintaining frontend and backend
+- ❌ Backend and frontend deployed independently with versioning
+
+### Complete End-to-End Example: Adding a New Endpoint
+
+Here's how to add a new feature from backend to frontend with full type safety:
+
+**Step 1: Define Backend Route with Validation**
+```typescript
+// backend/src/routes/posts.ts
+import { Hono } from 'hono';
+import { zValidator } from '@hono/zod-validator';
+import { z } from 'zod';
+
+const createPostSchema = z.object({
+  title: z.string().min(1).max(100),
+  content: z.string().min(1),
+  tags: z.array(z.string()).optional()
+});
+
+const app = new Hono()
+  .get('/', async (c) => {
+    // List posts
+    const posts = await db.select().from(posts);
+    return c.json({ success: true, data: posts });
+  })
+  .post('/', zValidator('json', createPostSchema), async (c) => {
+    // Create post with validation
+    const data = c.req.valid('json'); // Fully typed from Zod
+    const newPost = await db.insert(posts).values(data).returning();
+    return c.json({ success: true, data: newPost[0] });
+  })
+  .get('/:id', async (c) => {
+    const id = c.req.param('id'); // Type-safe parameter
+    const post = await db.select().from(posts).where(eq(posts.id, id));
+    if (!post.length) {
+      throw new HTTPException(404, { message: 'Post not found' });
+    }
+    return c.json({ success: true, data: post[0] });
+  });
+
+export default app;
+```
+
+**Step 2: Add to Main App for RPC Export**
+```typescript
+// backend/src/index.ts
+import postsRoutes from './routes/posts';
+
+const routes = app
+  .get('/api/health', (c) => c.json({ status: 'ok' }))
+  .route('/api/posts', postsRoutes) // Mount posts routes
+  .route('/api/users', usersRoutes);
+
+// Export for frontend - this includes ALL routes
+export type AppType = typeof routes;
+```
+
+**Step 3: Use in Frontend with Full Type Safety**
+```typescript
+// frontend/src/lib/posts.ts
+import { api } from './api'; // Typed client
+import type { AppType } from '../../../backend/src/index';
+
+// All operations are fully typed automatically
+export const postsService = {
+  async list() {
+    const response = await api.posts.$get();
+    return response.json(); // Type: { success: boolean, data: Post[] }
+  },
+
+  async create(post: { title: string; content: string; tags?: string[] }) {
+    const response = await api.posts.$post({
+      json: post // Type validated against Zod schema
+    });
+    return response.json(); // Type: { success: boolean, data: Post }
+  },
+
+  async getById(id: string) {
+    const response = await api.posts[':id'].$get({
+      param: { id } // Type-safe parameters
+    });
+    return response.json(); // Type: { success: boolean, data: Post }
+  }
+};
+```
+
+**Step 4: Use in Svelte Component**
+```svelte
+<!-- frontend/src/routes/posts/+page.svelte -->
+<script lang="ts">
+  import { postsService } from '$lib/posts';
+  import { onMount } from 'svelte';
+
+  let posts: Awaited<ReturnType<typeof postsService.list>>['data'] = [];
+  let newPost = { title: '', content: '' };
+
+  onMount(async () => {
+    const result = await postsService.list();
+    posts = result.data; // Fully typed
+  });
+
+  async function createPost() {
+    try {
+      const result = await postsService.create(newPost);
+      posts = [...posts, result.data]; // Type-safe
+      newPost = { title: '', content: '' };
+    } catch (error) {
+      console.error('Failed to create post:', error);
+    }
+  }
+</script>
+
+<!-- Your component markup here -->
+```
+
+**Key Benefits Demonstrated:**
+- ✅ **No manual type definitions** in frontend
+- ✅ **Zod validation** automatically typed in frontend
+- ✅ **Parameter typing** for dynamic routes  
+- ✅ **Response typing** from backend return types
+- ✅ **Compile-time errors** when APIs change
+- ✅ **IntelliSense support** throughout the stack
+
+### Hono Client Usage Details
 
 The Hono client has a specific API that differs from standard fetch API:
 
