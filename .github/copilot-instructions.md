@@ -41,6 +41,14 @@ These are the fundamental rules that support our development process.
 - The frontend **MUST** import all API and data types directly from the backend project.
 - This is critical for maintaining end-to-end type safety. If you have a type error, fix it by importing the correct type.
 
+### Hono RPC Pattern Guidelines
+- **Always export route handlers as `AppType`**: `export type AppType = typeof routes;`
+- **Use Zod for all input validation**: Import `zValidator` and define schemas for all endpoints
+- **Import `AppType` in frontend**: `import type { AppType } from '../../../backend/src/index';`
+- **Follow the complete pattern**: Define → Validate → Export → Import → Use
+- **Chain route methods for RPC compatibility**: Use method chaining like `.get().post().put()`
+- **Never create separate controller functions** - write handlers inline for better type inference
+
 ### Rigorous, Layered Testing
 - **Testing is a required step for every layer.** No feature is complete until it is fully tested according to the development cycle.
 - Our primary focus is on **integration tests** that use real database connections and make real HTTP requests.

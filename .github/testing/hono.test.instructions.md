@@ -561,6 +561,328 @@ bun test users.test.ts
 bun test:coverage
 ```
 
+## Hono RPC Contract Testing
+
+### Testing Type Safety and Breaking Changes
+
+One of the key benefits of Hono RPC is compile-time contract validation. Here's how to test that your API contracts remain stable:
+
+#### Testing Frontend-Backend Contract
+
+```typescript
+// backend/src/tests/contract.test.ts
+import { describe, it, expect } from 'vitest'
+import { testClient } from 'hono/testing'
+import app, { type AppType } from '../index'
+
+describe('API Contract Tests', () => {
+  const client = testClient(app)
+
+  it('should maintain stable response structure for users endpoint', async () => {
+    const res = await client.users.$get()
+    expect(res.status).toBe(200)
+    
+    const data = await res.json()
+    
+    // Contract test: Response structure must remain consistent
+    expect(data).toHaveProperty('success')
+    expect(data).toHaveProperty('data')
+    expect(Array.isArray(data.data)).toBe(true)
+    
+    if (data.data.length > 0) {
+      const user = data.data[0]
+      // Required fields that frontend depends on
+      expect(user).toHaveProperty('id')
+      expect(user).toHaveProperty('email')
+      expect(user).toHaveProperty('name')
+      expect(user).toHaveProperty('createdAt')
+      
+      // Type contract validation
+      expect(typeof user.id).toBe('string')
+      expect(typeof user.email).toBe('string')
+      expect(typeof user.name).toBe('string')
+      expect(typeof user.createdAt).toBe('string')
+    }
+  })
+
+  it('should maintain parameter contracts for dynamic routes', async () => {
+    // First create a user to test with
+    const createRes = await client.users.$post({
+      json: {
+        name: 'Contract Test User',
+        email: 'contract@test.com',
+        password: 'testpass'
+      }
+    })
+    
+    expect(createRes.status).toBe(201)
+    const created = await createRes.json()
+    
+    // Test that parameter typing works
+    const res = await client.users[':id'].$get({
+      param: { id: created.data.id }  // TypeScript ensures this matches :id param
+    })
+    
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.data.id).toBe(created.data.id)
+  })
+
+  it('should validate Zod schema contracts', async () => {
+    // Test that validation rules haven't changed
+    const invalidRes = await client.users.$post({
+      json: {
+        name: '', // Should fail validation
+        email: 'not-an-email', // Should fail validation
+        password: '123' // Too short, should fail
+      }
+    })
+    
+    expect(invalidRes.status).toBe(400) // Zod validation error
+    
+    const validRes = await client.users.$post({
+      json: {
+        name: 'Valid User',
+        email: 'valid@example.com',
+        password: 'validpassword123'
+      }
+    })
+    
+    expect(validRes.status).toBe(201)
+  })
+})
+```
+
+#### Testing Response Type Extraction
+
+```typescript
+// frontend/src/tests/api-types.test.ts
+import { describe, it, expect } from 'vitest'
+import type { AppType } from '../../../backend/src/index'
+
+// This test ensures frontend can extract types correctly
+describe('API Type Extraction', () => {
+  it('should extract response types correctly', () => {
+    // These type extractions should compile without errors
+    // If backend changes break compatibility, TypeScript will fail
+    
+    type UsersListResponse = Awaited<ReturnType<
+      AppType['users']['$get']
+    >>['json']
+    
+    type UserCreateRequest = Parameters<
+      AppType['users']['$post']
+    >[0]['json']
+    
+    type SingleUserResponse = Awaited<ReturnType<
+      AppType['users'][':id']['$get']  
+    >>['json']
+    
+    // Verify we can use these types
+    const mockCreateRequest: UserCreateRequest = {
+      name: 'Test',
+      email: 'test@example.com',
+      password: 'password123'
+    }
+    
+    expect(mockCreateRequest.name).toBe('Test')
+  })
+})
+```
+
+### Testing API Evolution and Versioning
+
+```typescript
+// backend/src/tests/api-evolution.test.ts
+import { describe, it, expect } from 'vitest'
+import { testClient } from 'hono/testing'
+import app from '../index'
+
+describe('API Evolution Tests', () => {
+  const client = testClient(app)
+
+  it('should maintain backward compatibility when adding optional fields', async () => {
+    // Old request format should still work
+    const oldFormatRes = await client.posts.$post({
+      json: {
+        title: 'Test Post',
+        content: 'Test Content'
+      }
+    })
+    
+    expect(oldFormatRes.status).toBe(201)
+    
+    // New request format with additional optional field should also work
+    const newFormatRes = await client.posts.$post({
+      json: {
+        title: 'Test Post',
+        content: 'Test Content',
+        tags: ['test', 'example'] // Optional field added in new version
+      }
+    })
+    
+    expect(newFormatRes.status).toBe(201)
+  })
+
+  it('should detect breaking changes in required fields', async () => {
+    // This test will fail if required fields are removed or renamed
+    // helping detect breaking changes
+    const res = await client.users.$post({
+      json: {
+        name: 'Required Field Test',
+        email: 'required@test.com',
+        password: 'password123'
+        // If any of these become optional or renamed,
+        // this test structure ensures we catch it
+      }
+    })
+    
+    expect(res.status).toBe(201)
+  })
+})
+```
+
+### Contract Testing with Mock Data
+
+```typescript
+// backend/src/tests/contract-validation.test.ts
+import { describe, it, expect } from 'vitest'
+import { testClient } from 'hono/testing'
+import app from '../index'
+
+describe('Contract Validation with Mock Data', () => {
+  const client = testClient(app)
+
+  // Define expected contract shapes
+  const USER_CONTRACT = {
+    id: 'string',
+    name: 'string', 
+    email: 'string',
+    createdAt: 'string'
+  }
+  
+  const POST_CONTRACT = {
+    id: 'string',
+    title: 'string',
+    content: 'string',
+    authorId: 'string',
+    createdAt: 'string',
+    updatedAt: 'string'
+  }
+
+  function validateContract(obj: any, contract: Record<string, string>) {
+    for (const [key, expectedType] of Object.entries(contract)) {
+      expect(obj).toHaveProperty(key)
+      expect(typeof obj[key]).toBe(expectedType)
+    }
+  }
+
+  it('should return users matching contract', async () => {
+    const res = await client.users.$get()
+    expect(res.status).toBe(200)
+    
+    const data = await res.json()
+    expect(data.success).toBe(true)
+    
+    if (data.data.length > 0) {
+      validateContract(data.data[0], USER_CONTRACT)
+    }
+  })
+
+  it('should create posts matching contract', async () => {
+    // First login to get auth token
+    const loginRes = await client.users.login.$post({
+      json: {
+        email: 'test@example.com',
+        password: 'testpass'
+      }
+    })
+    
+    const { token } = await loginRes.json()
+    
+    const res = await client.posts.$post({
+      json: {
+        title: 'Contract Test Post',
+        content: 'Testing post creation contract'
+      },
+      header: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    
+    expect(res.status).toBe(201)
+    const data = await res.json()
+    
+    validateContract(data.data, POST_CONTRACT)
+  })
+})
+```
+
+### Testing Error Response Contracts
+
+```typescript
+// backend/src/tests/error-contracts.test.ts
+import { describe, it, expect } from 'vitest'
+import { testClient } from 'hono/testing'
+import app from '../index'
+
+describe('Error Response Contracts', () => {
+  const client = testClient(app)
+
+  const ERROR_CONTRACT = {
+    success: 'boolean',
+    error: 'string'
+  }
+
+  function validateErrorContract(obj: any) {
+    expect(obj.success).toBe(false)
+    expect(typeof obj.error).toBe('string')
+    expect(obj.error.length).toBeGreaterThan(0)
+  }
+
+  it('should return consistent error format for 404', async () => {
+    const res = await client.users[':id'].$get({
+      param: { id: 'nonexistent-id' }
+    })
+    
+    expect(res.status).toBe(404)
+    const data = await res.json()
+    
+    validateErrorContract(data)
+  })
+
+  it('should return consistent error format for validation errors', async () => {
+    const res = await client.users.$post({
+      json: {
+        name: '',
+        email: 'invalid-email',
+        password: '123'
+      }
+    })
+    
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    
+    validateErrorContract(data)
+  })
+
+  it('should return consistent error format for authentication errors', async () => {
+    const res = await client.posts.$post({
+      json: {
+        title: 'Test',
+        content: 'Test'
+      }
+      // No authorization header
+    })
+    
+    expect(res.status).toBe(401)
+    const data = await res.json()
+    
+    validateErrorContract(data)
+  })
+})
+```
+
 ## Key Takeaways
 
 1. **Always test with real HTTP requests** - Don't mock the HTTP layer
@@ -570,5 +892,8 @@ bun test:coverage
 5. **Test both success and error cases** - Ensure your error handling works
 6. **Use real database operations** - Don't mock the database layer in integration tests
 7. **Keep tests focused and independent** - Each test should be able to run in isolation
+8. **Test API contracts explicitly** - Use contract tests to catch breaking changes early
+9. **Validate type extraction** - Ensure frontend can always extract types correctly
+10. **Test error response consistency** - Standardize error formats across all endpoints
 
 This approach ensures your Hono applications are thoroughly tested and behave correctly in production environments.

@@ -27,12 +27,14 @@ app.use('*', cors({
 }));
 
 // Chain routes for RPC compatibility
+// IMPORTANT: This chaining pattern is crucial for Hono RPC type safety
+// Each route method returns a new typed instance that includes the previous routes
 const routes = app
   // Health check endpoints
   .get('/api/health', (c) => {
     return c.json({ status: 'ok', timestamp: new Date().toISOString() });
   })
-  // Mount API routes
+  // Mount API routes - each .route() call adds to the type definition
   .route('/api/users', usersRoutes)
   // Mount hello world authenticated route
   .route('/api/hello', helloRoutes);
@@ -70,7 +72,10 @@ app.get('*', serveStatic({
   }
 }));
 
-// Export the app type for RPC
+// Export the app type for RPC - THIS IS THE KEY TO HONO STACKS
+// The frontend imports this type to get full type safety across the API
+// TypeScript infers all route signatures, parameters, request/response types
+// from this single export. No manual type definitions needed in frontend.
 export type AppType = typeof routes;
 
 export default app;
