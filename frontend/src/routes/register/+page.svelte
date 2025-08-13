@@ -29,7 +29,7 @@
   async function checkRegistrationStatus() {
     try {
       // Check for test override
-      if (browser && (window as any).__TEST_DISABLE_REGISTRATION) {
+      if (browser && (window as Window & { __TEST_DISABLE_REGISTRATION?: boolean }).__TEST_DISABLE_REGISTRATION) {
         registrationEnabled = false;
         return;
       }

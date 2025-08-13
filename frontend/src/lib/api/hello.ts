@@ -29,7 +29,12 @@ export const helloApi = {
       if (!response.ok) {
         console.error('Hello API error:', response.status, response.statusText);
         const result = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error((result as any).error || `Error ${response.status}: ${response.statusText}`);
+        // Type-safe error extraction
+        const errorMsg =
+          typeof result === 'object' && result && 'error' in result && typeof result.error === 'string'
+            ? result.error
+            : `Error ${response.status}: ${response.statusText}`;
+        throw new Error(errorMsg);
       }
 
       return response.json();
