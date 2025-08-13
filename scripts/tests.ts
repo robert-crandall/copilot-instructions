@@ -90,7 +90,7 @@ async function runFrontendTests(): Promise<void> {
   console.log('- Building frontend...');
   await runCommand('bun', ['run', 'build'], frontendDir);
 
-  console.log('🔧 Running linter...(not in CI)');
+  console.log('🔧 Running linter...');
   await runCommand('bun', ['run', 'lint'], frontendDir);
 }
 
