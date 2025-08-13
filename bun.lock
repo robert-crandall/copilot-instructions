@@ -17,6 +17,7 @@
         "drizzle-zod": "^0.8.2",
         "hono": "^4.8.3",
         "postgres": "^3.4.7",
+        "types": "file:../packages/types",
         "zod": "^3.25.67",
       },
       "devDependencies": {
@@ -37,6 +38,7 @@
         "daisyui": "^5.0.43",
         "hono": "^4.8.3",
         "lucide-svelte": "^0.523.0",
+        "types": "file:../packages/types",
       },
       "devDependencies": {
         "@eslint/compat": "^1.2.5",
@@ -66,6 +68,13 @@
         "vite-plugin-devtools-json": "^0.2.0",
         "vitest": "^3.2.3",
         "vitest-browser-svelte": "^0.1.0",
+      },
+    },
+    "packages/types": {
+      "name": "types",
+      "version": "1.0.0",
+      "devDependencies": {
+        "typescript": "^5.0.0",
       },
     },
   },
@@ -783,6 +792,8 @@
     "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
     "type-check": ["type-check@0.4.0", "", { "dependencies": { "prelude-ls": "^1.2.1" } }, "sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew=="],
+
+    "types": ["types@workspace:packages/types"],
 
     "typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
