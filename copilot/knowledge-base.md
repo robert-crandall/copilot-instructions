@@ -6,14 +6,21 @@ This file contains key insights, patterns, and best practices for the project.
 
 ### Type Safety Requirements (CRITICAL)
 
-**NEVER REWRITE INTERFACES - ALWAYS IMPORT FROM BACKEND**
+**ALWAYS USE SHARED TYPES FROM packages/types**
 
 This is the most important rule in the codebase:
 
-- **Frontend MUST import all types directly from backend**: `import type { User } from '../../backend/src/db/schema'`
-- **NEVER create custom interfaces** that duplicate backend types
-- **NEVER rewrite type definitions** - always import from the single source of truth
-- **Fix typing issues by importing proper types** from backend, not by creating workarounds
+- **Frontend MUST import all data types from packages/types**: `import type { User, PublicUser } from 'types'`
+- **Backend MUST re-export types from packages/types**: `export type { User } from 'types'`
+- **NEVER create duplicate interfaces** that replicate existing shared types
+- **NEVER rewrite type definitions** - always import from the shared types package (single source of truth)
+- **For API types**: Frontend still imports AppType directly from backend: `import type { AppType } from '../../../backend/src/index'`
+- **Fix typing issues by importing proper types** from packages/types, not by creating workarounds
+
+**Types Architecture:**
+- `packages/types`: Shared data interfaces (User, PublicUser, etc.)
+- `backend/src/index.ts`: Exports AppType for Hono RPC type safety
+- Frontend imports both for complete type coverage
 
 ### Error Handling
 
