@@ -1,6 +1,5 @@
 <script lang="ts">
   import { authStore } from '$lib/stores/auth';
-  import Navigation from '$lib/components/Navigation.svelte';
   import type { PublicUser } from 'types';
 
   let user: PublicUser | null = null;

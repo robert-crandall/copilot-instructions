@@ -1,5 +1,4 @@
 import { authStore } from '../stores/auth';
-import { api } from '../api';
 import type { PublicUser } from 'types';
 
 // Interface for the JWT payload
