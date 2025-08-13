@@ -72,7 +72,7 @@ jobs:
 
       - name: Run frontend linting
         working-directory: ./frontend
-        run: bun run lint:eslint
+        run: bun run lint
 
       - name: Build frontend
         working-directory: ./frontend
