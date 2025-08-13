@@ -3,14 +3,10 @@
   import type { PublicUser } from 'types';
 
   let user: PublicUser | null = null;
-  let token: string | null = null;
-  let loading = false;
 
   // Subscribe to auth store
   authStore.subscribe((state) => {
     user = state.user;
-    token = state.token;
-    loading = state.loading;
   });
 </script>
 

@@ -5,12 +5,10 @@
   import type { PublicUser } from 'types';
 
   let user: PublicUser | null = null;
-  let token: string | null = null;
 
   // Subscribe to auth store
   authStore.subscribe((state) => {
     user = state.user;
-    token = state.token;
   });
 
   // Handle logout and close dropdown

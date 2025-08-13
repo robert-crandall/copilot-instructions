@@ -28,7 +28,7 @@ function createAuthStore() {
     initialized: false,
   };
 
-  const { subscribe, set, update } = writable<AuthState>(initialState);
+  const { subscribe, update } = writable<AuthState>(initialState);
 
   return {
     subscribe,
