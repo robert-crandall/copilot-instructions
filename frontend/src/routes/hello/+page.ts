@@ -4,18 +4,18 @@ import { goto } from '$app/navigation';
 
 /** @type {import('./$types').PageLoad} */
 export function load() {
-	// Check authentication status
-	const { token, initialized } = get(authStore);
+  // Check authentication status
+  const { token, initialized } = get(authStore);
 
-	// If authenticated, continue to page
-	if (token && initialized) {
-		return {};
-	}
+  // If authenticated, continue to page
+  if (token && initialized) {
+    return {};
+  }
 
-	// If not authenticated, redirect to login
-	if (initialized) {
-		goto('/login');
-	}
+  // If not authenticated, redirect to login
+  if (initialized) {
+    goto('/login');
+  }
 
-	return {};
+  return {};
 }
