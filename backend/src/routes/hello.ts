@@ -11,11 +11,11 @@ const app = new Hono()
       // Get user ID from JWT context (set by jwtAuth middleware)
       const userId = getUserId(c);
       const jwtPayload = c.get('jwtPayload');
-      
+
       return c.json({
         message: `Hello, ${jwtPayload.email}!`,
         id: userId, // Send as id instead of userId
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       // Handle error using standard pattern
