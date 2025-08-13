@@ -12,7 +12,8 @@
   },
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "packages/types"
   ],
   "devDependencies": {
     "concurrently": "^9.2.0",

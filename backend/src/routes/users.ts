@@ -46,6 +46,7 @@ const app = new Hono()
           name: users.name,
           email: users.email,
           createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
         });
 
       // Generate JWT token
@@ -108,6 +109,7 @@ const app = new Hono()
           name: user.name,
           email: user.email,
           createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
         },
         token
       }, 200);

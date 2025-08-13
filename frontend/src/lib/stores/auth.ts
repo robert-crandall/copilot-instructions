@@ -1,17 +1,13 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import type { PublicUser } from 'types';
 
-// User type definition
-export interface User {
-	id: string;
-	name: string;
-	email: string;
-	createdAt: string;
-}
+// Use the shared PublicUser type instead of defining our own
+// This ensures consistency across frontend and backend
 
 // Authentication store state
 interface AuthState {
-	user: User | null;
+	user: PublicUser | null;
 	token: string | null;
 	loading: boolean;
 	error: string | null;
@@ -38,7 +34,7 @@ function createAuthStore() {
 		subscribe,
 
 		// Set the user and token after successful authentication
-		setAuth: (user: User, token: string) => {
+		setAuth: (user: PublicUser, token: string) => {
 			if (browser) {
 				localStorage.setItem('token', token);
 			}

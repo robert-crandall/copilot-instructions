@@ -13,7 +13,12 @@
 		"isolatedModules": true,
 		"verbatimModuleSyntax": false /* Changed to false to avoid type-only import issues */,
 		"rootDir": "../backend/src",
-		"outDir": "./.svelte-kit/backend-types"
+		"outDir": "./.svelte-kit/backend-types",
+		"baseUrl": "..",
+		"paths": {
+			"types": ["../packages/types"],
+			"types/*": ["../packages/types/*"]
+		}
 	},
 	"include": ["../backend/src/**/*.ts"],
 	"exclude": ["../backend/src/**/*.test.ts", "../backend/src/tests/**/*"]

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { authStore, type User } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth';
 	import Navigation from '$lib/components/Navigation.svelte';
+	import type { PublicUser } from 'types';
 
-	let user: User | null = null;
+	let user: PublicUser | null = null;
 	let token: string | null = null;
 	let loading = false;
 

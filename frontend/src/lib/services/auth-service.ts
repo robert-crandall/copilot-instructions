@@ -1,5 +1,6 @@
-import { authStore, type User } from '../stores/auth';
+import { authStore } from '../stores/auth';
 import { api } from '../api';
+import type { PublicUser } from 'types';
 
 // Interface for the JWT payload
 interface JWTPayload {
@@ -64,11 +65,12 @@ export function initializeAuth(): Promise<void> {
 		}
 
 		// Reconstruct user object from token payload
-		const user: User = {
+		const user: PublicUser = {
 			id: payload.id,
 			name: payload.name,
 			email: payload.email,
-			createdAt: new Date(payload.iat * 1000).toISOString() // Convert iat to ISO string
+			createdAt: new Date(payload.iat * 1000).toISOString(), // Convert iat to ISO string
+			updatedAt: new Date(payload.iat * 1000).toISOString()  // Use same timestamp as default
 		};
 
 		// Set user in auth store

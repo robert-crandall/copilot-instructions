@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { authStore, type User } from '$lib/stores/auth';
+	import { authStore } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
 	import ThemeController from './ThemeController.svelte';
+	import type { PublicUser } from 'types';
 
-	let user: User | null = null;
+	let user: PublicUser | null = null;
 	let token: string | null = null;
 
 	// Subscribe to auth store

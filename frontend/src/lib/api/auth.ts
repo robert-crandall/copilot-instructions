@@ -1,4 +1,11 @@
 import { api } from '../api';
+import type { PublicUser } from 'types';
+
+// Interface for authentication API responses  
+interface AuthResponse {
+	user: PublicUser;
+	token: string;
+}
 
 // Type-safe authentication API using Hono client
 export const authApi = {
@@ -12,15 +19,7 @@ export const authApi = {
 	},
 
 	// Register a new user
-	async register(data: { name: string; email: string; password: string }): Promise<{
-		user: {
-			id: string;
-			name: string;
-			email: string;
-			createdAt: string;
-		};
-		token: string;
-	}> {
+	async register(data: { name: string; email: string; password: string }): Promise<AuthResponse> {
 		const response = await api.api.users.$post({
 			json: data
 		});
@@ -34,27 +33,11 @@ export const authApi = {
 		}
 
 		// Type narrowing: if response is ok, result has user and token
-		return result as {
-			user: {
-				id: string;
-				name: string;
-				email: string;
-				createdAt: string;
-			};
-			token: string;
-		};
+		return result as AuthResponse;
 	},
 
 	// Login
-	async login(data: { email: string; password: string; rememberMe?: boolean }): Promise<{
-		user: {
-			id: string;
-			name: string;
-			email: string;
-			createdAt: string;
-		};
-		token: string;
-	}> {
+	async login(data: { email: string; password: string; rememberMe?: boolean }): Promise<AuthResponse> {
 		const response = await api.api.users.login.$post({
 			json: data
 		});
@@ -68,14 +51,6 @@ export const authApi = {
 		}
 
 		// Type narrowing: if response is ok, result has user and token
-		return result as {
-			user: {
-				id: string;
-				name: string;
-				email: string;
-				createdAt: string;
-			};
-			token: string;
-		};
+		return result as AuthResponse;
 	}
 };

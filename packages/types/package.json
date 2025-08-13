@@ -1,0 +1,11 @@
+{
+  "name": "types",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
