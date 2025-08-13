@@ -70,5 +70,3 @@ For detailed guidance on specific technologies, refer to these documents.
 - **Knowledge Base**: For common patterns, architectural decisions, and tips, see [knowledge-base.md](../copilot/knowledge-base.md).
 - **Hono (Backend)**: For best practices, see [hono.instructions.md](./instructions/hono.instructions.md).
 - **SvelteKit (Frontend)**: For best practices, see [svelte5.instructions.md](./instructions/svelte5.instructions.md).
-- **Backend Testing**: For detailed guidance, see [hono.test.instructions.md](./testing/hono.test.instructions.md).
-- **Frontend Testing**: For detailed guidance, see [sveltekit.test.instructions.md](./testing/sveltekit.test.instructions.md).
