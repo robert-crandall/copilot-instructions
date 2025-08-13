@@ -18,7 +18,7 @@ import { HTTPException } from 'hono/http-exception';
 const createTodoSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().optional(),
-  priority: z.enum(['low', 'medium', 'high']).default('medium')
+  priority: z.enum(['low', 'medium', 'high']).default('medium'),
 });
 
 const updateTodoSchema = createTodoSchema.partial();
@@ -43,108 +43,111 @@ let todos: Todo[] = [
     priority: 'high',
     completed: false,
     createdAt: new Date(),
-    updatedAt: new Date()
-  }
+    updatedAt: new Date(),
+  },
 ];
 
 // Chain all route methods for RPC compatibility
 const app = new Hono()
   // GET /todos - List all todos
   .get('/', async (c) => {
-    return c.json({ 
-      success: true, 
+    return c.json({
+      success: true,
       data: todos,
-      total: todos.length 
+      total: todos.length,
     });
   })
-  
+
   // POST /todos - Create new todo
   .post('/', zValidator('json', createTodoSchema), async (c) => {
     const data = c.req.valid('json'); // Fully typed from Zod schema
-    
+
     const newTodo: Todo = {
       id: Math.random().toString(36).substring(7),
       ...data,
       description: data.description || null,
       completed: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     todos.push(newTodo);
-    
-    return c.json({ 
-      success: true, 
-      data: newTodo 
-    }, 201);
+
+    return c.json(
+      {
+        success: true,
+        data: newTodo,
+      },
+      201,
+    );
   })
-  
+
   // GET /todos/:id - Get single todo
   .get('/:id', async (c) => {
     const id = c.req.param('id'); // Type-safe parameter extraction
-    const todo = todos.find(t => t.id === id);
-    
+    const todo = todos.find((t) => t.id === id);
+
     if (!todo) {
       throw new HTTPException(404, { message: 'Todo not found' });
     }
-    
-    return c.json({ 
-      success: true, 
-      data: todo 
+
+    return c.json({
+      success: true,
+      data: todo,
     });
   })
-  
+
   // PUT /todos/:id - Update todo
   .put('/:id', zValidator('json', updateTodoSchema), async (c) => {
     const id = c.req.param('id');
     const data = c.req.valid('json'); // Partial update data
-    
-    const todoIndex = todos.findIndex(t => t.id === id);
+
+    const todoIndex = todos.findIndex((t) => t.id === id);
     if (todoIndex === -1) {
       throw new HTTPException(404, { message: 'Todo not found' });
     }
-    
+
     todos[todoIndex] = {
       ...todos[todoIndex],
       ...data,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
-    return c.json({ 
-      success: true, 
-      data: todos[todoIndex] 
+
+    return c.json({
+      success: true,
+      data: todos[todoIndex],
     });
   })
-  
+
   // PATCH /todos/:id/toggle - Toggle completion status
   .patch('/:id/toggle', async (c) => {
     const id = c.req.param('id');
-    const todoIndex = todos.findIndex(t => t.id === id);
-    
+    const todoIndex = todos.findIndex((t) => t.id === id);
+
     if (todoIndex === -1) {
       throw new HTTPException(404, { message: 'Todo not found' });
     }
-    
+
     todos[todoIndex].completed = !todos[todoIndex].completed;
     todos[todoIndex].updatedAt = new Date();
-    
-    return c.json({ 
-      success: true, 
-      data: todos[todoIndex] 
+
+    return c.json({
+      success: true,
+      data: todos[todoIndex],
     });
   })
-  
+
   // DELETE /todos/:id - Delete todo
   .delete('/:id', async (c) => {
     const id = c.req.param('id');
-    const todoIndex = todos.findIndex(t => t.id === id);
-    
+    const todoIndex = todos.findIndex((t) => t.id === id);
+
     if (todoIndex === -1) {
       throw new HTTPException(404, { message: 'Todo not found' });
     }
-    
+
     todos.splice(todoIndex, 1);
-    
+
     return c.json({ success: true });
   });
 
@@ -180,74 +183,74 @@ export const todosService = {
   // List all todos
   async list() {
     const response = await api.todos.$get();
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch todos');
     }
-    
+
     return response.json(); // Type: { success: boolean, data: Todo[], total: number }
   },
 
   // Create new todo
   async create(data: CreateTodoData) {
     const response = await api.todos.$post({ json: data });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to create todo');
     }
-    
+
     return response.json(); // Type: { success: boolean, data: Todo }
   },
 
   // Get single todo
   async getById(id: string) {
     const response = await api.todos[':id'].$get({ param: { id } });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to fetch todo');
     }
-    
+
     return response.json(); // Type: { success: boolean, data: Todo }
   },
 
   // Update todo
   async update(id: string, data: UpdateTodoData) {
-    const response = await api.todos[':id'].$put({ 
-      param: { id }, 
-      json: data 
+    const response = await api.todos[':id'].$put({
+      param: { id },
+      json: data
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to update todo');
     }
-    
+
     return response.json(); // Type: { success: boolean, data: Todo }
   },
 
   // Toggle completion
   async toggleComplete(id: string) {
     const response = await api.todos[':id'].toggle.$patch({ param: { id } });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to toggle todo');
     }
-    
+
     return response.json(); // Type: { success: boolean, data: Todo }
   },
 
   // Delete todo
   async delete(id: string) {
     const response = await api.todos[':id'].$delete({ param: { id } });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to delete todo');
     }
-    
+
     return response.json(); // Type: { success: boolean }
   }
 };
@@ -259,15 +262,15 @@ export const todosService = {
 <script lang="ts">
   import { onMount } from 'svelte';
   import { todosService } from '$lib/todos';
-  
+
   // Extract type from service response
   type Todo = Awaited<ReturnType<typeof todosService.list>>['data'][0];
-  
+
   let todos: Todo[] = [];
   let newTodo = {
     title: '',
     description: '',
-    priority: 'medium' as const
+    priority: 'medium' as const,
   };
   let loading = false;
   let error = '';
@@ -288,7 +291,7 @@ export const todosService = {
 
   async function createTodo() {
     if (!newTodo.title.trim()) return;
-    
+
     try {
       const result = await todosService.create(newTodo);
       todos = [...todos, result.data]; // Type-safe array operation
@@ -302,7 +305,7 @@ export const todosService = {
   async function toggleTodo(todo: Todo) {
     try {
       const result = await todosService.toggleComplete(todo.id);
-      todos = todos.map(t => t.id === todo.id ? result.data : t);
+      todos = todos.map((t) => (t.id === todo.id ? result.data : t));
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to toggle todo';
     }
@@ -311,7 +314,7 @@ export const todosService = {
   async function deleteTodo(todo: Todo) {
     try {
       await todosService.delete(todo.id);
-      todos = todos.filter(t => t.id !== todo.id);
+      todos = todos.filter((t) => t.id !== todo.id);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to delete todo';
     }
@@ -319,8 +322,8 @@ export const todosService = {
 </script>
 
 <div class="container mx-auto p-4">
-  <h1 class="text-2xl font-bold mb-4">Todos</h1>
-  
+  <h1 class="mb-4 text-2xl font-bold">Todos</h1>
+
   {#if error}
     <div class="alert alert-error mb-4">
       {error}
@@ -330,23 +333,13 @@ export const todosService = {
   <!-- Create Todo Form -->
   <form on:submit|preventDefault={createTodo} class="mb-6">
     <div class="form-control">
-      <input 
-        type="text" 
-        placeholder="What needs to be done?" 
-        bind:value={newTodo.title}
-        class="input input-bordered"
-        required
-      />
+      <input type="text" placeholder="What needs to be done?" bind:value={newTodo.title} class="input input-bordered" required />
     </div>
-    
+
     <div class="form-control">
-      <textarea 
-        placeholder="Description (optional)"
-        bind:value={newTodo.description}
-        class="textarea textarea-bordered mt-2"
-      ></textarea>
+      <textarea placeholder="Description (optional)" bind:value={newTodo.description} class="textarea textarea-bordered mt-2"></textarea>
     </div>
-    
+
     <div class="form-control">
       <select bind:value={newTodo.priority} class="select select-bordered mt-2">
         <option value="low">Low Priority</option>
@@ -354,10 +347,8 @@ export const todosService = {
         <option value="high">High Priority</option>
       </select>
     </div>
-    
-    <button type="submit" class="btn btn-primary mt-2">
-      Add Todo
-    </button>
+
+    <button type="submit" class="btn btn-primary mt-2"> Add Todo </button>
   </form>
 
   <!-- Todos List -->
@@ -372,12 +363,7 @@ export const todosService = {
           <div class="card-body">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <input 
-                  type="checkbox" 
-                  checked={todo.completed}
-                  on:change={() => toggleTodo(todo)}
-                  class="checkbox"
-                />
+                <input type="checkbox" checked={todo.completed} on:change={() => toggleTodo(todo)} class="checkbox" />
                 <div class:line-through={todo.completed}>
                   <h3 class="font-semibold">{todo.title}</h3>
                   {#if todo.description}
@@ -385,17 +371,12 @@ export const todosService = {
                   {/if}
                 </div>
               </div>
-              
+
               <div class="flex items-center gap-2">
                 <span class="badge badge-{todo.priority === 'high' ? 'error' : todo.priority === 'medium' ? 'warning' : 'info'}">
                   {todo.priority}
                 </span>
-                <button 
-                  on:click={() => deleteTodo(todo)}
-                  class="btn btn-error btn-sm"
-                >
-                  Delete
-                </button>
+                <button on:click={() => deleteTodo(todo)} class="btn btn-error btn-sm"> Delete </button>
               </div>
             </div>
           </div>
@@ -409,7 +390,7 @@ export const todosService = {
 ## Key Benefits Demonstrated
 
 1. **No Manual Types**: Frontend never defines Todo interface - it's inferred from backend
-2. **Validation Propagation**: Zod schemas in backend automatically validate frontend requests  
+2. **Validation Propagation**: Zod schemas in backend automatically validate frontend requests
 3. **Parameter Safety**: Dynamic route parameters (`:id`) are type-checked
 4. **Response Typing**: All API responses are automatically typed
 5. **Refactoring Safety**: Changing backend types immediately shows errors in frontend
@@ -429,7 +410,7 @@ describe('Todos API', () => {
   test('should list todos', async () => {
     const res = await client.$get();
     expect(res.status).toBe(200);
-    
+
     const data = await res.json();
     expect(data.success).toBe(true);
     expect(Array.isArray(data.data)).toBe(true);
@@ -440,10 +421,10 @@ describe('Todos API', () => {
       json: {
         title: 'Test Todo',
         description: 'Test Description',
-        priority: 'high'
-      }
+        priority: 'high',
+      },
     });
-    
+
     expect(res.status).toBe(201);
     const data = await res.json();
     expect(data.success).toBe(true);
@@ -452,9 +433,9 @@ describe('Todos API', () => {
 
   test('should validate required fields', async () => {
     const res = await client.$post({
-      json: { title: '' } // Invalid: empty title
+      json: { title: '' }, // Invalid: empty title
     });
-    
+
     expect(res.status).toBe(400); // Zod validation error
   });
 });

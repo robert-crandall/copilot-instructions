@@ -10,12 +10,6 @@
     "emitDeclarationOnly": true,
     "outDir": "./dist"
   },
-  "include": [
-    "*.ts",
-    "**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["*.ts", "**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

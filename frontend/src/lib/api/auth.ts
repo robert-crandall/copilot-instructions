@@ -1,7 +1,7 @@
 import { api } from '../api';
 import type { PublicUser } from 'types';
 
-// Interface for authentication API responses  
+// Interface for authentication API responses
 interface AuthResponse {
 	user: PublicUser;
 	token: string;
@@ -37,7 +37,11 @@ export const authApi = {
 	},
 
 	// Login
-	async login(data: { email: string; password: string; rememberMe?: boolean }): Promise<AuthResponse> {
+	async login(data: {
+		email: string;
+		password: string;
+		rememberMe?: boolean;
+	}): Promise<AuthResponse> {
 		const response = await api.api.users.login.$post({
 			json: data
 		});

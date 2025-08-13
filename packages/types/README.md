@@ -15,18 +15,21 @@ The `packages/types` directory serves as the single source of truth for data typ
 ## Usage
 
 ### In Backend
+
 ```typescript
 // Re-export shared types for backwards compatibility
 export type { User, PublicUser, NewUser, UserUpdate } from 'types';
 ```
 
 ### In Frontend
+
 ```typescript
 // Import shared types directly
 import type { User, PublicUser } from 'types';
 ```
 
 ### In Frontend Components
+
 ```typescript
 // Use in component props or stores
 import type { PublicUser } from 'types';
@@ -37,6 +40,7 @@ let user: PublicUser | null = null;
 ## Available Types
 
 ### User Types
+
 - `User` - Complete user object (includes sensitive fields like password)
 - `PublicUser` - User object safe for API responses (excludes password)
 - `NewUser` - Data required to create a new user

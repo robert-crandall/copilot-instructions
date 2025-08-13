@@ -18,6 +18,7 @@ This is the most important rule in the codebase:
 - **Fix typing issues by importing proper types** from packages/types, not by creating workarounds
 
 **Types Architecture:**
+
 - `packages/types`: Shared data interfaces (User, PublicUser, etc.)
 - `backend/src/index.ts`: Exports AppType for Hono RPC type safety
 - Frontend imports both for complete type coverage
@@ -29,19 +30,20 @@ This is the most important rule in the codebase:
 We use a standardized error handling approach in all API routes:
 
 ```typescript
-import logger, { handleApiError } from '../utils/logger'
+import logger, { handleApiError } from '../utils/logger';
 
 // In route handlers:
 try {
   // Your code here
-  return c.json({ success: true, data })
+  return c.json({ success: true, data });
 } catch (error) {
   // Standard error handling - logs the error and throws appropriate HTTPException
-  handleApiError(error, 'Failed to perform operation')
+  handleApiError(error, 'Failed to perform operation');
 }
 ```
 
 The `handleApiError` utility:
+
 1. Logs errors with appropriate level
 2. Preserves HTTPExceptions when they occur
 3. Wraps other errors with proper status codes
@@ -61,19 +63,20 @@ Tests should use real instances instead of mocks whenever possible:
 - **❌ DON'T**: Create fake implementations that don't match real behavior
 
 **Benefits of no-mock testing:**
+
 - Tests that catch real integration issues
 - Closer to real-world usage scenarios
 - Improved confidence in test coverage
 - Avoids maintaining both implementation and mock logic
 
 **Implementation guidelines:**
+
 1. Set up dedicated test databases for integration tests
 2. Use environment variables to configure test settings
 3. Ensure proper cleanup between test runs
 4. Containerize dependencies when needed for test isolation
 
 This approach ensures tests validate the actual system behavior rather than just verifying mock interactions.
-
 
 ## Architecture Decisions
 
@@ -89,6 +92,7 @@ We follow a standardized error handling approach throughout the codebase:
 6. **Standardization scripts**: Use `scripts/standardize_all_error_handling.sh` to enforce pattern
 
 The `handleApiError` function centralizes the common pattern:
+
 ```typescript
 // Before standardization
 catch (error) {
@@ -115,6 +119,7 @@ Our architecture intentionally uses direct type imports from backend to frontend
 - **Shared utilities when beneficial**
 
 **Benefits of this approach:**
+
 - Automatic end-to-end type safety without manual schema definitions
 - No OpenAPI/JSON Schema duplication or synchronization issues
 - Compile-time validation of API contracts
@@ -124,11 +129,13 @@ Our architecture intentionally uses direct type imports from backend to frontend
 This tight coupling is **intentional** and provides better developer experience than traditional REST API patterns.
 
 ### State Management
+
 - Use Svelte stores for global state
 - Prefer reactive declarations over complex state management
 - Keep component state local when possible
 
 ### API Design
+
 - RESTful endpoints where appropriate
 - Consistent response structure with `success`, `data`, `error` fields
 - Use HTTP status codes appropriately
@@ -138,14 +145,16 @@ This tight coupling is **intentional** and provides better developer experience 
 **Why We Use Hono RPC Pattern Instead of OpenAPI/REST**
 
 Traditional REST APIs require maintaining separate type definitions:
+
 - Backend defines API endpoints and data models
 - Frontend creates separate TypeScript interfaces
 - OpenAPI schemas for documentation and validation
 - Manual synchronization between all three
 
 **Problems with traditional approach:**
+
 - Type definitions get out of sync
-- Runtime errors from mismatched interfaces  
+- Runtime errors from mismatched interfaces
 - Manual maintenance of multiple sources of truth
 - Complex code generation pipelines
 - Breaking changes aren't caught at compile time
@@ -159,11 +168,10 @@ const createUserSchema = z.object({
   email: z.string().email(),
 });
 
-const routes = app
-  .post('/users', zValidator('json', createUserSchema), async (c) => {
-    const data = c.req.valid('json'); // Fully typed
-    return c.json({ success: true, user: newUser });
-  });
+const routes = app.post('/users', zValidator('json', createUserSchema), async (c) => {
+  const data = c.req.valid('json'); // Fully typed
+  return c.json({ success: true, user: newUser });
+});
 
 export type AppType = typeof routes; // Single type export
 ```
@@ -177,12 +185,13 @@ const api = hc<AppType>(baseUrl);
 
 // Fully typed - no manual interface definitions needed
 const response = await api.users.$post({
-  json: { name: 'John', email: 'john@example.com' }
+  json: { name: 'John', email: 'john@example.com' },
 });
 const data = await response.json(); // Typed automatically
 ```
 
 **Key advantages:**
+
 - **Single source of truth**: Types defined once in backend
 - **Automatic propagation**: Changes flow from backend to frontend
 - **Compile-time safety**: Mismatched types cause TypeScript errors
@@ -191,12 +200,14 @@ const data = await response.json(); // Typed automatically
 - **Developer experience**: IntelliSense works perfectly
 
 **When to use this pattern:**
+
 - ✅ Monorepo with TypeScript frontend and backend
 - ✅ Rapid development with frequent API changes
 - ✅ Strong type safety requirements
 - ✅ Small to medium team with shared codebase ownership
 
 **When traditional REST might be better:**
+
 - ❌ Multi-language clients requiring OpenAPI
 - ❌ External API consumers needing documentation
 - ❌ Separate teams maintaining frontend and backend
@@ -207,6 +218,7 @@ const data = await response.json(); // Typed automatically
 Here's how to add a new feature from backend to frontend with full type safety:
 
 **Step 1: Define Backend Route with Validation**
+
 ```typescript
 // backend/src/routes/posts.ts
 import { Hono } from 'hono';
@@ -216,7 +228,7 @@ import { z } from 'zod';
 const createPostSchema = z.object({
   title: z.string().min(1).max(100),
   content: z.string().min(1),
-  tags: z.array(z.string()).optional()
+  tags: z.array(z.string()).optional(),
 });
 
 const app = new Hono()
@@ -244,6 +256,7 @@ export default app;
 ```
 
 **Step 2: Add to Main App for RPC Export**
+
 ```typescript
 // backend/src/index.ts
 import postsRoutes from './routes/posts';
@@ -258,6 +271,7 @@ export type AppType = typeof routes;
 ```
 
 **Step 3: Use in Frontend with Full Type Safety**
+
 ```typescript
 // frontend/src/lib/posts.ts
 import { api } from './api'; // Typed client
@@ -272,21 +286,22 @@ export const postsService = {
 
   async create(post: { title: string; content: string; tags?: string[] }) {
     const response = await api.posts.$post({
-      json: post // Type validated against Zod schema
+      json: post, // Type validated against Zod schema
     });
     return response.json(); // Type: { success: boolean, data: Post }
   },
 
   async getById(id: string) {
     const response = await api.posts[':id'].$get({
-      param: { id } // Type-safe parameters
+      param: { id }, // Type-safe parameters
     });
     return response.json(); // Type: { success: boolean, data: Post }
-  }
+  },
 };
 ```
 
 **Step 4: Use in Svelte Component**
+
 ```svelte
 <!-- frontend/src/routes/posts/+page.svelte -->
 <script lang="ts">
@@ -316,9 +331,10 @@ export const postsService = {
 ```
 
 **Key Benefits Demonstrated:**
+
 - ✅ **No manual type definitions** in frontend
 - ✅ **Zod validation** automatically typed in frontend
-- ✅ **Parameter typing** for dynamic routes  
+- ✅ **Parameter typing** for dynamic routes
 - ✅ **Response typing** from backend return types
 - ✅ **Compile-time errors** when APIs change
 - ✅ **IntelliSense support** throughout the stack
@@ -333,15 +349,16 @@ The Hono client has a specific API that differs from standard fetch API:
 // CORRECT: Use 'header' (singular) with Hono client
 const response = await api.route.$get({
   header: {
-    Authorization: `Bearer ${token}`
-  }
+    Authorization: `Bearer ${token}`,
+  },
 });
 
 // INCORRECT: Don't use 'headers' (plural) with Hono client
 const response = await api.route.$get({
-  headers: { // This won't work with Hono client
-    Authorization: `Bearer ${token}`
-  }
+  headers: {
+    // This won't work with Hono client
+    Authorization: `Bearer ${token}`,
+  },
 });
 ```
 
@@ -372,6 +389,7 @@ const user: User = {
 This standardization simplifies our codebase by using a single field name (`id`) throughout our API responses and frontend models.
 
 ### Database Design
+
 - UUID primary keys for all entities
 - Proper foreign key relationships
 - Timestamp fields for audit trails

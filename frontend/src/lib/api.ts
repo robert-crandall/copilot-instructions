@@ -31,7 +31,7 @@ const baseUrl = getBaseUrl();
 // The AppType contains all route definitions from the backend
 // This gives us:
 // - Full TypeScript IntelliSense for all endpoints
-// - Compile-time validation of request/response types  
+// - Compile-time validation of request/response types
 // - Parameter type checking for dynamic routes
 // - Automatic error handling type inference
 export const api = hc<AppType>(baseUrl);

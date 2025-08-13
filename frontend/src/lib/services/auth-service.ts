@@ -70,7 +70,7 @@ export function initializeAuth(): Promise<void> {
 			name: payload.name,
 			email: payload.email,
 			createdAt: new Date(payload.iat * 1000).toISOString(), // Convert iat to ISO string
-			updatedAt: new Date(payload.iat * 1000).toISOString()  // Use same timestamp as default
+			updatedAt: new Date(payload.iat * 1000).toISOString() // Use same timestamp as default
 		};
 
 		// Set user in auth store
