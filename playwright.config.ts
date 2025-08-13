@@ -53,7 +53,7 @@ export default defineConfig({
     {
       // Start backend with test database
       command: 'NODE_ENV=test bun run backend:force',
-      port: 3001,
+      port: parseInt(process.env.PORT || '3000'),
       reuseExistingServer: !process.env.CI,
       timeout: 30000,
     },
