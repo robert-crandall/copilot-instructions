@@ -72,18 +72,16 @@ test.describe('User Registration', () => {
     // Wait for registration to complete
     await page.waitForURL('/');
 
-    // Sign out by clearing localStorage (more reliable than UI interactions)
+    // Sign out by clearing localStorage then performing an explicit navigation to avoid race conditions
     await page.evaluate(() => {
       localStorage.removeItem('token');
-      // Force page reload to apply the logout
-      window.location.href = '/';
     });
-
-    // Wait for the redirect to complete
-    await page.waitForURL('/');
+    // Navigate to home explicitly and wait for network to settle so no pending navigations race with the next goto
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // Try to register with the same email
-    await page.goto('/register');
+    await page.goto('/register', { waitUntil: 'domcontentloaded' });
 
     // Fill out the registration form with the same email
     await page.fill('#name', 'Another User');

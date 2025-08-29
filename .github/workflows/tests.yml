@@ -8,6 +8,9 @@ on:
   # Allow manual triggering
   workflow_dispatch:
 
+permissions:
+  contents: write   # needed to push bun.lock updates for Dependabot PRs
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -49,9 +52,52 @@ jobs:
 
       # Cheap checks first
       # Backend setup and tests
-      - name: Install backend dependencies
-        working-directory: ./backend
-        run: bun install --frozen-lockfile
+      # --- Lockfile management -------------------------------------------------
+      # We no longer use a frozen lockfile so that Dependabot updates can resolve
+      # and refresh transitive dependencies. To keep human PRs disciplined:
+      #  * If bun.lock changes on a non-Dependabot PR, the build fails asking
+      #    the contributor to commit the updated lockfile.
+      #  * If the actor is Dependabot, we auto-commit the refreshed bun.lock.
+      # This preserves reproducibility while allowing automated dependency bumps.
+      - name: Record initial bun.lock hash
+        id: lock_pre
+        run: |
+          if [ -f bun.lock ]; then
+            echo "hash=$(sha256sum bun.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          else
+            echo "hash=absent" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies
+        working-directory: ./
+        run: bun install
+
+      - name: Detect bun.lock changes
+        id: lock_post
+        run: |
+          if [ -f bun.lock ]; then
+            echo "new_hash=$(sha256sum bun.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          else
+            echo "new_hash=absent" >> $GITHUB_OUTPUT
+          fi
+          echo "pre_hash=${{ steps.lock_pre.outputs.hash }}" >> $GITHUB_OUTPUT
+
+      - name: Fail if bun.lock changed (non-Dependabot)
+        if: ${{ steps.lock_pre.outputs.hash != steps.lock_post.outputs.new_hash && github.actor != 'dependabot[bot]' }}
+        run: |
+          echo "bun.lock changed after install. Please commit the updated lockfile." >&2
+          git --no-pager diff --name-only
+          exit 1
+
+      - name: Auto-commit updated bun.lock (Dependabot only)
+        if: ${{ steps.lock_pre.outputs.hash != steps.lock_post.outputs.new_hash && github.actor == 'dependabot[bot]' }}
+        run: |
+          git config user.name 'github-actions'
+          git config user.email 'github-actions@github.com'
+            
+          git add bun.lock
+          git commit -m 'chore: update bun.lock (auto-commit from CI for Dependabot)'
+          git push
 
       - name: Run backend database migrations
         working-directory: ./
@@ -60,11 +106,6 @@ jobs:
       - name: Run backend type checking
         working-directory: ./backend
         run: bun run check
-
-      # Frontend setup and tests
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: bun install --frozen-lockfile
 
       - name: Run frontend type checking
         working-directory: ./frontend

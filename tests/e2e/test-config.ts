@@ -4,7 +4,7 @@
 export const TEST_CONFIG = {
   // API Configuration
   API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:3000',
-  FRONTEND_BASE_URL: process.env.BASE_URL || 'http://localhost:4173',
+  FRONTEND_BASE_URL: process.env.BASE_URL || 'http://localhost:5173',
 
   // Database Configuration
   DATABASE_URL: 'postgresql://test:test@localhost:5432/example_app',
