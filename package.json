@@ -33,5 +33,9 @@
   "devDependencies": {
     "concurrently": "^9.2.0",
     "node-fetch": "^3.3.2"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "tsx": "^4.20.5"
   }
 }
