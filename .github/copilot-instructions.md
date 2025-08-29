@@ -1,5 +1,7 @@
 # Copilot Instructions
 
+**ALWAYS reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
+
 ## How We Work: The Core Philosophy
 
 Our goal is to build robust, maintainable features with a consistent and predictable workflow. Follow these core principles above all else.
@@ -30,36 +32,146 @@ Every new feature **must** follow this specific, sequential order. Do not skip o
 
 ---
 
-## Guiding Principles
+## Working Effectively
 
-These are the fundamental rules that support our development process.
+### Bootstrap, Build, and Test the Repository
 
-### Search First, Code Second
+**ALWAYS run these steps first before making any changes:**
 
-- **DRY (Don't Repeat Yourself) is our most important code quality rule.**
-- **Before writing any code**, search the repository for existing implementations. Look for reusable components, utilities, and types.
-- Use semantic search for concepts (`"How is authentication handled?"`) and lexical search for specifics (`symbol:UserValidator`).
+1. **Install Bun runtime**: `curl -fsSL https://bun.sh/install | bash && source ~/.bashrc`
+2. **Start PostgreSQL**: `docker run --name postgres-test -e POSTGRES_DB=example_app -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -p 5432:5432 -d postgres:15`
+3. **Install dependencies**:
+   - Root: `bun install` -- takes ~16s
+   - Backend: `cd backend && bun install` -- takes ~16s
+   - Frontend: `cd frontend && bun install` -- takes ~16s
+4. **Setup environment**: `cp .env.example .env`
+5. **Setup database**: `bun run db:setup --force` -- takes ~5s
+6. **Setup test database**: `NODE_ENV=test bun run db:setup --force` -- takes ~5s
 
-### Single Source of Truth for Types
+### Build and Test Commands
 
-- **NEVER duplicate types.** The backend is the single source of truth.
-- The frontend **MUST** import all API and data types directly from the backend project.
-- This is critical for maintaining end-to-end type safety. If you have a type error, fix it by importing the correct type.
+**CRITICAL TIMING EXPECTATIONS - NEVER CANCEL these commands:**
 
-### Hono RPC Pattern Guidelines
+- **Backend type check**: `cd backend && bun run check` -- takes ~1s
+- **Backend tests**: `cd backend && bun test` -- takes ~3s. NEVER CANCEL. Set timeout to 60s minimum.
+- **Frontend type check**: `cd frontend && bun run check` -- takes ~5s. NEVER CANCEL. Set timeout to 60s minimum.
+- **Frontend build**: `cd frontend && bun run build` -- takes ~3s. NEVER CANCEL. Set timeout to 120s minimum.
+- **Frontend lint**: `cd frontend && bun run lint` -- takes ~5s
+- **Formatting**: `bun run format` -- takes ~3s
+- **Complete backend test suite**: `bun run test:backend` -- takes ~9s. NEVER CANCEL. Set timeout to 300s minimum.
 
-- **Always export route handlers as `AppType`**: `export type AppType = typeof routes;`
-- **Use Zod for all input validation**: Import `zValidator` and define schemas for all endpoints
-- **Import `AppType` in frontend**: `import type { AppType } from '../../../backend/src/index';`
-- **Follow the complete pattern**: Define → Validate → Export → Import → Use
-- **Chain route methods for RPC compatibility**: Use method chaining like `.get().post().put()`
-- **Never create separate controller functions** - write handlers inline for better type inference
+### Run the Application
 
-### Rigorous, Layered Testing
+**ALWAYS run the bootstrapping steps first before starting servers.**
 
-- **Testing is a required step for every layer.** No feature is complete until it is fully tested according to the development cycle.
-- Our primary focus is on **integration tests** that use real database connections and make real HTTP requests.
-- Business logic should be imported into tests, **never copied or reimplemented**.
+- **Full development environment**: `bun run dev` -- starts both backend and frontend, takes ~4s to fully start
+- **Backend only**: `bun run backend:force` -- starts backend on port 3000, takes ~2s
+- **Frontend only**: `bun run frontend` -- starts frontend on port 5173, takes ~2s
+- **Database studio**: `bun run db:studio` -- opens Drizzle Studio
+
+### Validation Scenarios
+
+**ALWAYS manually validate any new code through these complete scenarios:**
+
+1. **User Registration Flow**:
+
+   ```bash
+   curl -X POST http://localhost:3000/api/users \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Test User","email":"test@example.com","password":"password123"}'
+   ```
+
+   Expected: Returns user object with JWT token
+
+2. **User Login Flow**:
+
+   ```bash
+   curl -X POST http://localhost:3000/api/users/login \
+     -H "Content-Type: application/json" \
+     -d '{"email":"test@example.com","password":"password123"}'
+   ```
+
+   Expected: Returns user object with JWT token
+
+3. **Authenticated API Access**:
+
+   ```bash
+   curl -H "Authorization: Bearer [JWT_TOKEN]" http://localhost:3000/api/hello
+   ```
+
+   Expected: Returns personalized hello message
+
+4. **Frontend Accessibility**: Visit `http://localhost:5173/` and verify the UI loads
+
+### E2E Testing Setup
+
+**E2E tests require Playwright browser installation:**
+
+- Install browsers: `bunx playwright install chromium` -- takes ~5-10 minutes. NEVER CANCEL.
+- Run E2E tests: `bun run test:frontend` -- includes E2E, takes ~1-2 minutes. NEVER CANCEL. Set timeout to 300s minimum.
+
+### Additional Validation Steps
+
+**ALWAYS run these before committing changes:**
+
+- Format code: `bun run format`
+- Type check backend: `cd backend && bun run check`
+- Type check frontend: `cd frontend && bun run check`
+- Lint frontend: `cd frontend && bun run lint`
+- Test backend: `cd backend && bun test`
+
+---
+
+## Key Projects and Architecture
+
+### Backend (`backend/`)
+
+- **Framework**: Hono with TypeScript
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: JWT tokens with bcrypt password hashing
+- **Port**: 3000 (configurable via PORT env var)
+- **Entry Point**: `src/index.ts`
+- **Key Commands**: `bun run dev`, `bun run check`, `bun test`
+
+### Frontend (`frontend/`)
+
+- **Framework**: SvelteKit with Svelte 5
+- **Styling**: Tailwind CSS v4 + DaisyUI
+- **Icons**: Lucide Svelte
+- **Port**: 5173 (Vite default)
+- **Key Commands**: `bun run dev`, `bun run build`, `bun run check`, `bun run lint`
+
+### Database
+
+- **Migrations**: Located in `backend/src/db/migrations/`
+- **Schema**: Defined in `backend/src/db/schema.ts`
+- **Generate migration**: `cd backend && bun run db:generate`
+- **Apply migrations**: `cd backend && bun run db:migrate` or `bun run db:setup`
+
+### Testing
+
+- **Backend Tests**: Located in `backend/src/tests/` using Vitest
+- **E2E Tests**: Located in `tests/e2e/` using Playwright
+- **Test script**: `bun run test` (runs all tests)
+
+---
+
+## Common Issues and Solutions
+
+1. **"Cannot find package 'commander'"**: Run `bun add commander tsx` in project root
+2. **"Database does not exist" in tests**: Run `NODE_ENV=test bun run db:setup --force`
+3. **Backend lint fails**: Backend uses `bun run check` instead of `lint`
+4. **E2E tests fail**: Install Playwright browsers with `bunx playwright install chromium`
+5. **Port 3000 conflicts**: The start script reserves port 3000 for Copilot compatibility
+
+## Environment Variables
+
+Required in `.env` file:
+
+- `DATABASE_URL`: PostgreSQL connection string
+- `JWT_SECRET`: At least 32 characters for JWT signing
+- `ALLOW_REGISTRATION`: "true" or "false" to control user registration
+- `PORT`: Backend server port (default: 3000)
 
 ---
 
@@ -69,4 +181,5 @@ For detailed guidance on specific technologies, refer to these documents.
 
 - **Knowledge Base**: For common patterns, architectural decisions, and tips, see [knowledge-base.md](../copilot/knowledge-base.md).
 - **Hono (Backend)**: For best practices, see [hono.instructions.md](./instructions/hono.instructions.md).
-- **SvelteKit (Frontend)**: For best practices, see [svelte5.instructions.md](./instructions/svelte5.instructions.md).
+- **SvelteKit (Frontend)**: For best practices, see [sveltekit.instructions.md](./instructions/sveltekit.instructions.md).
+- **Tailwind CSS**: For styling guidelines, see [tailwindcss.instructions.md](./instructions/tailwindcss.instructions.md).
