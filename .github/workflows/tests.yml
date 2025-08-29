@@ -43,7 +43,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # needed so we can push back to the PR branch
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -91,13 +93,43 @@ jobs:
 
       - name: Auto-commit updated bun.lock (Dependabot only)
         if: ${{ steps.lock_pre.outputs.hash != steps.lock_post.outputs.new_hash && github.actor == 'dependabot[bot]' }}
+        env:
+          PR_BRANCH: ${{ github.head_ref }}
         run: |
-          git config user.name 'github-actions'
-          git config user.email 'github-actions@github.com'
-            
+          set -euo pipefail
+          echo "Dependabot detected bun.lock change; preparing auto-commit."
+          echo "PR branch: ${PR_BRANCH}"
+
+          if [ -z "${PR_BRANCH}" ]; then
+            echo "github.head_ref is empty; attempting to derive current branch." >&2
+            PR_BRANCH=$(git rev-parse --abbrev-ref HEAD || echo '')
+          fi
+
+          if [ -z "${PR_BRANCH}" ] || [ "${PR_BRANCH}" = "HEAD" ]; then
+            echo "Cannot determine PR branch name; aborting auto-commit." >&2
+            exit 1
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git --no-pager diff --name-status || true
+
           git add bun.lock
+          if git diff --cached --quiet; then
+            echo "No staged changes after add; skipping commit."; exit 0; fi
+
           git commit -m 'chore: update bun.lock (auto-commit from CI for Dependabot)'
-          git push
+
+          # Retry push up to 3 times in case of race with another workflow
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:${PR_BRANCH}"; then
+              echo "Push succeeded (attempt ${attempt})."; break; fi
+            echo "Push failed (attempt ${attempt})." >&2
+            if [ "${attempt}" = "3" ]; then
+              echo "Giving up after 3 attempts." >&2; exit 1; fi
+            echo "Fetching latest and retrying..."; git fetch origin "${PR_BRANCH}" --depth=1; sleep 2;
+          done
 
       - name: Run backend database migrations
         working-directory: ./
