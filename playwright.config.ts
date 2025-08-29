@@ -24,7 +24,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:4173',
+    baseURL: 'http://localhost:5173',
 
     /* Capture screenshots on failure */
     screenshot: 'only-on-failure',
@@ -52,7 +52,7 @@ export default defineConfig({
   webServer: [
     {
       // Start backend with test database
-      command: 'NODE_ENV=test bun run dev',
+      command: 'NODE_ENV=test bun run dev:force',
       port: parseInt(process.env.PORT || '3000'),
       reuseExistingServer: !process.env.CI,
       timeout: 30000,
