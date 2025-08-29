@@ -69,14 +69,14 @@ pnpm run devctl -- start
 
 Flags:
 
-| Flag          | Purpose                                                              |
-| ------------- | -------------------------------------------------------------------- |
-| `--backend`   | Limit action to backend service                                      |
-| `--frontend`  | Limit action to frontend service                                     |
-| (none)        | Acts on both services                                                |
-| `--force`     | Kill any process on the required port(s) before starting             |
-| `--lines <n>` | Number of log lines to show for `logs` (default 50)                  |
-| `--json`      | JSON output for `status`                                             |
+| Flag          | Purpose                                                  |
+| ------------- | -------------------------------------------------------- |
+| `--backend`   | Limit action to backend service                          |
+| `--frontend`  | Limit action to frontend service                         |
+| (none)        | Acts on both services                                    |
+| `--force`     | Kill any process on the required port(s) before starting |
+| `--lines <n>` | Number of log lines to show for `logs` (default 50)      |
+| `--json`      | JSON output for `status`                                 |
 
 Outputs (status --json):
 
