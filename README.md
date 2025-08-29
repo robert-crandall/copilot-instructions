@@ -30,7 +30,7 @@ This template tries to address several Agentic coding weaknesses:
 
 4. Creates new terminals that conflict with each other (Copilot only?)
 
-- See `scripts/start-dev.js`. This checks if the backend or frontend are already in use, and skips if they are. This should make Copilot behave better.
+- See `scripts/devctl.mjs`. This checks if the backend or frontend are already in use, and skips if they are. This should make Copilot behave better.
 
 ## How to Use
 
@@ -44,6 +44,57 @@ It provides:
 - Script to test everything `scripts/test_pr`
 - Deployable application
 - CI/CD setup
+
+### Dev Controller (devctl)
+
+To keep a free interactive terminal for Copilot while running both services, use the new lightweight controller.
+
+Quick start:
+
+```sh
+node scripts/devctl.mjs status            # human readable status
+node scripts/devctl.mjs status --json     # structured JSON status
+node scripts/devctl.mjs logs --lines 100  # combined recent logs
+node scripts/devctl.mjs logs --backend    # backend only logs
+node scripts/devctl.mjs restart --backend # restart only backend
+node scripts/devctl.mjs stop              # stop both
+```
+
+Convenience npm script:
+
+```sh
+pnpm run devctl -- start
+# or: npm run devctl -- start --backend
+```
+
+Flags:
+
+| Flag          | Purpose                                                              |
+| ------------- | -------------------------------------------------------------------- |
+| `--backend`   | Limit action to backend service                                      |
+| `--frontend`  | Limit action to frontend service                                     |
+| (none)        | Acts on both services                                                |
+| `--force`     | Kill any process on the required port(s) before starting             |
+| `--lines <n>` | Number of log lines to show for `logs` (default 50)                  |
+| `--json`      | JSON output for `status`                                             |
+
+Outputs (status --json):
+
+```json
+{
+  "running": true,
+  "host": "localhost",
+  "backend": { "running": true, "pid": 12345, "port": 3000, "url": "http://localhost:3000", "logFile": ".logs/devctl/backend.log", "uptime": "00:02:10" },
+  "frontend": { "running": true, "pid": 12356, "port": 5173, "url": "http://localhost:5173", "logFile": ".logs/devctl/frontend.log", "uptime": "00:02:05" }
+}
+```
+
+Implementation notes:
+
+- Each service gets its own PID + log file (`.devctl-*.pid`, `.logs/devctl/*.log`).
+- Readiness is probed via HEAD requests to the health/port.
+- Migrations use existing root script: `bun run db:migrate` (drizzle).
+- Safe to call `start` repeatedly (already-running services are skipped).
 
 ### Including Instructions
 
