@@ -86,10 +86,6 @@ async function globalSetup(config: FullConfig) {
     console.error('❌ Failed to seed test data:', error);
     throw error;
   }
-
-  // Record that setup completed (useful for debugging / potential teardown coordination)
-  writeFileSync('.e2e-setup-complete', new Date().toISOString());
-  console.log('🎉 Global setup completed');
 }
 
 export default globalSetup;
