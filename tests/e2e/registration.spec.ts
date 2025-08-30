@@ -37,13 +37,8 @@ test.describe('User Registration', () => {
     // Wait for the form to be visible
     await page.waitForSelector('form');
 
-    // If a registration token field is present, fill it so the submit button is enabled for validation
-    if (await page.$('#registrationToken')) {
-      await page.fill('#registrationToken', process.env.REGISTRATION_TOKEN || 'test-registration-token');
-    }
-
-    const submitButton = page.locator('button[type="submit"]');
-    await submitButton.click();
+    // Submit an empty form
+    await page.click('button[type="submit"]');
 
     // Verify validation errors are displayed
     await expect(page.locator('text=Name is required')).toBeVisible();
@@ -55,7 +50,8 @@ test.describe('User Registration', () => {
     await page.fill('#email', 'invalid-email');
     await page.fill('#password', '12345'); // Too short
 
-    await submitButton.click();
+    // Submit the form
+    await page.click('button[type="submit"]');
 
     // Verify validation errors for invalid data
     await expect(page.locator('text=valid email')).toBeVisible();
