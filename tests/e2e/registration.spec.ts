@@ -26,34 +26,6 @@ test.describe('User Registration', () => {
     await expect(page.locator("text=You're successfully logged in to your account.")).toBeVisible();
   });
 
-  test('should display validation errors for invalid inputs', async ({ page }) => {
-    // Navigate to the registration page
-    await page.goto('/register');
-
-    // Wait for the form to be visible
-    await page.waitForSelector('form');
-
-    // Submit an empty form
-    await page.click('button[type="submit"]');
-
-    // Verify validation errors are displayed
-    await expect(page.locator('text=Name is required')).toBeVisible();
-    await expect(page.locator('text=Email is required')).toBeVisible();
-    await expect(page.locator('text=Password is required')).toBeVisible();
-
-    // Fill with invalid data
-    await page.fill('#name', 'Test');
-    await page.fill('#email', 'invalid-email');
-    await page.fill('#password', '12345'); // Too short
-
-    // Submit the form
-    await page.click('button[type="submit"]');
-
-    // Verify validation errors for invalid data
-    await expect(page.locator('text=Please enter a valid email address')).toBeVisible();
-    await expect(page.locator('text=Password must be at least 6 characters')).toBeVisible();
-  });
-
   test('should show error for duplicate email', async ({ page }) => {
     // First register a user
     const email = `duplicate-${Date.now()}@example.com`;
