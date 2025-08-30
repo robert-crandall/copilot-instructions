@@ -235,12 +235,7 @@ async function start(opts) {
   if (targets.length === 0) targets.push('backend', 'frontend');
 
   if (opts.force) {
-    log('Force flag is set. Killing any existing processes on target ports.', 'warning');
-    for (const t of targets) {
-      const port = t === 'backend' ? CONFIG.backendPort : CONFIG.frontendPort;
-      // eslint-disable-next-line no-await-in-loop
-      await killProcessOnPort(port, t);
-    }
+    await stop(opts);
   }
 
   await runMigrations();
@@ -296,6 +291,15 @@ async function stop(opts) {
       results[t] = await stopService(CONFIG[t]);
     }),
   );
+  // If force is requested, perform a post-stop port scan to ensure nothing is lingering.
+  if (opts.force) {
+    log('Force flag set for stop: scanning ports for lingering processes after graceful shutdown.', 'warning');
+    for (const t of targets) {
+      /* eslint-disable no-await-in-loop */
+      const port = t === 'backend' ? CONFIG.backendPort : CONFIG.frontendPort;
+      await killProcessOnPort(port, t);
+    }
+  }
   return status();
 }
 
@@ -384,7 +388,7 @@ async function main() {
     }
     default: {
       console.log(
-        `\nUsage: node scripts/devctl.mjs <command> [flags]\n\nCommands:\n  start            Start services (default both)\n  stop             Stop services\n  restart          Restart services\n  status           Show status (use --json for JSON)\n  logs             Show recent logs (combined unless filtered)\n\nFlags:\n  --backend        Limit action to backend service\n  --frontend       Limit action to frontend service\n  --migrate        Run backend migrations before start\n  --force          Kill any process on the required port(s) before starting\n  --lines <n>      Lines to show for logs (default 50)\n  --json           JSON output for status\n\nExamples:\n  node scripts/devctl.mjs start --migrate\n  node scripts/devctl.mjs start --backend --force\n  node scripts/devctl.mjs logs --backend --lines 100\n  node scripts/devctl.mjs status --json\n`,
+        `\nUsage: node scripts/devctl.mjs <command> [flags]\n\nCommands:\n  start            Start services (default both)\n  stop             Stop services\n  restart          Restart services\n  status           Show status (use --json for JSON)\n  logs             Show recent logs (combined unless filtered)\n\nFlags:\n  --backend        Limit action to backend service\n  --frontend       Limit action to frontend service\n  --migrate        Run backend migrations before start\n  --force          start: kill PIDs then scan ports; stop: scan ports after graceful stop\n  --lines <n>      Lines to show for logs (default 50)\n  --json           JSON output for status\n\nExamples:\n  node scripts/devctl.mjs start --migrate\n  node scripts/devctl.mjs start --backend --force\n  node scripts/devctl.mjs stop --force\n  node scripts/devctl.mjs logs --backend --lines 100\n  node scripts/devctl.mjs status --json\n`,
       );
       process.exit(1);
     }
