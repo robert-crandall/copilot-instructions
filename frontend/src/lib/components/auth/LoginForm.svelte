@@ -113,7 +113,7 @@
         bind:value={password}
         on:blur={validatePassword}
         placeholder="••••••••"
-        class="input input-bordered w-full h-10 {passwordError ? 'input-error' : ''}"
+        class="input input-bordered h-10 w-full {passwordError ? 'input-error' : ''}"
         disabled={loading}
         autocomplete="current-password"
         required
@@ -133,7 +133,7 @@
     </div>
 
     <div class="form-control mt-6">
-      <button type="submit" class="btn btn-primary w-full h-10" disabled={loading}>
+      <button type="submit" class="btn btn-primary h-10 w-full" disabled={loading}>
         {#if loading}
           <span class="loading loading-spinner loading-sm"></span>
         {/if}

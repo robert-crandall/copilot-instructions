@@ -1,20 +1,20 @@
 <script lang="ts">
   export let label: string;
   export let name: string;
-  export let type = "text";
+  export let type = 'text';
   export let value: string;
-  export let description = "";
-  export let error = "";
-  export let placeholder = "";
+  export let description = '';
+  export let error = '';
+  export let placeholder = '';
   export let disabled = false;
-  export let autocomplete: string | null | undefined = undefined;
+  export let autocomplete: string | undefined = undefined;
   export let min: number | undefined = undefined;
   export let max: number | undefined = undefined;
   export let required = false;
   export let rows: number | undefined = undefined;
 
   // Support for class prop to add additional styling
-  let className = "";
+  let className = '';
   export { className as class };
 </script>
 
@@ -30,11 +30,11 @@
   {#if rows}
     <textarea
       bind:value
-      name={name}
+      {name}
       id={name}
       class="textarea textarea-bordered w-full {error ? 'textarea-error' : ''}"
       class:textarea-error={error}
-      aria-invalid={error ? "true" : "false"}
+      aria-invalid={error ? 'true' : 'false'}
       aria-describedby={description || error ? `${name}-desc` : undefined}
       {placeholder}
       {disabled}
@@ -48,16 +48,16 @@
   {:else}
     <input
       bind:value
-      type={type}
-      name={name}
+      {type}
+      {name}
       id={name}
-      class="input input-bordered w-full h-10 {error ? 'input-error' : ''}"
+      class="input input-bordered h-10 w-full {error ? 'input-error' : ''}"
       class:input-error={error}
-      aria-invalid={error ? "true" : "false"}
+      aria-invalid={error ? 'true' : 'false'}
       aria-describedby={description || error ? `${name}-desc` : undefined}
       {placeholder}
       {disabled}
-      autocomplete={autocomplete as any}
+      autocomplete={autocomplete as HTMLInputElement['autocomplete']}
       {min}
       {max}
       {required}

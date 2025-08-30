@@ -172,7 +172,7 @@
     />
 
     <div class="form-control mt-6">
-      <button type="submit" class="btn btn-primary w-full h-10" disabled={loading || !registrationEnabled}>
+      <button type="submit" class="btn btn-primary h-10 w-full" disabled={loading || !registrationEnabled}>
         {#if loading}
           <span class="loading loading-spinner loading-sm"></span>
         {/if}
