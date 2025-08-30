@@ -58,6 +58,7 @@ const CONFIG = {
     cwd: 'backend',
     startCmd: ['bun', 'run', 'dev'], // uses package script
     healthUrl: () => `http://${process.env.HOST || 'localhost'}:${process.env.BACKEND_PORT || '3000'}/api/health`,
+    readiness: 'backend',
   },
   frontend: {
     name: 'frontend',
@@ -66,6 +67,7 @@ const CONFIG = {
     cwd: 'frontend',
     startCmd: ['bun', 'run', 'dev'],
     healthUrl: () => `http://${process.env.HOST || 'localhost'}:${process.env.FRONTEND_PORT || '5173'}`,
+    readiness: 'frontend',
   },
 };
 
@@ -185,24 +187,46 @@ async function startService(svc, port, extraEnv = {}) {
   child.unref();
   // readiness poll
   const url = svc.healthUrl();
-  const deadline = Date.now() + 15000;
+  const deadline = Date.now() + 20000; // allow a bit more time for first build
+  let consecutive = 0;
   async function poll() {
     try {
       const controller = new AbortController();
-      const t = setTimeout(() => controller.abort(), 1500);
-      const res = await fetch(url, { method: 'HEAD', signal: controller.signal });
+      const timeoutMs = 2500;
+      const t = setTimeout(() => controller.abort(), timeoutMs);
+      if (svc.readiness === 'backend') {
+        const res = await fetch(url, { method: 'HEAD', signal: controller.signal });
+        clearTimeout(t);
+        return res.ok;
+      }
+      // frontend readiness: ensure dev server responds with non-trivial HTML (lazy compilation may make first request slow)
+      const res = await fetch(url, { method: 'GET', signal: controller.signal, headers: { Accept: 'text/html' } });
       clearTimeout(t);
-      if (res.ok) return true;
-    } catch {}
-    return false;
+      if (!res.ok) return false;
+      const text = await res.text();
+      // heuristic: HTML doc & some app-specific marker to reduce false positives (brand text or closing tag)
+      const ready = /<html[\s\S]*<\/html>/i.test(text);
+      return ready;
+    } catch (e) {
+      return false;
+    }
   }
   while (Date.now() < deadline) {
     /* eslint-disable no-await-in-loop */
     if (await poll()) {
-      log(`${svc.name} ready: ${url}`, 'success');
-      break;
+      consecutive += 1;
+      if (consecutive >= 2) {
+        // require two consecutive successful polls for stability
+        log(`${svc.name} ready: ${url}`, 'success');
+        break;
+      }
+    } else {
+      consecutive = 0; // reset if a failure occurs between successes
     }
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 600));
+  }
+  if (consecutive < 2) {
+    log(`${svc.name} readiness not confirmed within timeout; continuing anyway (may still be initializing).`, 'warning');
   }
   return serviceStatus(svc, port);
 }
