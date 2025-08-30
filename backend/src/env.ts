@@ -5,10 +5,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   PORT: z.string().optional().default('3000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  ALLOW_REGISTRATION: z
-    .string()
-    .transform((val) => val === 'true')
-    .default('true'),
+  REGISTRATION_TOKEN: z.string().min(1).default(''),
   FRONTEND_URL: z.string().url().default('http://localhost:3000'),
 });
 

@@ -10,7 +10,7 @@ This task list is generated based on the requirements in the [Authentication Tem
   - [x] 1.3 Implement server-side validation for registration fields
   - [x] 1.4 Add duplicate email check in registration process
   - [x] 1.5 Implement password hashing mechanism
-  - [x] 1.6 Add environment variable check for `ALLOW_REGISTRATION` flag
+  - [x] 1.6 Add environment variable gate via `REGISTRATION_TOKEN` (required for registration)
   - [x] 1.7 Create frontend registration form component with all required fields
   - [x] 1.8 Implement client-side form validation for registration
   - [x] 1.9 Connect frontend form to backend API endpoint

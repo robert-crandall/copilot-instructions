@@ -17,7 +17,7 @@ describe('Authentication Flow Integration Tests', () => {
       // Step 1: Register user
       const registerRes = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -74,7 +74,7 @@ describe('Authentication Flow Integration Tests', () => {
       // Register first user
       const res1 = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(user1Data),
+        body: JSON.stringify({ ...user1Data, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -86,7 +86,7 @@ describe('Authentication Flow Integration Tests', () => {
       // Register second user
       const res2 = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(user2Data),
+        body: JSON.stringify({ ...user2Data, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -116,7 +116,7 @@ describe('Authentication Flow Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -157,7 +157,7 @@ describe('Authentication Flow Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -183,6 +183,7 @@ describe('Authentication Flow Integration Tests', () => {
         body: JSON.stringify({
           ...userData,
           email: 'hash2@example.com',
+          registrationToken: process.env.REGISTRATION_TOKEN,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -213,7 +214,7 @@ describe('Authentication Flow Integration Tests', () => {
 
         const res = await app.request('/api/users', {
           method: 'POST',
-          body: JSON.stringify(userData),
+          body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -251,6 +252,7 @@ describe('Authentication Flow Integration Tests', () => {
           body: JSON.stringify({
             ...userData,
             email: `tokensec${i}@example.com`,
+            registrationToken: process.env.REGISTRATION_TOKEN,
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -282,7 +284,7 @@ describe('Authentication Flow Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -316,7 +318,7 @@ describe('Authentication Flow Integration Tests', () => {
       const promises = Array.from({ length: 3 }, () =>
         app.request('/api/users', {
           method: 'POST',
-          body: JSON.stringify(userData),
+          body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -346,7 +348,7 @@ describe('Authentication Flow Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },

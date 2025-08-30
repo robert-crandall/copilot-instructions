@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # needed to push bun.lock updates for Dependabot PRs
+  contents: write # needed to push bun.lock updates for Dependabot PRs
 
 jobs:
   tests:
@@ -38,14 +38,14 @@ jobs:
       NODE_ENV: test
       PORT: 3000
       TZ: America/Los_Angeles
-      ALLOW_REGISTRATION: true
+      REGISTRATION_TOKEN: test-registration-token
       FRONTEND_URL: http://localhost:4173
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0  # needed so we can push back to the PR branch
+          fetch-depth: 0 # needed so we can push back to the PR branch
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2

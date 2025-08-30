@@ -4,7 +4,9 @@
   // Props
   export let loading = false;
   export let error: string | null = null;
-  export let registrationEnabled = true;
+  export let registrationTokenRequired = false;
+  export let registrationEnabled = false;
+  export let registrationToken: string = '';
 
   // Form data
   let name = '';
@@ -19,7 +21,7 @@
 
   // Event dispatcher
   const dispatch = createEventDispatcher<{
-    register: { name: string; email: string; password: string };
+    register: { name: string; email: string; password: string; registrationToken?: string };
   }>();
 
   // Validate form input
@@ -72,7 +74,7 @@
   // Handle form submission
   function handleSubmit() {
     if (validateForm()) {
-      dispatch('register', { name, email, password });
+      dispatch('register', { name, email, password, registrationToken: registrationTokenRequired ? registrationToken : undefined });
     }
   }
 </script>
@@ -83,8 +85,8 @@
     <p class="text-base-content/70">Join today to get started</p>
   </div>
 
-  {#if !registrationEnabled}
-    <div class="alert alert-warning mb-6">
+  {#if registrationTokenRequired}
+    <div class="alert alert-info mb-6">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -97,11 +99,11 @@
         stroke-linejoin="round"
         class="h-5 w-5"
       >
-        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-        <path d="M12 9v4"></path>
-        <path d="M12 17h.01"></path>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" x2="12" y1="8" y2="12" />
+        <line x1="12" x2="12.01" y1="16" y2="16" />
       </svg>
-      <span>Registration is currently disabled</span>
+      <span>A registration token is required to create an account.</span>
     </div>
   {/if}
 
@@ -196,8 +198,28 @@
       </label>
     </div>
 
+    {#if registrationTokenRequired}
+      <div class="form-control">
+        <label class="label" for="registrationToken">
+          <span class="label-text">Registration Token</span>
+        </label>
+        <input
+          type="text"
+          id="registrationToken"
+          bind:value={registrationToken}
+          placeholder="Enter provided token"
+          class="input input-bordered w-full"
+          disabled={loading || !registrationEnabled}
+          autocomplete="off"
+        />
+        <label class="label">
+          <span class="label-text-alt text-base-content/60">Ask the administrator for the token</span>
+        </label>
+      </div>
+    {/if}
+
     <div class="form-control mt-6">
-      <button type="submit" class="btn btn-primary w-full" disabled={loading || !registrationEnabled}>
+      <button type="submit" class="btn btn-primary w-full" disabled={loading || !registrationEnabled || (registrationTokenRequired && !registrationToken)}>
         {#if loading}
           <span class="loading loading-spinner loading-sm"></span>
         {/if}

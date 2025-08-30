@@ -44,6 +44,8 @@ async function createTestUser() {
       name: TEST_CONFIG.USER.username,
       email: TEST_CONFIG.USER.email,
       password: TEST_CONFIG.USER.password,
+      // Provide registration token required by backend if set in environment; default test token
+      registrationToken: process.env.REGISTRATION_TOKEN || 'test-registration-token',
     }),
   });
 

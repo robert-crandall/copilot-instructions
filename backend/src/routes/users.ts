@@ -10,19 +10,26 @@ import { registerSchema, loginSchema } from '../validation/users';
 
 // Chain methods for RPC compatibility
 const app = new Hono()
-  // Check if registration is enabled
+  // Check if registration token is required
   .get('/registration-status', async (c) => {
-    return c.json({ enabled: env.ALLOW_REGISTRATION });
+    const tokenPresent = env.REGISTRATION_TOKEN.length > 0;
+    return c.json({ enabled: tokenPresent, required: tokenPresent });
   })
   // User registration endpoint
   .post('/', zValidator('json', registerSchema), async (c) => {
-    // Check if registration is allowed
-    if (!env.ALLOW_REGISTRATION) {
+    const data = c.req.valid('json');
+    const { name, email, password, registrationToken } = data as typeof data & { registrationToken?: string };
+
+    const tokenPresent = env.REGISTRATION_TOKEN.length > 0;
+    if (!tokenPresent) {
       return c.json({ error: 'Registration is currently disabled' }, 403);
     }
-
-    const data = c.req.valid('json');
-    const { name, email, password } = data;
+    if (!registrationToken) {
+      return c.json({ error: 'Registration token is required' }, 403);
+    }
+    if (registrationToken !== env.REGISTRATION_TOKEN) {
+      return c.json({ error: 'Invalid registration token' }, 403);
+    }
 
     try {
       // Check if user already exists

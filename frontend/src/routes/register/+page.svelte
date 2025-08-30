@@ -8,7 +8,9 @@
 
   let loading = false;
   let error: string | null = null;
-  let registrationEnabled = true;
+  let registrationTokenRequired = false;
+  let registrationEnabled = false;
+  let registrationToken = '';
 
   // Check if registration is enabled
   onMount(async () => {
@@ -30,25 +32,27 @@
     try {
       // Check for test override
       if (browser && (window as Window & { __TEST_DISABLE_REGISTRATION?: boolean }).__TEST_DISABLE_REGISTRATION) {
-        registrationEnabled = false;
+        // When test override disables registration, treat as token required but impossible (simulate block)
+        registrationTokenRequired = true;
         return;
       }
 
       const status = await authApi.getRegistrationStatus();
       registrationEnabled = status.enabled;
+      registrationTokenRequired = status.required;
     } catch (err) {
       console.error('Failed to check registration status', err);
     }
   }
 
   // Handle registration
-  async function handleRegister(event: CustomEvent<{ name: string; email: string; password: string }>) {
+  async function handleRegister(event: CustomEvent<{ name: string; email: string; password: string; registrationToken?: string }>) {
     loading = true;
     error = null;
     authStore.setLoading(true);
 
     try {
-      const response = await authApi.register(event.detail);
+      const response = await authApi.register({ ...event.detail, registrationToken: registrationTokenRequired ? registrationToken : undefined });
 
       // Update auth store with user and token
       authStore.setAuth(response.user, response.token);
@@ -78,7 +82,7 @@
           <a href="/" class="btn btn-ghost text-gradient text-2xl font-bold"> Auth Template </a>
         </div>
 
-        <RegisterForm {loading} {error} {registrationEnabled} on:register={handleRegister} />
+        <RegisterForm {loading} {error} {registrationEnabled} {registrationTokenRequired} bind:registrationToken on:register={handleRegister} />
       </div>
     </div>
   </div>
