@@ -25,7 +25,7 @@
 
 <header class="navbar bg-base-100 border-base-200 sticky top-0 z-30 border-b shadow-sm">
   <div class="navbar-start">
-    <a href="/" class="btn btn-ghost text-gradient text-xl font-semibold"> Auth Template </a>
+    <a href="/" class="btn btn-ghost text-gradient text-xl font-semibold"> Hono/Svelte Template </a>
   </div>
 
   <div class="navbar-end">

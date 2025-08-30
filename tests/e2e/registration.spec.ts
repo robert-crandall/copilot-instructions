@@ -50,8 +50,8 @@ test.describe('User Registration', () => {
     await page.click('button[type="submit"]');
 
     // Verify validation errors for invalid data
-    await expect(page.locator('text=valid email')).toBeVisible();
-    await expect(page.locator('text=least 6 characters')).toBeVisible();
+    await expect(page.locator('text=Please enter a valid email address')).toBeVisible();
+    await expect(page.locator('text=Password must be at least 6 characters')).toBeVisible();
   });
 
   test('should show error for duplicate email', async ({ page }) => {
