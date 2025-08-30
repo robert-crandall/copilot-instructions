@@ -25,7 +25,7 @@
 
 <header class="navbar bg-base-100 border-base-200 sticky top-0 z-30 border-b shadow-sm">
   <div class="navbar-start">
-    <a href="/" class="btn btn-ghost text-gradient text-xl font-semibold"> Auth Template </a>
+    <a href="/" class="btn btn-ghost text-gradient text-xl font-semibold"> Hono/Svelte Template </a>
   </div>
 
   <div class="navbar-end">
@@ -33,6 +33,7 @@
 
     {#if user}
       <a href="/hello" class="btn btn-ghost">Hello World</a>
+      <a href="/demo" class="btn btn-ghost">Form Demo</a>
 
       <!-- User dropdown menu using DaisyUI Method 1 (details/summary) -->
       <details class="dropdown dropdown-end">
@@ -77,6 +78,7 @@
         </ul>
       </details>
     {:else}
+      <a href="/demo" class="btn btn-ghost">Form Demo</a>
       <a href="/login" class="btn btn-ghost">Login</a>
       <a href="/register" class="btn btn-primary">Register</a>
     {/if}

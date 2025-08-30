@@ -11,7 +11,7 @@
 </script>
 
 <svelte:head>
-  <title>Home | Auth Template</title>
+  <title>Home | Hono/Svelte Template</title>
 </svelte:head>
 
 <div class="min-h-screen">
@@ -122,10 +122,10 @@
             <!-- Left side content -->
             <div class="max-w-xl flex-1">
               <h1 class="mb-4 text-5xl leading-tight font-bold">
-                <span class="text-gradient"> Modern Auth Template </span>
+                <span class="text-gradient"> Modern Hono/Svelte Template </span>
               </h1>
               <p class="text-base-content/80 mb-8 text-xl">
-                A sleek SvelteKit application with user authentication powered by Hono backend. The perfect starting point for your next project.
+                A sleek Svelte UI application with user authentication powered by Hono backend. The perfect starting point for your next project.
               </p>
 
               <div class="mb-8 flex items-center gap-4">
