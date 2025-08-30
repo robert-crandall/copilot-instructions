@@ -10,7 +10,7 @@ interface AuthResponse {
 // Type-safe authentication API using Hono client
 export const authApi = {
   // Check if registration is enabled
-  async getRegistrationStatus(): Promise<{ enabled: boolean }> {
+  async getRegistrationStatus(): Promise<{ enabled: boolean; required: boolean }> {
     const response = await api.api.users['registration-status'].$get();
     if (!response.ok) {
       throw new Error('Failed to check registration status');
@@ -19,7 +19,7 @@ export const authApi = {
   },
 
   // Register a new user
-  async register(data: { name: string; email: string; password: string }): Promise<AuthResponse> {
+  async register(data: { name: string; email: string; password: string; registrationToken?: string }): Promise<AuthResponse> {
     const response = await api.api.users.$post({
       json: data,
     });

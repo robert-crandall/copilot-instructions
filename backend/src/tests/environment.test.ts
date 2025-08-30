@@ -3,61 +3,45 @@ import app from '../index';
 
 describe('Environment Configuration Integration', () => {
   describe('Registration Control', () => {
-    it('should respect ALLOW_REGISTRATION environment variable', async () => {
+    it('should report registration token requirement', async () => {
       const res = await app.request('/api/users/registration-status');
-
       expect(res.status).toBe(200);
       const data = await res.json();
-
-      expect(data).toHaveProperty('enabled');
-      expect(typeof data.enabled).toBe('boolean');
-
-      // The value should reflect the actual environment setting
-      // In test environment, this should be true based on .env.example
-      expect(data.enabled).toBe(true);
+      expect(data).toHaveProperty('required');
+      expect(typeof data.required).toBe('boolean');
+      expect(data.required).toBe(true); // test env sets a token
     });
 
-    it('should block registration when disabled', async () => {
-      // This test assumes we can temporarily modify the environment
-      // In a real scenario, you might test this with a separate test database
-      // or environment configuration
-
+    it('should block registration without token and allow with correct token', async () => {
       const userData = {
         name: 'Test User',
-        email: 'test@example.com',
+        email: `test-${Date.now()}@example.com`,
         password: 'password123',
       };
 
-      // First, check if registration is enabled
-      const statusRes = await app.request('/api/users/registration-status');
-      const statusData = await statusRes.json();
+      // Missing token
+      const resMissing = await app.request('/api/users', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      expect(resMissing.status).toBe(403);
 
-      if (statusData.enabled) {
-        // If registration is enabled, user creation should work
-        const res = await app.request('/api/users', {
-          method: 'POST',
-          body: JSON.stringify(userData),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+      // Wrong token
+      const resWrong = await app.request('/api/users', {
+        method: 'POST',
+        body: JSON.stringify({ ...userData, email: `wrong-${Date.now()}@example.com`, registrationToken: 'bad-token' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      expect(resWrong.status).toBe(403);
 
-        expect(res.status).toBe(201);
-      } else {
-        // If registration is disabled, user creation should fail
-        const res = await app.request('/api/users', {
-          method: 'POST',
-          body: JSON.stringify(userData),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        expect(res.status).toBe(403);
-        const errorData = await res.json();
-        expect(errorData).toHaveProperty('error');
-        expect(errorData.error).toContain('Registration is currently disabled');
-      }
+      // Correct token
+      const resOk = await app.request('/api/users', {
+        method: 'POST',
+        body: JSON.stringify({ ...userData, email: `ok-${Date.now()}@example.com`, registrationToken: process.env.REGISTRATION_TOKEN }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      expect(resOk.status).toBe(201);
     });
   });
 
@@ -72,7 +56,7 @@ describe('Environment Configuration Integration', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },

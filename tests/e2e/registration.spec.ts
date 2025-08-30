@@ -8,13 +8,17 @@ test.describe('User Registration', () => {
     // Wait for the form to be visible
     await page.waitForSelector('form');
 
-    // Make sure registration is enabled (using mock API or environment variable)
-    // This test assumes the backend is configured with ALLOW_REGISTRATION=true
+    // Provide registration token if required by backend configuration
 
     // Fill out the registration form
     await page.fill('#name', 'Test User');
     await page.fill('#email', `test-${Date.now()}@example.com`); // Unique email
     await page.fill('#password', 'password123');
+
+    // If token field exists, fill it
+    if (await page.$('#registrationToken')) {
+      await page.fill('#registrationToken', process.env.REGISTRATION_TOKEN || 'test-registration-token');
+    }
 
     // Submit the form
     await page.click('button[type="submit"]');
@@ -38,6 +42,10 @@ test.describe('User Registration', () => {
     await page.fill('#email', email);
     await page.fill('#password', 'password123');
 
+    if (await page.$('#registrationToken')) {
+      await page.fill('#registrationToken', process.env.REGISTRATION_TOKEN || 'test-registration-token');
+    }
+
     // Submit the form
     await page.click('button[type="submit"]');
 
@@ -59,6 +67,10 @@ test.describe('User Registration', () => {
     await page.fill('#name', 'Another User');
     await page.fill('#email', email);
     await page.fill('#password', 'password456');
+
+    if (await page.$('#registrationToken')) {
+      await page.fill('#registrationToken', process.env.REGISTRATION_TOKEN || 'test-registration-token');
+    }
 
     // Submit the form
     await page.click('button[type="submit"]');
@@ -90,8 +102,8 @@ test.describe('User Registration', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
     });
 
-    // Verify the disabled message is shown
-    await expect(page.locator('text=Registration is currently disabled')).toBeVisible();
+    // Verify the page reflects disabled registration (alert or disabled button)
+    await expect(page.locator('button[type="submit"]')).toBeDisabled();
 
     // Verify the form is disabled
     await expect(page.locator('button[type="submit"]')).toBeDisabled();

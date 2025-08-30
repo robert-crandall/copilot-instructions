@@ -14,7 +14,7 @@ This document outlines the requirements for a streamlined authentication system 
 
 ## User Stories
 
-1. **Registration:** As a new user, I want to register for an account when registration is enabled, so that I can access the application.
+1. **Registration:** As a new user, I want to register for an account using a registration token when required, so that only invited users can access the application.
 2. **Login:** As a registered user, I want to log in to the application, so that I can access my account.
 3. **Remembered Login:** As a returning user, I want the option to stay logged in, so that I don't have to re-enter my credentials every time I visit the site.
 4. **Registration Restriction:** As a system administrator, I want to control when user registration is available, so that I can manage access to the application.
@@ -31,7 +31,7 @@ This document outlines the requirements for a streamlined authentication system 
 3. The system must perform server-side validation of all fields with the same requirements.
 4. The system must check for existing users with the same email and reject registrations with duplicate emails.
 5. The system must securely hash passwords before storing them in the database.
-6. The system must only allow registration when the environment variable `ALLOW_REGISTRATION` is set to "true".
+6. The system must only allow registration when the user supplies the correct `REGISTRATION_TOKEN` value configured in the environment. If the token is blank, registration is disabled.
 7. The system must return appropriate error messages for validation failures.
 8. The system must create a new user record in the database upon successful registration.
 9. The system must issue a JWT token upon successful registration and log the user in automatically.
@@ -97,5 +97,5 @@ This document outlines the requirements for a streamlined authentication system 
    - Test both backend API endpoints and frontend interactions
 
 4. **Environment Configuration:**
-   - Implement `ALLOW_REGISTRATION` environment variable to control registration availability
+   - Implement `REGISTRATION_TOKEN` environment variable; when set (non-empty) it is required for registration; when unset/empty registration is disabled
    - Store JWT secret in environment variables

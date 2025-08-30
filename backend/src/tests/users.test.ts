@@ -14,8 +14,8 @@ describe('Users API Integration Tests', () => {
 
       expect(res.status).toBe(200);
       const data = await res.json();
-      expect(data).toHaveProperty('enabled');
-      expect(typeof data.enabled).toBe('boolean');
+      expect(data).toHaveProperty('required');
+      expect(typeof data.required).toBe('boolean');
     });
   });
 
@@ -29,7 +29,7 @@ describe('Users API Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -66,7 +66,7 @@ describe('Users API Integration Tests', () => {
       // Create first user
       const firstRes = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -79,6 +79,7 @@ describe('Users API Integration Tests', () => {
         body: JSON.stringify({
           ...userData,
           name: 'Different Name',
+          registrationToken: process.env.REGISTRATION_TOKEN,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +105,7 @@ describe('Users API Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -130,7 +131,7 @@ describe('Users API Integration Tests', () => {
       for (const userData of testCases) {
         const res = await app.request('/api/users', {
           method: 'POST',
-          body: JSON.stringify(userData),
+          body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -158,7 +159,7 @@ describe('Users API Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -182,7 +183,7 @@ describe('Users API Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -250,7 +251,7 @@ describe('Users API Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -285,7 +286,7 @@ describe('Users API Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -344,7 +345,7 @@ describe('Users API Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -374,7 +375,7 @@ describe('Users API Integration Tests', () => {
 
       const registerRes = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -441,7 +442,7 @@ describe('Users API Integration Tests', () => {
 
       const registerRes = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -479,7 +480,7 @@ describe('Users API Integration Tests', () => {
 
       const registerRes = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ ...userData, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },

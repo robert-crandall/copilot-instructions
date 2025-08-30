@@ -38,7 +38,7 @@ jobs:
       NODE_ENV: test
       PORT: 3000
       TZ: America/Los_Angeles
-      ALLOW_REGISTRATION: true
+      REGISTRATION_TOKEN: test-registration-token
       FRONTEND_URL: http://localhost:4173
 
     steps:

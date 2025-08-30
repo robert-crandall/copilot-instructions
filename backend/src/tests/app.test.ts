@@ -142,7 +142,7 @@ describe('App Integration Tests', () => {
 
       const res = await app.request('/api/users', {
         method: 'POST',
-        body: JSON.stringify(largePayload),
+        body: JSON.stringify({ ...largePayload, registrationToken: process.env.REGISTRATION_TOKEN }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -160,7 +160,7 @@ describe('App Integration Tests', () => {
       expect(res.status).toBe(200);
 
       const data = await res.json();
-      expect(data).toHaveProperty('enabled');
+      expect(data).toHaveProperty('required');
     });
 
     it('should return 404 for non-existent API routes', async () => {

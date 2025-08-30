@@ -20,6 +20,11 @@ test.describe('Authentication Persistence', () => {
     await page.fill('#email', email);
     await page.fill('#password', password);
 
+    // If a registration token field is present, fill it
+    if (await page.$('#registrationToken')) {
+      await page.fill('#registrationToken', process.env.REGISTRATION_TOKEN || 'test-registration-token');
+    }
+
     await page.click('button[type="submit"]');
     await page.waitForURL('/', { timeout: TEST_CONFIG.TIMEOUTS.LOGIN });
 
