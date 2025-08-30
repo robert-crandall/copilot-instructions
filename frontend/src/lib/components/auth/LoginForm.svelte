@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import FormField from '../FormField.svelte';
 
   // Props
   export let loading = false;
@@ -87,27 +88,19 @@
     </div>
   {/if}
 
-  <form on:submit|preventDefault={handleSubmit} class="space-y-4">
-    <div class="form-control">
-      <label class="label" for="email">
-        <span class="label-text">Email address</span>
-      </label>
-      <input
-        type="email"
-        id="email"
-        bind:value={email}
-        on:blur={validateEmail}
-        placeholder="you@example.com"
-        class="input input-bordered w-full {emailError ? 'input-error' : ''}"
-        disabled={loading}
-        autocomplete="email"
-      />
-      {#if emailError}
-        <label class="label">
-          <span class="label-text-alt text-error">{emailError}</span>
-        </label>
-      {/if}
-    </div>
+  <form on:submit|preventDefault={handleSubmit} class="grid grid-cols-1 gap-6">
+    <FormField
+      label="Email address"
+      name="email"
+      type="email"
+      bind:value={email}
+      error={emailError}
+      placeholder="you@example.com"
+      disabled={loading}
+      autocomplete="email"
+      required
+      on:blur={validateEmail}
+    />
 
     <div class="form-control">
       <label class="label" for="password">
@@ -120,14 +113,15 @@
         bind:value={password}
         on:blur={validatePassword}
         placeholder="••••••••"
-        class="input input-bordered w-full {passwordError ? 'input-error' : ''}"
+        class="input input-bordered w-full h-10 {passwordError ? 'input-error' : ''}"
         disabled={loading}
         autocomplete="current-password"
+        required
       />
       {#if passwordError}
-        <label class="label">
+        <div class="label">
           <span class="label-text-alt text-error">{passwordError}</span>
-        </label>
+        </div>
       {/if}
     </div>
 
@@ -139,7 +133,7 @@
     </div>
 
     <div class="form-control mt-6">
-      <button type="submit" class="btn btn-primary w-full" disabled={loading}>
+      <button type="submit" class="btn btn-primary w-full h-10" disabled={loading}>
         {#if loading}
           <span class="loading loading-spinner loading-sm"></span>
         {/if}

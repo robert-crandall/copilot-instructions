@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import FormField from '../FormField.svelte';
 
   // Props
   export let loading = false;
@@ -127,77 +128,51 @@
     </div>
   {/if}
 
-  <form on:submit|preventDefault={handleSubmit} class="space-y-4">
-    <div class="form-control">
-      <label class="label" for="name">
-        <span class="label-text">Full Name</span>
-      </label>
-      <input
-        type="text"
-        id="name"
-        bind:value={name}
-        on:blur={validateName}
-        placeholder="John Doe"
-        class="input input-bordered w-full {nameError ? 'input-error' : ''}"
-        disabled={loading || !registrationEnabled}
-        min="1"
-        max="100"
-        autocomplete="name"
-      />
-      {#if nameError}
-        <label class="label">
-          <span class="label-text-alt text-error">{nameError}</span>
-        </label>
-      {/if}
-    </div>
+  <form on:submit|preventDefault={handleSubmit} class="grid grid-cols-1 gap-6">
+    <FormField
+      label="Full Name"
+      name="name"
+      bind:value={name}
+      error={nameError}
+      placeholder="John Doe"
+      disabled={loading || !registrationEnabled}
+      autocomplete="name"
+      min={1}
+      max={100}
+      required
+      on:blur={validateName}
+    />
 
-    <div class="form-control">
-      <label class="label" for="email">
-        <span class="label-text">Email address</span>
-      </label>
-      <input
-        type="email"
-        id="email"
-        bind:value={email}
-        on:blur={validateEmail}
-        placeholder="you@example.com"
-        class="input input-bordered w-full {emailError ? 'input-error' : ''}"
-        disabled={loading || !registrationEnabled}
-        autocomplete="email"
-      />
-      {#if emailError}
-        <label class="label">
-          <span class="label-text-alt text-error">{emailError}</span>
-        </label>
-      {/if}
-    </div>
+    <FormField
+      label="Email address"
+      name="email"
+      type="email"
+      bind:value={email}
+      error={emailError}
+      placeholder="you@example.com"
+      disabled={loading || !registrationEnabled}
+      autocomplete="email"
+      required
+      on:blur={validateEmail}
+    />
 
-    <div class="form-control">
-      <label class="label" for="password">
-        <span class="label-text">Password</span>
-      </label>
-      <input
-        type="password"
-        id="password"
-        bind:value={password}
-        on:blur={validatePassword}
-        placeholder="••••••••"
-        class="input input-bordered w-full {passwordError ? 'input-error' : ''}"
-        disabled={loading || !registrationEnabled}
-        min="6"
-        autocomplete="new-password"
-      />
-      <label class="label">
-        {#if passwordError}
-          <span class="label-text-alt text-error">{passwordError}</span>
-        {:else}
-          <span class="label-text-alt text-base-content/60">Must be at least 6 characters</span>
-        {/if}
-      </label>
-    </div>
+    <FormField
+      label="Password"
+      name="password"
+      type="password"
+      bind:value={password}
+      error={passwordError}
+      description="Must be at least 6 characters"
+      placeholder="••••••••"
+      disabled={loading || !registrationEnabled}
+      min={6}
+      autocomplete="new-password"
+      required
+      on:blur={validatePassword}
+    />
 
     <div class="form-control mt-6">
-      <button type="submit" class="btn btn-primary w-full" disabled={loading || !registrationEnabled}>
+      <button type="submit" class="btn btn-primary w-full h-10" disabled={loading || !registrationEnabled}>
         {#if loading}
           <span class="loading loading-spinner loading-sm"></span>
         {/if}
